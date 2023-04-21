@@ -37,27 +37,29 @@ class GameScore constructor() {
     }
     
     fun addA(revertServe: Boolean = true, revertLp: Boolean = true) {
+        if (pointA == 30) return
         if (pointA.notDeuce(pointB)) pointA += 1
         if (revertServe) serveA()
-        if (revertLp) pointA.revertLastPoint(pointB)
-        gameEnd = pointA.setEndGame(pointB)
+        if (revertLp) pointA.lastPointA(pointB)
+        gameEnd = pointA.isEndGame(pointB)
     }
     
     fun addB(revertServe: Boolean = true, revertLp: Boolean = true) {
+        if (pointB == 30) return
         if (pointB.notDeuce(pointB)) pointB += 1
         if (revertServe) serveB()
-        if (revertLp) pointB.revertLastPoint(pointA)
-        gameEnd = pointB.setEndGame(pointA)
+        if (revertLp) pointB.lastPointB(pointA)
+        gameEnd = pointB.isEndGame(pointA)
     }
     
     fun minA(revertLp: Boolean = true) {
         if (pointA > 0) pointA -= 1
-        if (revertLp) pointA.revertLastPoint(pointA)
+        if (revertLp) pointA.lastPointA(pointA)
     }
     
     fun minB(revertLp: Boolean = true) {
         if (pointB > 0) pointB -= 1
-        if (revertLp) pointB.revertLastPoint(pointA)
+        if (revertLp) pointB.lastPointB(pointA)
     }
     
     fun serveA() {
@@ -72,14 +74,18 @@ class GameScore constructor() {
     
     fun server(): String = if (onTurnA) "A" else if (onTurnB) "B" else "A"
 
-    private fun Int.revertLastPoint(opposite: Int) {
+    private fun Int.lastPointA(opposite: Int) {
         lastPointA = this.lastPoint(opposite)
         lastPointB = false
     }
+    private fun Int.lastPointB(opposite: Int) {
+        lastPointB = this.lastPoint(opposite)
+        lastPointA = false
+    }
     
-    private fun Int.notDeuce(opposite: Int) = !this.setEndGame(opposite)
+    private fun Int.notDeuce(opposite: Int) = !this.isEndGame(opposite)
 
-    private fun Int.setEndGame(opposite: Int) = this in 21..30 && this - opposite > 1
+    private fun Int.isEndGame(opposite: Int) = this in 21..30 && this - opposite > 1
 
     private fun Int.lastPoint(opposite: Int) = this in 20..29 && this - opposite > 0
 

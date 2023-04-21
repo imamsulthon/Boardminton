@@ -44,15 +44,15 @@ class ExampleUnitTest {
         useCaseDoubleMatch.addA()
         useCaseDoubleMatch.addA()
 
-        assertEquals(useCaseDoubleMatch.gameScore.value.pointA, 2)
-        assertEquals(useCaseDoubleMatch.gameScore.value.onTurnA, true)
+        assertEquals(useCaseDoubleMatch.get2().pointA, 2)
+        assertEquals(useCaseDoubleMatch.get2().onTurnA, true)
 
         // add player B 1 point
         useCaseDoubleMatch.addB()
 
-        assertEquals(useCaseDoubleMatch.gameScore.value.pointB, 1)
-        assertEquals(useCaseDoubleMatch.gameScore.value.onTurnB, true)
-        assertEquals(useCaseDoubleMatch.gameScore.value.onTurnA, false)
+        assertEquals(useCaseDoubleMatch.get2().pointB, 1)
+        assertEquals(useCaseDoubleMatch.get2().onTurnB, true)
+        assertEquals(useCaseDoubleMatch.get2().onTurnA, false)
 
     }
 

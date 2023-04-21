@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Visibility
 import com.imams.boardminton.R
+import com.imams.boardminton.data.TeamPlayer
 import com.imams.boardminton.ui.theme.*
 
 @Composable
@@ -26,6 +27,7 @@ fun BaseScore(
     score: Int,
     onTurn: Boolean,
     lastPoint: Boolean = false,
+    winner: Boolean = false,
     callback: ((Int, Boolean) -> Unit)? = null,
     modifier: Modifier = boardStyle(onTurn, score, callback),
 ) {
@@ -34,7 +36,7 @@ fun BaseScore(
     ) {
         val (tvScore, ivTurn) = createRefs()
         Image(
-            painter = painterResource(id = R.drawable.ic_accept),
+            painter = painterResource(id = R.drawable.ic_cock),
             contentDescription = "content_turn",
             modifier = Modifier
                 .width(18.dp)
@@ -49,7 +51,9 @@ fun BaseScore(
 
         Text(
             text = score.toString(), fontSize = 64.sp,
-            color = if (lastPoint) Yellow else if (onTurn) AppOnPrimaryColor else AppPrimaryColor,
+            color = if (lastPoint) {
+                if (winner) Green else Yellow
+            } else if (onTurn) AppPrimaryColor else AppPrimaryColor,
             modifier = Modifier
                 .constrainAs(tvScore) {
                     top.linkTo(ivTurn.bottom)
@@ -69,14 +73,14 @@ private fun printLog(msg: String) {
 
 
 fun boardStyle(onTurn: Boolean, score: Int, callback: ((Int, Boolean) -> Unit)?): Modifier {
-    val bgColor = if (onTurn) Purple40 else White
+    val bgColor = if (onTurn) Purple80 else White
     return Modifier
         .widthIn(min = 128.dp, max = 160.dp)
         .heightIn(min = 128.dp, max = 160.dp)
         .border(
             width = 4.dp,
             color = Color.Black,
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(4.dp)
         )
         .background(bgColor)
         .padding(top = 12.dp, bottom = 24.dp, start = 12.dp, end = 12.dp)
@@ -98,15 +102,17 @@ fun TimeCounterView(
 
 @Composable
 fun PlayerNameBoard(
-    player1: String,
-    player2: String?,
+    teamPlayer: TeamPlayer?,
     modifier: Modifier,
     alignment: Alignment.Horizontal = Alignment.Start,
 ) {
+    if (teamPlayer == null) return
     Column(modifier = modifier, horizontalAlignment = alignment) {
-        Text(text = player1, modifier = Modifier.padding(top = 10.dp))
-        AnimatedVisibility(visible = player2 != null) {
-            Text(text = player2 ?: "", modifier = Modifier.padding(top = 10.dp))
+
+        Text(text = teamPlayer.player1.name, modifier = Modifier.padding(top = 10.dp))
+
+        AnimatedVisibility(visible = teamPlayer.player2 != null) {
+            Text(text = teamPlayer.player2?.name ?: "", modifier = Modifier.padding(top = 10.dp))
         }
     }
 

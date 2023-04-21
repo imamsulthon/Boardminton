@@ -1,5 +1,6 @@
 package com.imams.boardminton.data.domain
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.imams.boardminton.data.GameScore
 import javax.inject.Inject
@@ -10,21 +11,37 @@ class GameUseCase @Inject constructor(
 
     private val _gameScore by lazy {
         if (matchType == MatchType.SINGLE) {
+            printLog("by Lazy single")
             mutableStateOf(GameScore().createSingles())
         } else {
+            printLog("by Lazy double")
             mutableStateOf(GameScore().createDoubles())
         }
     }
 
-    val gameScore = _gameScore
+    override fun get(): MutableState<GameScore> {
+        return _gameScore
+    }
 
-    override fun addA() = _gameScore.value.addA()
+    override fun get2(): GameScore {
+        return _gameScore.value
+    }
 
-    override fun addB() = _gameScore.value.addB()
+    override fun addA() {
+        _gameScore.value.run { addA() }
+    }
 
-    override fun minA() = _gameScore.value.minA()
+    override fun addB() {
+        _gameScore.value.run { addB() }
+    }
 
-    override fun minB() = _gameScore.value.minB()
+    override fun minA() {
+        _gameScore.value.run { minA() }
+    }
+
+    override fun minB() {
+        _gameScore.value.minB()
+    }
 
     override fun createSingleMatch(playerA: String, playerB: String) {
         matchType = MatchType.SINGLE
@@ -44,6 +61,8 @@ class GameUseCase @Inject constructor(
             createDoubles(playerA1, playerA2, playerB1, playerB2)
         }
     }
+
+    private fun printLog(msg: String = "No Message") = println("ScoreBoardUseCase $msg")
 
 }
 

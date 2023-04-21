@@ -19,6 +19,8 @@ object ScoreModule {
 
     @Provides
     @Singleton
-    fun provideGameUseCase(matchType: MatchType): UseCase = GameUseCase(matchType)
+    fun provideGameUseCase(matchType: MatchType = MatchType.SINGLE): UseCase {
+        return GameUseCase(matchType)
+    }
 
 }

@@ -22,25 +22,18 @@ import com.imams.boardminton.ui.viewmodel.CountTimerViewModel
 import com.imams.boardminton.ui.viewmodel.ScoreBoardVM
 import com.ramcosta.composedestinations.annotation.Destination
 
-
 @Destination
 @Composable
 fun ScoreBoardScreen(
     counterVm: CountTimerViewModel = hiltViewModel(),
     scoreVm: ScoreBoardVM = hiltViewModel(),
 ) {
-    val playerA1 by remember { scoreVm.playerA1 }
-    val playerA2 by remember { scoreVm.playerA2 }
+    val game by remember { scoreVm.game }
     val scoreA by remember { scoreVm.scoreA }
     val scoreB by remember { scoreVm.scoreB }
-    val turnA by remember { scoreVm.turnA }
-    val turnB by remember { scoreVm.turnB }
-    val lastPointA by remember { scoreVm.lastPointA }
-    val lastPointB by remember { scoreVm.lastPointB }
-    val gameOver by remember { scoreVm.gameOver }
     val timer by counterVm.time.observeAsState()
 
-    printLog("gameOver $gameOver")
+    printLog("game A ${game.pointA} B ${game.pointB}")
 
     ConstraintLayout(
         modifier = Modifier
@@ -86,26 +79,25 @@ fun ScoreBoardScreen(
                     .wrapContentHeight()
             ) { Text(text = "-") }
 
-            BaseScore(score = scoreA, onTurn = turnA, lastPoint = lastPointA, callback = { _, _ ->
-                run {
-                    scoreVm.plusA()
-                    scoreVm.turnA()
-                }
-            })
+            BaseScore(
+                score = scoreA, onTurn = game.onTurnA, winner = game.gameEnd, lastPoint = game.lastPointA,
+                callback = { _, _ ->
+                    run {
+                        scoreVm.plusA()
+                    }
+                })
 
             Spacer(modifier = Modifier.size(6.dp))
 
-            BaseScore(score = scoreB, onTurn = turnB, lastPoint = lastPointB, callback = { _, _ ->
-                run {
-                    scoreVm.plusB()
-                    scoreVm.turnB()
-                }
-            })
+            BaseScore(
+                score = scoreB, onTurn = game.onTurnB, lastPoint = game.lastPointB, winner = game.gameEnd,
+                callback = { _, _ ->
+                    run { scoreVm.plusB() }
+                })
 
             OutlinedButton(
                 onClick = {
                     scoreVm.minB()
-                    printLog("buttonClick $scoreB")
                 },
                 modifier = Modifier
                     .wrapContentWidth(unbounded = false)
@@ -117,14 +109,15 @@ fun ScoreBoardScreen(
 
         }
 
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 4.dp)
-            .constrainAs(playerDetail) {
-                top.linkTo(scoreView1.bottom)
-                end.linkTo(parent.end)
-                start.linkTo(parent.start)
-            }, verticalArrangement = Arrangement.Top
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 4.dp)
+                .constrainAs(playerDetail) {
+                    top.linkTo(scoreView1.bottom)
+                    end.linkTo(parent.end)
+                    start.linkTo(parent.start)
+                }, verticalArrangement = Arrangement.Top
         )
         {
             ConstraintLayout(
@@ -140,8 +133,7 @@ fun ScoreBoardScreen(
                             start.linkTo(parent.start)
                             top.linkTo(parent.top)
                         },
-                    player1 = scoreVm.playerA1.value,
-                    player2 = scoreVm.playerA2.value,
+                    teamPlayer = game.teamA,
                     alignment = Alignment.Start
                 )
                 PlayerNameBoard(
@@ -151,17 +143,16 @@ fun ScoreBoardScreen(
                             end.linkTo(parent.end)
                             top.linkTo(parent.top)
                         },
-                    player1 = scoreVm.playerB1.value,
-                    player2 = scoreVm.playerB2.value,
+                    teamPlayer = game.teamB,
                     alignment = Alignment.End
                 )
             }
 
             AnimatedVisibility(
-                visible = gameOver,
+                visible = game.gameEnd,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                Text(text = "Game Over", fontSize = 24.sp)
+                Text(text = "Game End", fontSize = 24.sp)
             }
         }
     }

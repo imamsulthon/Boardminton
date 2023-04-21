@@ -1,4 +1,4 @@
-package com.imams.boardminton.ui.screen
+package com.imams.boardminton.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -87,17 +87,6 @@ fun boardStyle(onTurn: Boolean, score: Int, callback: ((Int, Boolean) -> Unit)?)
         .clickable {
             callback?.invoke(score + 1, true)
         }
-}
-
-@Composable
-fun TimeCounterView(
-    modifier: Modifier,
-    timeString: String,
-    play: () -> Unit?,
-    pause: () -> Unit?,
-    stop: () -> Unit?,
-) {
-    Text(text = timeString, fontSize = 24.sp, modifier = modifier)
 }
 
 @Composable

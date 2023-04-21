@@ -15,11 +15,8 @@ class CountTimerViewModel @Inject constructor(
     // todo
 ): ViewModel() {
 
-    //region Properties
     private var countDownTimer: CountDownTimer? = null
-    //endregion
 
-    //region States
     private val _time = MutableLiveData(Utility.TIME_COUNTDOWN.formatTime())
     val time: LiveData<String> = _time
 
@@ -29,22 +26,16 @@ class CountTimerViewModel @Inject constructor(
     private val _isPlaying = MutableLiveData(false)
     val isPlaying: LiveData<Boolean> = _isPlaying
 
-    //hold data for celebrate view as boolean
-
-    //private
     private val _celebrate = SingleLiveEvent<Boolean>()
 
-    //accessed publicly
     val celebrate : LiveData<Boolean> get() =  _celebrate
-
-    //endregion
 
     init {
         handleCountDownTimer()
     }
 
     //region Public methods
-    fun handleCountDownTimer() {
+    private fun handleCountDownTimer() {
         if (isPlaying.value == true) {
             pauseTimer()
             _celebrate.postValue(false)
@@ -91,7 +82,7 @@ class CountTimerViewModel @Inject constructor(
 object Utility {
 
     //time to countdown - 1hr - 60secs
-    const val TIME_COUNTDOWN: Long = 360000L
+    const val TIME_COUNTDOWN: Long = 3600000L
     private const val TIME_FORMAT = "%02d:%02d:%02d"
 
 

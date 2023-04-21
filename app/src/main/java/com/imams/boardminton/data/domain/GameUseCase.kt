@@ -11,10 +11,8 @@ class GameUseCase @Inject constructor(
 
     private val _gameScore by lazy {
         if (matchType == MatchType.SINGLE) {
-            printLog("by Lazy single")
             mutableStateOf(GameScore().createSingles())
         } else {
-            printLog("by Lazy double")
             mutableStateOf(GameScore().createDoubles())
         }
     }
@@ -61,8 +59,6 @@ class GameUseCase @Inject constructor(
             createDoubles(playerA1, playerA2, playerB1, playerB2)
         }
     }
-
-    private fun printLog(msg: String = "No Message") = println("ScoreBoardUseCase $msg")
 
 }
 

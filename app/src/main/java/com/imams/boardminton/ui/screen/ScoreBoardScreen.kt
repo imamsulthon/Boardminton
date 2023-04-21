@@ -3,6 +3,7 @@ package com.imams.boardminton.ui.screen
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,7 +18,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.imams.boardminton.ui.component.BaseScore
+import com.imams.boardminton.ui.component.PlayerNameBoard
+import com.imams.boardminton.ui.component.TimeCounterView
 import com.imams.boardminton.ui.viewmodel.CountTimerViewModel
 import com.imams.boardminton.ui.viewmodel.ScoreBoardVM
 import com.ramcosta.composedestinations.annotation.Destination
@@ -42,7 +47,7 @@ fun ScoreBoardScreen(
             .background(Color.White)
             .padding(12.dp),
     ) {
-        val (timeLapseView, scoreView1, playerDetail) = createRefs()
+        val (timeLapseView, scoreView, playerDetail) = createRefs()
 
         TimeCounterView(
             modifier = Modifier
@@ -63,12 +68,13 @@ fun ScoreBoardScreen(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(vertical = 12.dp)
-                .constrainAs(scoreView1) {
+                .constrainAs(scoreView) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     top.linkTo(timeLapseView.bottom)
                 },
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
             OutlinedButton(
@@ -79,21 +85,35 @@ fun ScoreBoardScreen(
                     .wrapContentHeight()
             ) { Text(text = "-") }
 
-            BaseScore(
-                score = scoreA, onTurn = game.onTurnA, winner = game.gameEnd, lastPoint = game.lastPointA,
-                callback = { _, _ ->
-                    run {
-                        scoreVm.plusA()
-                    }
-                })
+            Row(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .wrapContentHeight(),
+                horizontalArrangement = Arrangement.Center
+            ) {
 
-            Spacer(modifier = Modifier.size(6.dp))
+                BaseScore(
+                    score = scoreA,
+                    onTurn = game.onTurnA,
+                    winner = game.gameEnd,
+                    lastPoint = game.lastPointA,
+                    callback = { _, _ ->
+                        run {
+                            scoreVm.plusA()
+                        }
+                    })
 
-            BaseScore(
-                score = scoreB, onTurn = game.onTurnB, lastPoint = game.lastPointB, winner = game.gameEnd,
-                callback = { _, _ ->
-                    run { scoreVm.plusB() }
-                })
+                Spacer(modifier = Modifier.size(6.dp))
+
+                BaseScore(
+                    score = scoreB,
+                    onTurn = game.onTurnB,
+                    lastPoint = game.lastPointB,
+                    winner = game.gameEnd,
+                    callback = { _, _ ->
+                        run { scoreVm.plusB() }
+                    })
+            }
 
             OutlinedButton(
                 onClick = {
@@ -112,18 +132,23 @@ fun ScoreBoardScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight()
                 .padding(horizontal = 4.dp, vertical = 4.dp)
                 .constrainAs(playerDetail) {
-                    top.linkTo(scoreView1.bottom)
+                    top.linkTo(scoreView.bottom)
                     end.linkTo(parent.end)
                     start.linkTo(parent.start)
-                }, verticalArrangement = Arrangement.Top
-        )
-        {
+                    bottom.linkTo(parent.bottom)
+                    height = Dimension.fillToConstraints
+                },
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
+                    .padding(top = 10.dp)
             ) {
                 val (left, right) = createRefs()
                 PlayerNameBoard(
@@ -153,6 +178,26 @@ fun ScoreBoardScreen(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Text(text = "Game End", fontSize = 24.sp)
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(bottom = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Button(
+                    onClick = { scoreVm.plusA() }, modifier = Modifier.wrapContentWidth()
+                ) {
+                    Text(text = "(Player A) +1")
+                }
+                Button(
+                    onClick = { scoreVm.plusB() },
+                    modifier = Modifier.wrapContentWidth()
+                ) {
+                    Text(text = "(Player B) +1")
+                }
             }
         }
     }

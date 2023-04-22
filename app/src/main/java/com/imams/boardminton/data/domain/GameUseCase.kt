@@ -41,6 +41,10 @@ class GameUseCase @Inject constructor(
         _gameScore.value.minB()
     }
 
+    override fun swapServer() {
+        _gameScore.value.run { swapServer() }
+    }
+
     override fun createSingleMatch(playerA: String, playerB: String) {
         matchType = MatchType.SINGLE
         _gameScore.value.run {

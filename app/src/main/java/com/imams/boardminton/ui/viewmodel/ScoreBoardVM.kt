@@ -56,6 +56,13 @@ class ScoreBoardVM @Inject constructor(
         }
     }
 
+    fun swapServe() {
+        useCase.run {
+            swapServer()
+            _game.value = get().value
+        }
+    }
+
     private fun printLog(msg: String) = println("ScoreBoardVM $msg")
 
 }

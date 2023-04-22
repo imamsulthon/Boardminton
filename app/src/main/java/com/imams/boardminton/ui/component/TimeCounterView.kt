@@ -14,7 +14,7 @@ fun TimeCounterView(
     pause: () -> Unit?,
     stop: () -> Unit?,
 ) {
-    Text(text = timeString, fontSize = 24.sp, modifier = modifier)
+    Text(text = timeString, fontSize = 18.sp, modifier = modifier)
 }
 
 fun printLog(any: Any? = null, msg: String = "") {

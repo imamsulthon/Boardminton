@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,7 +22,9 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.imams.boardminton.R
 import com.imams.boardminton.ui.component.BaseScore
+import com.imams.boardminton.ui.component.MainNameBoardView
 import com.imams.boardminton.ui.component.PlayerNameBoard
 import com.imams.boardminton.ui.component.TimeCounterView
 import com.imams.boardminton.ui.viewmodel.CountTimerViewModel
@@ -47,20 +51,20 @@ fun ScoreBoardScreen(
             .background(Color.White)
             .padding(12.dp),
     ) {
-        val (timeLapseView, scoreView, playerDetail) = createRefs()
+        val (topView, scoreView, playerDetail) = createRefs()
 
-        TimeCounterView(
-            modifier = Modifier
-                .wrapContentWidth()
-                .wrapContentHeight()
-                .constrainAs(timeLapseView) {
-                    start.linkTo(parent.start)
-                    top.linkTo(parent.top)
-                },
-            timeString = timer ?: "00:00:00",
-            play = {},
-            pause = {},
-            stop = {}
+        val modifierTop = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .constrainAs(topView) {
+                start.linkTo(parent.start)
+                top.linkTo(parent.top)
+                end.linkTo(parent.end)
+            }
+        TopView(
+            modifier = modifierTop, timer = timer,
+            onSwap = {},
+            onReset = {}
         )
 
         Row(
@@ -71,25 +75,18 @@ fun ScoreBoardScreen(
                 .constrainAs(scoreView) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                    top.linkTo(timeLapseView.bottom)
+                    top.linkTo(topView.bottom)
                 },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            OutlinedButton(
-                onClick = { scoreVm.minA() },
-                modifier = Modifier
-                    .wrapContentWidth(unbounded = false)
-                    .padding(end = 6.dp)
-                    .wrapContentHeight()
-            ) { Text(text = "-") }
-
             Row(
                 modifier = Modifier
-                    .wrapContentWidth()
+                    .fillMaxWidth()
                     .wrapContentHeight(),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
 
                 BaseScore(
@@ -114,19 +111,6 @@ fun ScoreBoardScreen(
                         run { scoreVm.plusB() }
                     })
             }
-
-            OutlinedButton(
-                onClick = {
-                    scoreVm.minB()
-                },
-                modifier = Modifier
-                    .wrapContentWidth(unbounded = false)
-                    .wrapContentHeight()
-                    .padding(start = 6.dp)
-            ) {
-                Text(text = "-", modifier = Modifier.padding(2.dp))
-            }
-
         }
 
         Column(
@@ -148,7 +132,7 @@ fun ScoreBoardScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(top = 10.dp)
+                    .padding(top = 12.dp)
             ) {
                 val (left, right) = createRefs()
                 PlayerNameBoard(
@@ -173,6 +157,13 @@ fun ScoreBoardScreen(
                 )
             }
 
+            MainNameBoardView(
+                team1 = game.teamA,
+                team2 = game.teamB,
+                scoreA = scoreA,
+                scoreB = scoreB
+            )
+
             AnimatedVisibility(
                 visible = game.gameEnd,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -187,23 +178,135 @@ fun ScoreBoardScreen(
                     .padding(bottom = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Button(
-                    onClick = { scoreVm.plusA() }, modifier = Modifier.wrapContentWidth()
+                ButtonPointLeft(
+                    onClickPlus = { scoreVm.plusA() },
+                    onClickMin = { scoreVm.minA() }
+                )
+
+                OutlinedButton(
+                    onClick = { scoreVm.swapServe() },
+                    modifier = Modifier.widthIn(min = 40.dp, max = 60.dp)
                 ) {
-                    Text(text = "(Player A) +1")
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_cock),
+                        contentDescription = "swap_server"
+                    )
                 }
-                Button(
-                    onClick = { scoreVm.plusB() },
-                    modifier = Modifier.wrapContentWidth()
-                ) {
-                    Text(text = "(Player B) +1")
-                }
+
+                ButtonPointRight(
+                    onClickPlus = { scoreVm.plusB() },
+                    onClickMin = { scoreVm.minB() }
+                )
             }
         }
     }
 
 }
 
+@Composable
+private fun TopView(
+    modifier: Modifier,
+    timer: String?,
+    onSwap: () -> Unit,
+    onReset: () -> Unit,
+) {
+    ConstraintLayout(modifier) {
+        val (startV, endV) = createRefs()
+        TimeCounterView(
+            modifier = Modifier
+                .wrapContentWidth()
+                .wrapContentHeight()
+                .constrainAs(startV) {
+                    start.linkTo(parent.start)
+                    top.linkTo(endV.top)
+                    bottom.linkTo(endV.bottom)
+                },
+            timeString = timer ?: "00:00:00",
+            play = {},
+            pause = {},
+            stop = {}
+        )
+
+        Row(
+            modifier = Modifier
+                .wrapContentWidth()
+                .wrapContentHeight()
+                .constrainAs(endV) {
+                    top.linkTo(parent.top)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom)
+                }
+        ) {
+            OutlinedButton(
+                onClick = { onSwap.invoke() },
+                modifier = Modifier
+                    .widthIn(min = 50.dp, max = 100.dp)
+                    .wrapContentHeight()
+                    .padding(horizontal = 2.dp)
+            ) {
+                Text(text = "<->", fontSize = 11.sp, modifier = Modifier.padding(1.dp))
+            }
+            OutlinedButton(
+                onClick = { onReset.invoke() },
+                modifier = Modifier
+                    .widthIn(min = 50.dp, max = 100.dp)
+                    .wrapContentHeight()
+                    .padding(horizontal = 2.dp)
+            ) {
+                Text(text = "@", fontSize = 11.sp, modifier = Modifier.padding(1.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun ButtonPointLeft(
+    onClickPlus: () -> Unit,
+    onClickMin: () -> Unit,
+) {
+    Row {
+        Button(
+            onClick = { onClickPlus.invoke() },
+            modifier = Modifier.widthIn(min = 60.dp, max = 120.dp)
+        ) {
+            Text(text = "+1")
+        }
+
+        OutlinedButton(
+            onClick = { onClickMin.invoke() },
+            modifier = Modifier
+                .widthIn(min = 40.dp, max = 80.dp)
+                .padding(horizontal = 4.dp)
+                .wrapContentHeight()
+        ) { Text(text = "-1") }
+
+    }
+}
+
+@Composable
+fun ButtonPointRight(
+    onClickPlus: () -> Unit,
+    onClickMin: () -> Unit,
+) {
+    Row {
+        OutlinedButton(
+            onClick = { onClickMin.invoke() },
+            modifier = Modifier
+                .widthIn(min = 40.dp, max = 80.dp)
+                .wrapContentHeight()
+                .padding(horizontal = 4.dp)
+        ) {
+            Text(text = "-1", modifier = Modifier.padding(2.dp))
+        }
+
+        Button(
+            onClick = { onClickPlus.invoke() },
+            modifier = Modifier.widthIn(min = 60.dp, max = 120.dp)
+        ) {
+            Text(text = "+1")
+        }
+    }
+}
 
 private fun printLog(msg: String) {
     println("ScoreBoardScreen $msg")

@@ -2,6 +2,9 @@ package com.imams.boardminton.data
 
 class GameScore constructor() {
 
+    private val gamePoint = 21
+    private val maxPoint = 30
+
     var teamA: TeamPlayer? = null
     var teamB: TeamPlayer? = null
     
@@ -46,7 +49,7 @@ class GameScore constructor() {
     
     fun addB(revertServe: Boolean = true, revertLp: Boolean = true) {
         if (pointB == 30) return
-        if (pointB.notDeuce(pointB)) pointB += 1
+        if (pointB.notDeuce(pointA)) pointB += 1
         if (revertServe) serveB()
         if (revertLp) pointB.lastPointB(pointA)
         gameEnd = pointB.isEndGame(pointA)
@@ -71,6 +74,10 @@ class GameScore constructor() {
         onTurnA = false
         onTurnB = true
     }
+
+    fun swapServer() {
+        if (onTurnA) serveB() else serveA()
+    }
     
     fun server(): String = if (onTurnA) "A" else if (onTurnB) "B" else "A"
 
@@ -85,8 +92,8 @@ class GameScore constructor() {
     
     private fun Int.notDeuce(opposite: Int) = !this.isEndGame(opposite)
 
-    private fun Int.isEndGame(opposite: Int) = this in 21..30 && this - opposite > 1
+    private fun Int.isEndGame(opposite: Int) = this in gamePoint..maxPoint && this - opposite > 1
 
-    private fun Int.lastPoint(opposite: Int) = this in 20..29 && this - opposite > 0
+    private fun Int.lastPoint(opposite: Int) = this in gamePoint - 1 until maxPoint - 1 && this - opposite > 0
 
 }

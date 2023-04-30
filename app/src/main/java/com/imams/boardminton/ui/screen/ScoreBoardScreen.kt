@@ -34,9 +34,13 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Destination
 @Composable
 fun ScoreBoardScreen(
+    players: String,
+    single: Boolean,
     counterVm: CountTimerViewModel = hiltViewModel(),
     scoreVm: ScoreBoardVM = hiltViewModel(),
 ) {
+    scoreVm.setupPlayer(players, single)
+
     val game by remember { scoreVm.game }
     val scoreA by remember { scoreVm.scoreA }
     val scoreB by remember { scoreVm.scoreB }
@@ -46,8 +50,7 @@ fun ScoreBoardScreen(
 
     ConstraintLayout(
         modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
+            .fillMaxSize()
             .background(Color.White)
             .padding(12.dp),
     ) {
@@ -315,5 +318,5 @@ private fun printLog(msg: String) {
 @Preview(device = Devices.NEXUS_6)
 @Composable
 fun ScoreBoardScreenV() {
-    ScoreBoardScreen()
+    ScoreBoardScreen("listOf()", false)
 }

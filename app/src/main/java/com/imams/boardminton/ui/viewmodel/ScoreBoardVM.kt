@@ -3,6 +3,7 @@ package com.imams.boardminton.ui.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.imams.boardminton.data.domain.UseCase
+import com.imams.boardminton.data.toList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -22,6 +23,16 @@ class ScoreBoardVM @Inject constructor(
 
     init {
         useCase.createDoubleMatch("Donald Kadafi", "Imam Sulthon", "Joe Biden", "Tai Lako")
+    }
+
+    fun setupPlayer(json: String, single: Boolean) {
+        val data = json.toList()
+        printLog("setupPlayer $single $data")
+        if (single) {
+            useCase.createSingleMatch(data[0], data[1])
+        } else {
+            useCase.createDoubleMatch(data[0], data[1], data[2], data[3])
+        }
     }
 
     fun plusA() {

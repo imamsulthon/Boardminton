@@ -28,11 +28,11 @@ fun MainNameBoardView(
     scoreB: Int,
 ) {
     val teamLabel1 =
-        if (team1?.isSingle() == true) team1.player1.name ?: "" else team1?.concatLastName()
-            ?: ""
+        if (team1?.isSingle() == true) team1.player1.name ?: ""
+        else team1?.concatLastName() ?: ""
     val teamLabel2 =
-        if (team2?.isSingle() == true) team1?.player1?.name ?: "" else team2?.concatLastName()
-            ?: ""
+        if (team2?.isSingle() == true) team2.player1.name ?: ""
+        else team2?.concatLastName() ?: ""
     Column(
         modifier = Modifier
             .fillMaxWidth()

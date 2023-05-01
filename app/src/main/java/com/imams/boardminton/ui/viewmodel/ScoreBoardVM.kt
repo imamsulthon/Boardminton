@@ -22,6 +22,10 @@ class ScoreBoardVM @Inject constructor(
     val scoreB = _scoreB
 
     init {
+        defaultConfig()
+    }
+
+    private fun defaultConfig() {
         useCase.createDoubleMatch("Donald Kadafi", "Imam Sulthon", "Joe Biden", "Tai Lako")
     }
 

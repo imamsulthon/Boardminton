@@ -7,6 +7,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -75,12 +77,12 @@ private fun printLog(msg: String) {
 fun boardStyle(onTurn: Boolean, score: Int, callback: ((Int, Boolean) -> Unit)?): Modifier {
     val bgColor = if (onTurn) Purple80 else White
     return Modifier
-        .widthIn(min = 128.dp, max = 160.dp)
-        .heightIn(min = 128.dp, max = 160.dp)
+        .widthIn(min = 100.dp, max = 160.dp)
+        .heightIn(min = 100.dp, max = 160.dp)
         .border(
-            width = 4.dp,
+            width = 2.dp,
             color = Color.Black,
-            shape = RoundedCornerShape(4.dp)
+            shape = RoundedCornerShape(2.dp)
         )
         .background(bgColor)
         .padding(top = 12.dp, bottom = 24.dp, start = 12.dp, end = 12.dp)
@@ -105,6 +107,55 @@ fun PlayerNameBoard(
         }
     }
 
+}
+
+@Composable
+fun ButtonPointLeft(
+    onClickPlus: () -> Unit,
+    onClickMin: () -> Unit,
+) {
+    Row {
+        Button(
+            onClick = { onClickPlus.invoke() },
+            modifier = Modifier.widthIn(min = 60.dp, max = 120.dp)
+        ) {
+            Text(text = "+1")
+        }
+
+        OutlinedButton(
+            onClick = { onClickMin.invoke() },
+            modifier = Modifier
+                .widthIn(min = 40.dp, max = 80.dp)
+                .padding(horizontal = 4.dp)
+                .wrapContentHeight()
+        ) { Text(text = "-1") }
+
+    }
+}
+
+@Composable
+fun ButtonPointRight(
+    onClickPlus: () -> Unit,
+    onClickMin: () -> Unit,
+) {
+    Row {
+        OutlinedButton(
+            onClick = { onClickMin.invoke() },
+            modifier = Modifier
+                .widthIn(min = 40.dp, max = 80.dp)
+                .wrapContentHeight()
+                .padding(horizontal = 4.dp)
+        ) {
+            Text(text = "-1", modifier = Modifier.padding(2.dp))
+        }
+
+        Button(
+            onClick = { onClickPlus.invoke() },
+            modifier = Modifier.widthIn(min = 60.dp, max = 120.dp)
+        ) {
+            Text(text = "+1")
+        }
+    }
 }
 
 @Preview

@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,9 +18,9 @@ import com.imams.boardminton.data.TeamPlayer
 import com.imams.boardminton.data.doublePlayer
 import com.imams.boardminton.ui.concatLastName
 
-
 @Composable
 fun MainNameBoardView(
+    modifier: Modifier = Modifier,
     team1: TeamPlayer? = doublePlayer("Test A1 NameA1", "Test A2 NameA2"),
     team2: TeamPlayer? = doublePlayer("Player B1", "Player B2"),
     scoreA: Int,
@@ -34,20 +33,19 @@ fun MainNameBoardView(
         if (team2?.isSingle() == true) team2.player1.name ?: ""
         else team2?.concatLastName() ?: ""
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .border(
-                width = 2.dp,
+                width = 1.dp,
                 color = Color.Black,
-                shape = RoundedCornerShape(2.dp)
+                shape = RoundedCornerShape(1.dp)
             )
             .padding(vertical = 10.dp, horizontal = 10.dp)
     ) {
-        Text(text = "Players", modifier = Modifier.padding(top = 10.dp))
+        Text(text = "Players", modifier = Modifier.padding(top = 5.dp))
         Row {
             Column {
-                Text(text = teamLabel1, modifier = Modifier.padding(top = 10.dp))
-                Text(text = teamLabel2, modifier = Modifier.padding(top = 10.dp))
+                Text(text = teamLabel1, modifier = Modifier.padding(top = 5.dp))
+                Text(text = teamLabel2, modifier = Modifier.padding(top = 5.dp))
             }
 
             Spacer(modifier = Modifier.padding(horizontal = 10.dp))
@@ -56,11 +54,11 @@ fun MainNameBoardView(
             Column {
                 Text(
                     text = "21",
-                    modifier = Modifier.padding(start = 10.dp, top = 10.dp)
+                    modifier = Modifier.padding(start = 10.dp, top = 5.dp)
                 )
                 Text(
                     text = "11",
-                    modifier = Modifier.padding(start = 10.dp, top = 10.dp)
+                    modifier = Modifier.padding(start = 10.dp, top = 5.dp)
                 )
             }
             // Game 2
@@ -68,11 +66,11 @@ fun MainNameBoardView(
                 Column {
                     Text(
                         text = scoreA.toString(),
-                        modifier = Modifier.padding(start = 10.dp, top = 10.dp)
+                        modifier = Modifier.padding(start = 10.dp, top = 5.dp)
                     )
                     Text(
                         text = scoreB.toString(),
-                        modifier = Modifier.padding(start = 10.dp, top = 10.dp)
+                        modifier = Modifier.padding(start = 10.dp, top = 5.dp)
                     )
                 }
             }
@@ -81,11 +79,11 @@ fun MainNameBoardView(
                 Column {
                     Text(
                         text = scoreA.toString(),
-                        modifier = Modifier.padding(start = 10.dp, top = 10.dp)
+                        modifier = Modifier.padding(start = 10.dp, top = 5.dp)
                     )
                     Text(
                         text = scoreB.toString(),
-                        modifier = Modifier.padding(start = 10.dp, top = 10.dp)
+                        modifier = Modifier.padding(start = 10.dp, top = 5.dp)
                     )
                 }
             }
@@ -112,7 +110,7 @@ fun CourtView(
             Text("Title 2")
         }
         items(2) {
-            MainNameBoardView(team1 = team1, team2 = team2, 1, 1)
+            MainNameBoardView(team1 = team1, team2 = team2, scoreA = 1, scoreB = 1)
         }
     }
 }
@@ -122,9 +120,9 @@ fun CourtView(
 @Composable
 fun CourtViewP() {
     MainNameBoardView(
-        doublePlayer("Muhammad Asrozi", "Imam Sulthon"),
-        doublePlayer("Kim Jong Un", "Michael Blur"),
-        1, 14
+        team1 = doublePlayer("Muhammad Asrozi", "Imam Sulthon"),
+        team2 = doublePlayer("Kim Jong Un", "Michael Blur"),
+        scoreA = 1, scoreB =  14
     )
 
 }

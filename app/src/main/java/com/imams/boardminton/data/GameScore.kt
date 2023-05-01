@@ -81,6 +81,16 @@ class GameScore constructor() {
     
     fun server(): String = if (onTurnA) "A" else if (onTurnB) "B" else "A"
 
+    fun reset() {
+        pointA = 0
+        pointB = 0
+        onTurnA = false
+        onTurnB = false
+        lastPointA = false
+        lastPointB = false
+        gameEnd = false
+    }
+
     private fun Int.lastPointA(opposite: Int) {
         lastPointA = this.lastPoint(opposite)
         lastPointB = false

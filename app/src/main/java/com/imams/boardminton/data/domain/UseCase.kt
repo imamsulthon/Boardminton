@@ -18,6 +18,8 @@ interface UseCase {
 
     fun swapServer()
 
+    fun reset()
+
     fun createSingleMatch(playerA: String, playerB: String)
 
     fun createDoubleMatch(playerA1: String, playerA2: String, playerB1: String, playerB2: String)

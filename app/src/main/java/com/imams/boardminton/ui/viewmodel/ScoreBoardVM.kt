@@ -78,6 +78,19 @@ class ScoreBoardVM @Inject constructor(
         }
     }
 
+    fun reset() {
+        useCase.run {
+            reset()
+            _scoreA.value = get().value.pointA
+            _scoreB.value = get().value.pointB
+            _game.value = get().value
+        }
+    }
+
+    fun swapSide() {
+
+    }
+
     private fun printLog(msg: String) = println("ScoreBoardVM $msg")
 
 }

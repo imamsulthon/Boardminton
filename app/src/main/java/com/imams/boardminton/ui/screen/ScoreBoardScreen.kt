@@ -8,7 +8,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -22,7 +21,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -168,7 +166,7 @@ fun ScoreBoardScreen(
                 },
             timer = timer,
             onSwap = {},
-            onReset = {}
+            onReset = { scoreVm.reset() }
         )
 
         ContentView(
@@ -239,21 +237,21 @@ private fun TopView(
         ) {
             OutlinedButton(
                 onClick = { onSwap.invoke() },
-                modifier = Modifier
-                    .widthIn(min = 50.dp, max = 100.dp)
-                    .wrapContentHeight()
-                    .padding(horizontal = 2.dp)
+                modifier = Modifier.wrapContentSize().padding(horizontal = 2.dp)
             ) {
-                Text(text = "<->", fontSize = 10.sp, modifier = Modifier.padding(1.dp))
+                Icon(modifier = Modifier.width(18.dp).height(18.dp),
+                    painter = painterResource(id = R.drawable.ic_swap_3),
+                    contentDescription = "swap_icon"
+                )
             }
             OutlinedButton(
                 onClick = { onReset.invoke() },
-                modifier = Modifier
-                    .widthIn(min = 50.dp, max = 100.dp)
-                    .wrapContentHeight()
-                    .padding(horizontal = 2.dp)
+                modifier = Modifier.wrapContentSize().padding(horizontal = 2.dp)
             ) {
-                Text(text = "@", fontSize = 10.sp, modifier = Modifier.padding(1.dp))
+                Icon(modifier = Modifier.width(18.dp).height(18.dp),
+                    painter = painterResource(id = R.drawable.ic_reset),
+                    contentDescription = "reset_icon"
+                )
             }
         }
     }

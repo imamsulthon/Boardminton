@@ -13,7 +13,6 @@ data class TeamPlayer(
     val player2: Player? = null,
 ) {
     var serve: Serve = Serve.None
-
     var onTurn: Boolean = if (isSingle()) player1.onTurn else player1.onTurn || player2!!.onTurn
 
     fun isSingle(): Boolean = player2 == null

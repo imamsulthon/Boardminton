@@ -22,6 +22,54 @@ fun String.lastName(): String {
     return this.substringAfterLast(" ")
 }
 
+fun String.prettifyName(): String {
+    val words = this.split(" ".toRegex()).toTypedArray().toMutableList()
+    val tLength = this.trim().length
+    return if (words.size == 1) this
+    else if (words.size >= 3 && tLength > 20) this.justLastName()
+    else if (words.size >= 3) this.shortMiddle()
+    else if (tLength > 20) this.shortFirst()
+    else this
+
+}
+
+/**
+ * save type only consisted two array string
+ */
+private fun String.shortFirst(): String {
+    val words = this.split(" ".toRegex()).toTypedArray().toMutableList()
+    return "${words.firstOrNull()?.get(0)}." + " " + words.lastOrNull()
+}
+
+private fun String.shortMiddle(): String {
+    val words = this.split(" ".toRegex()).toTypedArray().toMutableList()
+    if (words.size < 3) return this
+    val new = words.mapIndexed { index, s ->
+        if (index == 0 || index == words.size - 1) s
+        else s[0] + "."
+    }
+    var middle = " "
+    new.subList(1, new.size - 1).forEach {
+        middle = "$middle$it "
+    }
+    return new.firstOrNull() + middle + new.lastOrNull()
+}
+
+private fun String.justLastName(): String {
+    val words = this.split(" ".toRegex()).toTypedArray().toMutableList()
+    if (words.size < 3) return this
+    val new = words.mapIndexed { index, s ->
+        if (index == words.size - 1) s
+        else s[0] + "."
+    }
+    var first = " "
+    new.subList(0, new.size - 1).forEach {
+        first = "$first$it "
+    }
+    return first.trim() + " " + new.lastOrNull()
+}
+
+
 fun keyboardNext() = KeyboardOptions(
     capitalization = KeyboardCapitalization.Words,
     keyboardType = KeyboardType.Text,

@@ -3,7 +3,12 @@ package com.imams.boardminton.ui.screen
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -15,8 +20,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -59,13 +64,19 @@ fun ScoreBoardScreen(
 
     @Composable
     fun scoreBoard() {
-        Column(modifier = Modifier.widthIn(max = 450.dp, min = 250.dp)) {
+        Column(
+            modifier = Modifier
+                .widthIn(max = 450.dp, min = 250.dp)
+                .verticalScroll(rememberScrollState())
+                .wrapContentHeight(),
+            verticalArrangement = Arrangement.Top,
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(
@@ -73,7 +84,7 @@ fun ScoreBoardScreen(
                         .fillMaxWidth()
                         .wrapContentHeight(),
                     horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Top
                 ) {
                     BaseScore(
                         score = scoreA,
@@ -99,6 +110,12 @@ fun ScoreBoardScreen(
                 }
             }
 
+            Divider(
+                modifier = Modifier.padding(top = 6.dp),
+                color = Color.Black,
+                thickness = 1.dp
+            )
+
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -112,6 +129,7 @@ fun ScoreBoardScreen(
                         .constrainAs(left) {
                             start.linkTo(parent.start)
                             top.linkTo(parent.top)
+                            bottom.linkTo(parent.bottom)
                         },
                     teamPlayer = game.teamA,
                     alignment = Alignment.Start
@@ -122,6 +140,7 @@ fun ScoreBoardScreen(
                         .constrainAs(right) {
                             end.linkTo(parent.end)
                             top.linkTo(parent.top)
+                            bottom.linkTo(parent.bottom)
                         },
                     teamPlayer = game.teamB,
                     alignment = Alignment.End
@@ -171,7 +190,6 @@ fun ScoreBoardScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(bottom = 10.dp)
                 .constrainAs(bottomRef) {
                     top.linkTo(contentRef.bottom)
                     end.linkTo(parent.end)
@@ -304,11 +322,7 @@ private fun PortraitContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         mainBoard()
-        Divider(
-            modifier = Modifier.padding(vertical = 20.dp),
-            color = Color.Black,
-            thickness = 2.dp
-        )
+        LineDivider()
         scoreBoard()
     }
 }
@@ -347,6 +361,13 @@ private fun BottomView(
         )
     }
 }
+
+@Composable
+private fun LineDivider(padding: Dp = 20.dp) = Divider(
+    modifier = Modifier.padding(vertical = padding),
+    color = Color.Black,
+    thickness = 2.dp
+)
 
 private fun printLog(msg: String) {
     println("ScoreBoardScreen $msg")

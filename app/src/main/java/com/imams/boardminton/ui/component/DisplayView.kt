@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.imams.boardminton.data.TeamPlayer
 import com.imams.boardminton.data.doublePlayer
 import com.imams.boardminton.ui.concatLastName
+import com.imams.boardminton.ui.prettifyName
 
 @Composable
 fun MainNameBoardView(
@@ -27,10 +28,10 @@ fun MainNameBoardView(
     scoreB: Int,
 ) {
     val teamLabel1 =
-        if (team1?.isSingle() == true) team1.player1.name ?: ""
+        if (team1?.isSingle() == true) team1.player1.name.prettifyName()
         else team1?.concatLastName() ?: ""
     val teamLabel2 =
-        if (team2?.isSingle() == true) team2.player1.name ?: ""
+        if (team2?.isSingle() == true) team2.player1.name.prettifyName()
         else team2?.concatLastName() ?: ""
     Column(
         modifier = modifier

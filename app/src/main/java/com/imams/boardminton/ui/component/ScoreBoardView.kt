@@ -22,6 +22,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Visibility
 import com.imams.boardminton.R
 import com.imams.boardminton.data.TeamPlayer
+import com.imams.boardminton.ui.prettifyName
 import com.imams.boardminton.ui.theme.*
 
 @Composable
@@ -100,10 +101,10 @@ fun PlayerNameBoard(
     if (teamPlayer == null) return
     Column(modifier = modifier, horizontalAlignment = alignment) {
 
-        Text(text = teamPlayer.player1.name, modifier = Modifier.padding(top = 10.dp))
+        Text(text = teamPlayer.player1.name.prettifyName(), modifier = Modifier.padding(top = 6.dp))
 
         AnimatedVisibility(visible = teamPlayer.player2 != null) {
-            Text(text = teamPlayer.player2?.name ?: "", modifier = Modifier.padding(top = 10.dp))
+            Text(text = teamPlayer.player2?.name?.prettifyName() ?: "", modifier = Modifier.padding(top = 6.dp))
         }
     }
 

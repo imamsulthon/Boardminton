@@ -1,4 +1,4 @@
-package com.imams.boardminton.ui.viewmodel
+package com.imams.boardminton.ui.screen.create
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel

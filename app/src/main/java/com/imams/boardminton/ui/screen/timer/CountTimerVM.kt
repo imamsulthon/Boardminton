@@ -1,10 +1,10 @@
-package com.imams.boardminton.ui.viewmodel
+package com.imams.boardminton.ui.screen.timer
 
 import android.os.CountDownTimer
 import android.util.Log
 import androidx.annotation.MainThread
 import androidx.lifecycle.*
-import com.imams.boardminton.ui.viewmodel.Utility.formatTime
+import com.imams.boardminton.ui.screen.timer.Utility.formatTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean

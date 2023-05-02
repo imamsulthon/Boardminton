@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -100,15 +101,40 @@ fun PlayerNameBoard(
 ) {
     if (teamPlayer == null) return
     Column(modifier = modifier, horizontalAlignment = alignment) {
-
-        Text(text = teamPlayer.player1.name.prettifyName(), modifier = Modifier.padding(top = 6.dp))
-
+        val mod = Modifier.padding(top = 6.dp)
+        PlayerName(modifier = mod, alignment,
+            name = teamPlayer.player1.name.prettifyName(), teamPlayer.player1.onTurn)
         AnimatedVisibility(visible = teamPlayer.player2 != null) {
-            Text(text = teamPlayer.player2?.name?.prettifyName() ?: "", modifier = Modifier.padding(top = 6.dp))
+            PlayerName(
+                modifier = mod,
+                alignment,
+                name = teamPlayer.player2?.name?.prettifyName() ?: "",
+                teamPlayer.player2?.onTurn ?: false,
+            )
         }
     }
 
 }
+
+@Composable
+fun ServeIc() = Icon(painterResource(id = R.drawable.ic_cock), contentDescription = "import_icon")
+
+@Composable
+fun PlayerName(
+    modifier: Modifier,
+    alignment: Alignment.Horizontal,
+    name: String,
+    onServe: Boolean,
+) = Row(
+    modifier = modifier.wrapContentSize(),
+    horizontalArrangement = Arrangement.Start,
+    verticalAlignment = Alignment.CenterVertically,
+) {
+    if (alignment == Alignment.End && onServe) ServeIc()
+    Text(text = name, modifier = Modifier.padding(horizontal = 6.dp))
+    if (alignment == Alignment.Start && onServe) ServeIc()
+}
+
 
 @Composable
 fun ButtonPointLeft(

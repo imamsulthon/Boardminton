@@ -1,4 +1,4 @@
-package com.imams.boardminton.ui.screen
+package com.imams.boardminton.ui.screen.home
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Configuration.UI_MODE_TYPE_NORMAL

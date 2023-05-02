@@ -1,4 +1,4 @@
-package com.imams.boardminton.ui.viewmodel
+package com.imams.boardminton.ui.screen.score
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -12,6 +12,9 @@ class ScoreBoardVM @Inject constructor(
     private val useCase: UseCase
 ) : ViewModel() {
 
+    private val _players = mutableStateOf("")
+    val players = _players
+
     private val _game = mutableStateOf(useCase.get2())
     val game = _game
 
@@ -21,12 +24,8 @@ class ScoreBoardVM @Inject constructor(
     private val _scoreB = mutableStateOf(game.value.pointB)
     val scoreB = _scoreB
 
-    init {
-        defaultConfig()
-    }
-
-    private fun defaultConfig() {
-        useCase.createDoubleMatch("Donald Kadafi", "Imam Sulthon", "Joe Biden", "Tai Lako")
+    fun updatePlayers(data: String) {
+        _players.value = data
     }
 
     fun setupPlayer(json: String, single: Boolean) {

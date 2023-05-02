@@ -8,17 +8,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.imams.boardminton.ui.screen.toScoreBoard
-import com.imams.boardminton.ui.viewmodel.CreateMatchVM
+import com.imams.boardminton.data.toJson
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.result.ResultBackNavigator
 
 @Destination
 @Composable
@@ -28,12 +26,12 @@ fun EditPlayersScreen(
     a2: String = "",
     b1: String,
     b2: String = "",
-    navigator: DestinationsNavigator?,
+    result: ResultBackNavigator<String>,
     vm: CreateMatchVM = hiltViewModel<CreateMatchVM>().apply {
         setupPlayers(a1, a2, b1, b2)
     },
 ) {
-    var singleMatch by rememberSaveable { mutableStateOf(single) }
+    val singleMatch by rememberSaveable { mutableStateOf(single) }
     val playerA1 by rememberSaveable { vm.playerA1 }
     val playerA2 by rememberSaveable { vm.playerA2 }
     val playerB1 by rememberSaveable { vm.playerB1 }
@@ -76,10 +74,9 @@ fun EditPlayersScreen(
         if (it) {
             val params = if (singleMatch) listOf(playerA1, playerB1)
             else listOf(playerA1, playerA2, playerB1, playerB2)
-            navigator?.popBackStack()
-            navigator?.toScoreBoard(params, singleMatch, true)
+            result.navigateBack(params.toJson())
         } else {
-            navigator?.navigateUp()
+            result.navigateBack()
         }
     })
 

@@ -1,4 +1,4 @@
-package com.imams.boardminton.ui.screen
+package com.imams.boardminton.ui.screen.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

@@ -1,4 +1,4 @@
-package com.imams.boardminton.ui.screen
+package com.imams.boardminton.ui.screen.score
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -29,10 +29,13 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.R
 import com.imams.boardminton.ui.component.*
-import com.imams.boardminton.ui.viewmodel.CountTimerViewModel
-import com.imams.boardminton.ui.viewmodel.ScoreBoardVM
+import com.imams.boardminton.ui.screen.destinations.EditPlayersScreenDestination
+import com.imams.boardminton.ui.screen.timer.CountTimerViewModel
+import com.imams.boardminton.ui.screen.toEditPlayers
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.result.NavResult
+import com.ramcosta.composedestinations.result.ResultRecipient
 
 @Destination
 @Composable
@@ -42,15 +45,20 @@ fun ScoreBoardScreen(
     counterVm: CountTimerViewModel = hiltViewModel(),
     scoreVm: ScoreBoardVM = hiltViewModel(),
     navigator: DestinationsNavigator?,
+    resultRecipient: ResultRecipient<EditPlayersScreenDestination, String>?,
 ) {
-    scoreVm.setupPlayer(players, single)
-
+    val jsonPlayers by remember { scoreVm.players }
     val game by remember { scoreVm.game }
     val scoreA by remember { scoreVm.scoreA }
     val scoreB by remember { scoreVm.scoreB }
     val timer by counterVm.time.observeAsState()
 
-    printLog("game A ${game.pointA} B ${game.pointB}")
+    resultRecipient?.onNavResult { result ->
+        if (result is NavResult.Value) scoreVm.updatePlayers(result.value)
+    }
+
+    if (jsonPlayers.isEmpty()) scoreVm.setupPlayer(players, single)
+    else scoreVm.setupPlayer(jsonPlayers, single)
 
     @Composable
     fun mainBoard() {
@@ -410,5 +418,5 @@ private fun printLog(msg: String) {
 @Preview(device = Devices.NEXUS_6)
 @Composable
 fun ScoreBoardScreenV() {
-    ScoreBoardScreen("listOf()", false, navigator = null)
+    ScoreBoardScreen("listOf()", false, navigator = null, resultRecipient = null)
 }

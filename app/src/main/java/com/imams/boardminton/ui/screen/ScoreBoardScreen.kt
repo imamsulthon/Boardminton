@@ -29,9 +29,11 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.R
 import com.imams.boardminton.ui.component.*
+import com.imams.boardminton.ui.screen.create.toEditPlayersRoute
 import com.imams.boardminton.ui.viewmodel.CountTimerViewModel
 import com.imams.boardminton.ui.viewmodel.ScoreBoardVM
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @Destination
 @Composable
@@ -40,6 +42,7 @@ fun ScoreBoardScreen(
     single: Boolean,
     counterVm: CountTimerViewModel = hiltViewModel(),
     scoreVm: ScoreBoardVM = hiltViewModel(),
+    navigator: DestinationsNavigator?,
 ) {
     scoreVm.setupPlayer(players, single)
 
@@ -170,6 +173,9 @@ fun ScoreBoardScreen(
                 },
             timer = timer,
             onSwap = {},
+            onEdit = {
+                navigator?.toEditPlayersRoute(single, team1 = game.teamA, team2 = game.teamB)
+            },
             onReset = { scoreVm.reset() }
         )
 
@@ -212,6 +218,7 @@ private fun TopView(
     modifier: Modifier,
     timer: String?,
     onSwap: () -> Unit,
+    onEdit: () -> Unit,
     onReset: () -> Unit,
 ) {
     ConstraintLayout(modifier) {
@@ -242,31 +249,44 @@ private fun TopView(
             OutlinedButton(
                 enabled = false, // todo implement swap side opponent
                 onClick = { onSwap.invoke() },
-                modifier = Modifier.wrapContentSize().padding(horizontal = 2.dp)
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(horizontal = 2.dp)
             ) {
-                Icon(modifier = Modifier.width(18.dp).height(18.dp),
+                Icon(
+                    modifier = Modifier
+                        .width(18.dp)
+                        .height(18.dp),
                     painter = painterResource(id = R.drawable.ic_swap_3),
                     contentDescription = "swap_icon"
                 )
             }
             OutlinedButton(
                 onClick = { onReset.invoke() },
-                modifier = Modifier.wrapContentSize().padding(horizontal = 2.dp)
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(horizontal = 2.dp)
             ) {
                 Icon(
                     Icons.Outlined.Refresh,
-                    modifier = Modifier.width(18.dp).height(18.dp),
+                    modifier = Modifier
+                        .width(18.dp)
+                        .height(18.dp),
                     contentDescription = "reset_icon"
                 )
             }
             OutlinedButton(
-                enabled = false, // todo implement edit teams/players name
-                onClick = {  },
-                modifier = Modifier.wrapContentSize().padding(horizontal = 2.dp)
+                enabled = true, // todo implement edit teams/players name
+                onClick = { onEdit.invoke() },
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(horizontal = 2.dp)
             ) {
                 Icon(
                     Icons.Outlined.Edit,
-                    modifier = Modifier.width(18.dp).height(18.dp),
+                    modifier = Modifier
+                        .width(18.dp)
+                        .height(18.dp),
                     contentDescription = "edit_icon"
                 )
             }
@@ -391,5 +411,5 @@ private fun printLog(msg: String) {
 @Preview(device = Devices.NEXUS_6)
 @Composable
 fun ScoreBoardScreenV() {
-    ScoreBoardScreen("listOf()", false)
+    ScoreBoardScreen("listOf()", false, navigator = null)
 }

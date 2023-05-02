@@ -26,3 +26,7 @@ data class Player(
 enum class Serve {
     A, B, None
 }
+
+enum class ITeam {
+    A1, A2, B1, B2
+}

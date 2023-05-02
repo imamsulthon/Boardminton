@@ -5,6 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
@@ -56,7 +59,8 @@ fun ScoreBoardScreen(
             team1 = game.teamA,
             team2 = game.teamB,
             scoreA = scoreA,
-            scoreB = scoreB
+            scoreB = scoreB,
+            single = single,
         )
     }
 
@@ -236,6 +240,7 @@ private fun TopView(
                 }
         ) {
             OutlinedButton(
+                enabled = false, // todo implement swap side opponent
                 onClick = { onSwap.invoke() },
                 modifier = Modifier.wrapContentSize().padding(horizontal = 2.dp)
             ) {
@@ -248,9 +253,21 @@ private fun TopView(
                 onClick = { onReset.invoke() },
                 modifier = Modifier.wrapContentSize().padding(horizontal = 2.dp)
             ) {
-                Icon(modifier = Modifier.width(18.dp).height(18.dp),
-                    painter = painterResource(id = R.drawable.ic_reset),
+                Icon(
+                    Icons.Outlined.Refresh,
+                    modifier = Modifier.width(18.dp).height(18.dp),
                     contentDescription = "reset_icon"
+                )
+            }
+            OutlinedButton(
+                enabled = false, // todo implement edit teams/players name
+                onClick = {  },
+                modifier = Modifier.wrapContentSize().padding(horizontal = 2.dp)
+            ) {
+                Icon(
+                    Icons.Outlined.Edit,
+                    modifier = Modifier.width(18.dp).height(18.dp),
+                    contentDescription = "edit_icon"
                 )
             }
         }

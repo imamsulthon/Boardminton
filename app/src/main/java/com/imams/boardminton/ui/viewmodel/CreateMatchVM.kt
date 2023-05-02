@@ -2,6 +2,7 @@ package com.imams.boardminton.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.imams.boardminton.data.ITeam
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -66,6 +67,30 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
         val b2 = _playerB2.value
         _playerB1.value = b2
         _playerB2.value = b1
+    }
+
+    fun importPlayer(target: ITeam) {
+        when (target) {
+            ITeam.A1 -> {
+
+            }
+            ITeam.A2 -> {
+
+            }
+            ITeam.B1 -> {
+
+            }
+            ITeam.B2 -> {
+
+            }
+        }
+    }
+
+    fun onClearPlayers() {
+        _playerA1.value = ""
+        _playerA2.value = ""
+        _playerB1.value = ""
+        _playerB2.value = ""
     }
 
 }

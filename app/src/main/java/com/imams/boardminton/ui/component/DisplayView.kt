@@ -26,6 +26,7 @@ fun MainNameBoardView(
     team2: TeamPlayer? = doublePlayer("Player B1", "Player B2"),
     scoreA: Int,
     scoreB: Int,
+    single: Boolean = true,
 ) {
     val teamLabel1 =
         if (team1?.isSingle() == true) team1.player1.name.prettifyName()
@@ -42,7 +43,7 @@ fun MainNameBoardView(
             )
             .padding(vertical = 10.dp, horizontal = 10.dp)
     ) {
-        Text(text = "Players", modifier = Modifier.padding(top = 5.dp))
+        Text(text = "${if (single) "Single" else "Double"} match", modifier = Modifier.padding(top = 5.dp))
         Row {
             Column {
                 Text(text = teamLabel1, modifier = Modifier.padding(top = 5.dp))

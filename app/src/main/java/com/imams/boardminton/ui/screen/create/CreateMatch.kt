@@ -6,6 +6,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -20,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.R
+import com.imams.boardminton.data.ITeam
 import com.imams.boardminton.data.toJson
 import com.imams.boardminton.ui.keyBoardDone
 import com.imams.boardminton.ui.keyboardNext
@@ -36,7 +40,6 @@ fun CreateMatchScreen(
     vm: CreateMatchVM = hiltViewModel(),
 ) {
     var singleMatch by rememberSaveable { mutableStateOf(single) }
-
     val playerA1 by rememberSaveable { vm.playerA1 }
     val playerA2 by rememberSaveable { vm.playerA2 }
     val playerB1 by rememberSaveable { vm.playerB1 }
@@ -56,15 +59,10 @@ fun CreateMatchScreen(
     }
 
     @Composable
-    fun topView() {
-        MatchTypeView(
-            single = singleMatch,
-            onChange = { singleMatch = it },
-        )
-    }
+    fun topView() = MatchTypeView(single = singleMatch, onChange = { singleMatch = it })
 
     @Composable
-    fun content(
+    fun formView(
         modifier: Modifier = Modifier,
         arrangement: Arrangement.Vertical = Arrangement.Top
     ) {
@@ -76,6 +74,9 @@ fun CreateMatchScreen(
                 onChangeA1 = { vm.setA1(it) },
                 onChangeB1 = { vm.setB1(it) },
                 onSwap = { vm.swapSingleMatch() },
+                importPerson = {
+
+                }
             )
         } else {
             FieldInputDoubleMatch(
@@ -86,7 +87,10 @@ fun CreateMatchScreen(
                 onChangeA1 = { vm.setA1(it) }, onChangeA2 = { vm.setA2(it) },
                 onChangeB1 = { vm.setB1(it) }, onChangeB2 = { vm.setB2(it) },
                 swapA = { vm.swapTeamA() }, swapB = { vm.swapTeamB() },
-                swapTeam = { vm.swapDoubleMatch() }
+                swapTeam = { vm.swapDoubleMatch() },
+                importPerson = {
+
+                }
             )
         }
     }
@@ -96,11 +100,12 @@ fun CreateMatchScreen(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(10.dp)
-            PortraitForm(
+            PortraitContent(
                 topView = { topView() },
                 onNext = { gotoScoreBoard() },
                 onBack = { navigator?.navigateUp() },
-                content = { content(mPortrait) }
+                onClear = { vm.onClearPlayers() },
+                formField = { formView(mPortrait) }
             )
         }
         else -> {
@@ -108,11 +113,12 @@ fun CreateMatchScreen(
                 .widthIn(max = 400.dp)
                 .fillMaxHeight()
                 .padding(10.dp)
-            LandscapeForm(
+            LandscapeContent(
                 topView = { topView() },
                 onNext = { gotoScoreBoard() },
                 onBack = { navigator?.navigateUp() },
-                content = { content(mLandscape, Arrangement.SpaceBetween) }
+                onClear = { vm.onClearPlayers() },
+                formField = { formView(mLandscape, Arrangement.SpaceBetween) }
             )
         }
     }
@@ -164,11 +170,12 @@ private fun MatchTypeView(
 }
 
 @Composable
-private fun PortraitForm(
+private fun PortraitContent(
     onNext: () -> Unit,
     onBack: () -> Unit,
+    onClear: () -> Unit,
     topView: @Composable () -> Unit,
-    content: @Composable () -> Unit,
+    formField: @Composable () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -182,7 +189,7 @@ private fun PortraitForm(
             verticalArrangement = Arrangement.Top
         ) {
             topView()
-            content()
+            formField()
         }
         BottomButton(
             modifier = Modifier
@@ -190,26 +197,27 @@ private fun PortraitForm(
                 .wrapContentHeight()
                 .padding(10.dp),
             onBackPressed = { onBack.invoke() },
-            onNext = { onNext.invoke() }
+            onNext = { onNext.invoke() },
+            onClear = { onClear.invoke() }
         )
     }
 
 }
 
 @Composable
-private fun LandscapeForm(
+private fun LandscapeContent(
     onNext: () -> Unit,
     onBack: () -> Unit,
+    onClear: () -> Unit,
     topView: @Composable () -> Unit,
-    content: @Composable () -> Unit,
+    formField: @Composable () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        content()
-
+        formField()
         Column(
             modifier = Modifier
                 .fillMaxSize(),
@@ -225,7 +233,8 @@ private fun LandscapeForm(
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.End,
                 onBackPressed = { onBack.invoke() },
-                onNext = { onNext.invoke() }
+                onNext = { onNext.invoke() },
+                onClear = { onClear.invoke() }
             )
         }
     }
@@ -241,6 +250,7 @@ private fun FieldInputSingleMatch(
     onChangeA1: (String) -> Unit,
     onChangeB1: (String) -> Unit,
     onSwap: () -> Unit,
+    importPerson: (ITeam) -> Unit,
 ) {
     Column(modifier = modifier, verticalArrangement = vArrangement) {
         InputPlayer(
@@ -249,12 +259,14 @@ private fun FieldInputSingleMatch(
             onValueChange = {
                 onChangeA1.invoke(it)
             },
-            label = "Player Name 1"
+            label = "Player Name 1",
+            endIconClick = { importPerson.invoke(ITeam.A1) }
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = "Versus", modifier = Modifier.padding(vertical = 10.dp))
             SwapButton { onSwap.invoke() }
@@ -267,7 +279,8 @@ private fun FieldInputSingleMatch(
                 onChangeB1.invoke(it)
             },
             label = "Player Name 2",
-            keyboardOptions = keyBoardDone()
+            keyboardOptions = keyBoardDone(),
+            endIconClick = { importPerson.invoke(ITeam.B1) }
         )
     }
 
@@ -288,10 +301,12 @@ private fun FieldInputDoubleMatch(
     swapA: () -> Unit,
     swapB: () -> Unit,
     swapTeam: () -> Unit,
+    importPerson: (ITeam) -> Unit,
 ) {
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
-        verticalArrangement = vArrangement
+        verticalArrangement = vArrangement,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         InputPlayer(
             modifier = Modifier.fillMaxWidth(),
@@ -299,22 +314,24 @@ private fun FieldInputDoubleMatch(
             onValueChange = {
                 onChangeA1.invoke(it)
             },
-            label = "Player Name 1"
+            label = "Player Name 1",
+            endIconClick = { importPerson.invoke(ITeam.A1) },
         )
         SwapButton { swapA.invoke() }
-
         InputPlayer(
             modifier = Modifier.fillMaxWidth(),
             value = pA2,
             onValueChange = {
                 onChangeA2.invoke(it)
             },
-            label = "Player Name 2"
+            label = "Player Name 2",
+            endIconClick = { importPerson.invoke(ITeam.A2) },
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(text = "Versus", modifier = Modifier.padding(vertical = 10.dp))
             SwapButton { swapTeam.invoke() }
@@ -326,7 +343,8 @@ private fun FieldInputDoubleMatch(
             onValueChange = {
                 onChangeB1.invoke(it)
             },
-            label = "Player Name 1"
+            label = "Player Name 1",
+            endIconClick = { importPerson.invoke(ITeam.B1) },
         )
         SwapButton { swapB.invoke() }
 
@@ -337,7 +355,8 @@ private fun FieldInputDoubleMatch(
                 onChangeB2.invoke(it)
             },
             label = "Player Name 2",
-            keyboardOptions = keyBoardDone()
+            keyboardOptions = keyBoardDone(),
+            endIconClick = { importPerson.invoke(ITeam.B2) },
         )
     }
 
@@ -350,6 +369,7 @@ private fun BottomButton(
     horizontalArrangement: Arrangement.Horizontal = Arrangement.SpaceBetween,
     onNext: () -> Unit,
     onBackPressed: () -> Unit,
+    onClear: () -> Unit,
 ) {
     Row(
         modifier = modifier,
@@ -362,6 +382,10 @@ private fun BottomButton(
             modifier = Modifier.padding(end = 5.dp)
         ) {
             Text(text = "Back")
+        }
+
+        OutlinedButton(onClick = { onClear.invoke() }) {
+            Icon(Icons.Outlined.Delete, contentDescription = "clear_icon")
         }
 
         Button(onClick = { onNext.invoke() }, modifier = Modifier.padding(start = 5.dp)) {
@@ -378,14 +402,21 @@ fun InputPlayer(
     onValueChange: (String) -> Unit,
     label: String = "Player",
     keyboardOptions: KeyboardOptions = keyboardNext(),
+    endIconClick: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    @Composable
+    fun endIcon() = IconButton(onClick = { endIconClick.invoke() }) {
+        Icon(Icons.Outlined.Person, contentDescription = "import_icon")
+    }
+
     OutlinedTextField(
-        modifier = modifier.padding(bottom = 2.dp),
+        modifier = modifier,
         value = value,
         onValueChange = { onValueChange.invoke(it) },
         label = { Text(text = label) },
+        trailingIcon = { endIcon() },
         keyboardOptions = keyboardOptions,
         keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
     )
@@ -395,7 +426,13 @@ fun InputPlayer(
 private fun SwapButton(
     onSwap: () -> Unit,
 ) {
-    IconButton(onClick = { onSwap.invoke() }) {
+    IconButton(
+        onClick = { onSwap.invoke() },
+        modifier = Modifier
+            .padding(vertical = 2.dp)
+            .width(14.dp)
+            .height(14.dp)
+    ) {
         Icon(
             modifier = Modifier.wrapContentSize(),
             painter = painterResource(id = R.drawable.ic_swap_1),

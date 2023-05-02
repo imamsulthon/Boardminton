@@ -14,8 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.imams.boardminton.data.toJson
-import com.imams.boardminton.ui.screen.destinations.ScoreBoardScreenDestination
+import com.imams.boardminton.ui.screen.toScoreBoard
 import com.imams.boardminton.ui.viewmodel.CreateMatchVM
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -38,12 +37,8 @@ fun CreateMatchScreen(
     fun gotoScoreBoard() {
         val params = if (singleMatch) listOf(playerA1, playerB1)
         else listOf(playerA1, playerA2, playerB1, playerB2)
-        navigator?.navigate(
-            ScoreBoardScreenDestination(
-                players = params.toJson(),
-                single = singleMatch
-            )
-        )
+        navigator?.popBackStack()
+        navigator?.toScoreBoard(params, singleMatch)
     }
 
     @Composable

@@ -29,7 +29,6 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.R
 import com.imams.boardminton.ui.component.*
-import com.imams.boardminton.ui.screen.create.toEditPlayersRoute
 import com.imams.boardminton.ui.viewmodel.CountTimerViewModel
 import com.imams.boardminton.ui.viewmodel.ScoreBoardVM
 import com.ramcosta.composedestinations.annotation.Destination
@@ -174,7 +173,7 @@ fun ScoreBoardScreen(
             timer = timer,
             onSwap = {},
             onEdit = {
-                navigator?.toEditPlayersRoute(single, team1 = game.teamA, team2 = game.teamB)
+                navigator?.toEditPlayers(single, team1 = game.teamA, team2 = game.teamB)
             },
             onReset = { scoreVm.reset() }
         )

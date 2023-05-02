@@ -15,25 +15,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.imams.boardminton.data.TeamPlayer
-import com.imams.boardminton.ui.screen.destinations.EditPlayersScreenDestination
+import com.imams.boardminton.ui.screen.toScoreBoard
 import com.imams.boardminton.ui.viewmodel.CreateMatchVM
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-
-fun DestinationsNavigator.toEditPlayersRoute(
-    single: Boolean,
-    team1: TeamPlayer?,
-    team2: TeamPlayer?,
-) {
-    val a1 = team1?.player1?.name ?: ""
-    val a2 = team1?.player2?.name ?: ""
-    val b1 = team2?.player1?.name ?: ""
-    val b2 = team2?.player2?.name ?: ""
-    this.navigate(
-        EditPlayersScreenDestination(single = single, a1 = a1, a2 = a2, b1 = b1, b2 = b2)
-    )
-}
 
 @Destination
 @Composable
@@ -44,13 +29,15 @@ fun EditPlayersScreen(
     b1: String,
     b2: String = "",
     navigator: DestinationsNavigator?,
-    vm: CreateMatchVM = hiltViewModel(),
+    vm: CreateMatchVM = hiltViewModel<CreateMatchVM>().apply {
+        setupPlayers(a1, a2, b1, b2)
+    },
 ) {
     var singleMatch by rememberSaveable { mutableStateOf(single) }
-    val playerA1 by rememberSaveable { mutableStateOf(a1) }
-    val playerA2 by rememberSaveable { mutableStateOf(a2) }
-    val playerB1 by rememberSaveable { mutableStateOf(b1) }
-    val playerB2 by rememberSaveable { mutableStateOf(b2) }
+    val playerA1 by rememberSaveable { vm.playerA1 }
+    val playerA2 by rememberSaveable { vm.playerA2 }
+    val playerB1 by rememberSaveable { vm.playerB1 }
+    val playerB2 by rememberSaveable { vm.playerB2 }
 
     val config = LocalConfiguration.current
 
@@ -87,9 +74,12 @@ fun EditPlayersScreen(
     @Composable
     fun topView() = TopView(onApply = {
         if (it) {
-
+            val params = if (singleMatch) listOf(playerA1, playerB1)
+            else listOf(playerA1, playerA2, playerB1, playerB2)
+            navigator?.popBackStack()
+            navigator?.toScoreBoard(params, singleMatch, true)
         } else {
-
+            navigator?.navigateUp()
         }
     })
 
@@ -141,13 +131,13 @@ private fun TopView(
             horizontalArrangement = Arrangement.Center
         ) {
             Button(
-                onClick = { onApply.invoke(true) },
+                onClick = { onApply.invoke(false) },
                 modifier = Modifier.padding(horizontal = 5.dp),
             ) {
                 Text(text = "Cancel")
             }
             Button(
-                onClick = { onApply.invoke(false) },
+                onClick = { onApply.invoke(true) },
                 modifier = Modifier.padding(horizontal = 5.dp),
             ) {
                 Text(text = "Apply")

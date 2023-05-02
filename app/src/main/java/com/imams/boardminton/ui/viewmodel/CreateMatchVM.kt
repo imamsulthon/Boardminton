@@ -20,6 +20,13 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
     private val _playerB2 = mutableStateOf("")
     val playerB2 = _playerB2
 
+    fun setupPlayers(a1: String = "", a2: String = "", b1: String = "", b2: String = "") {
+        _playerA1.value = a1
+        _playerA2.value = a2
+        _playerB1.value = b1
+        _playerB2.value = b2
+    }
+
     fun setA1(name: String) {
         _playerA1.value = name
     }

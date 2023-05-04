@@ -283,7 +283,6 @@ private fun TopView(
                 )
             }
             OutlinedButton(
-                enabled = true, // todo implement edit teams/players name
                 onClick = { onEdit.invoke() },
                 modifier = Modifier
                     .wrapContentSize()

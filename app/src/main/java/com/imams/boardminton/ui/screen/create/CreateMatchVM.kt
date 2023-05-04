@@ -27,11 +27,19 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
         _playerB2.value = b2
     }
 
-    fun setA1(name: String) {
+    fun updatePlayerName(iTeam: ITeam, v: String) {
+        when (iTeam) {
+            ITeam.A1 -> setA1(v)
+            ITeam.A2 -> setA2(v)
+            ITeam.B1 -> setB1(v)
+            ITeam.B2 -> setB2(v)
+        }
+    }
+    private fun setA1(name: String) {
         _playerA1.value = name
     }
 
-    fun setA2(name: String) {
+    private fun setA2(name: String) {
         _playerA2.value = name
     }
 
@@ -39,7 +47,7 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
         _playerB1.value = name
     }
 
-    fun setB2(name: String) {
+    private fun setB2(name: String) {
         _playerB2.value = name
     }
 

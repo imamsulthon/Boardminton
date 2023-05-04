@@ -9,3 +9,7 @@ val Shapes = Shapes(
     medium = RoundedCornerShape(4.dp),
     large = RoundedCornerShape(0.dp)
 )
+
+enum class Orientation {
+    Landscape, Portrait
+}

@@ -10,11 +10,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.ui.screen.toScoreBoard
+import com.imams.boardminton.ui.theme.Orientation
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -41,20 +43,20 @@ fun CreateMatchScreen(
     }
 
     @Composable
-    fun topView() = MatchTypeView(single = singleMatch, onChange = { singleMatch = it })
+    fun topView() = TopView(single = singleMatch, onChange = { singleMatch = it })
 
     @Composable
     fun formView(
         modifier: Modifier = Modifier,
-        arrangement: Arrangement.Vertical = Arrangement.Top
+        orientation: Orientation = Orientation.Portrait,
     ) {
         if (singleMatch) {
             FieldInputSingleMatch(
                 modifier = modifier,
                 pA1 = playerA1,
                 pB1 = playerB1,
-                onChangeA1 = { vm.setA1(it) },
-                onChangeB1 = { vm.setB1(it) },
+                orientation = orientation,
+                onChange = vm::updatePlayerName,
                 onSwap = { vm.swapSingleMatch() },
                 importPerson = {
 
@@ -63,11 +65,10 @@ fun CreateMatchScreen(
         } else {
             FieldInputDoubleMatch(
                 modifier = modifier,
-                vArrangement = arrangement,
                 pA1 = playerA1, pA2 = playerA2,
                 pB1 = playerB1, pB2 = playerB2,
-                onChangeA1 = { vm.setA1(it) }, onChangeA2 = { vm.setA2(it) },
-                onChangeB1 = { vm.setB1(it) }, onChangeB2 = { vm.setB2(it) },
+                orientation = orientation,
+                onChange = vm::updatePlayerName,
                 swapA = { vm.swapTeamA() }, swapB = { vm.swapTeamB() },
                 swapTeam = { vm.swapDoubleMatch() },
                 importPerson = {
@@ -83,7 +84,7 @@ fun CreateMatchScreen(
                 onNext = { gotoScoreBoard() },
                 onBack = { navigator?.navigateUp() },
                 onClear = { vm.onClearPlayers() },
-                formField = { formView(mPortrait) }
+                formField = { formView(mPortrait, orientation = Orientation.Portrait) }
             )
         }
         else -> {
@@ -92,7 +93,7 @@ fun CreateMatchScreen(
                 onNext = { gotoScoreBoard() },
                 onBack = { navigator?.navigateUp() },
                 onClear = { vm.onClearPlayers() },
-                formField = { formView(mLandscape, Arrangement.SpaceBetween) }
+                formField = { formView(mLandscape, orientation = Orientation.Landscape) }
             )
         }
     }
@@ -100,7 +101,7 @@ fun CreateMatchScreen(
 }
 
 @Composable
-private fun MatchTypeView(
+private fun TopView(
     single: Boolean = true,
     onChange: (Boolean) -> Unit,
 ) {
@@ -169,7 +170,8 @@ private fun PortraitContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(10.dp),
+                .padding(10.dp)
+                .align(Alignment.End),
             onBackPressed = { onBack.invoke() },
             onNext = { onNext.invoke() },
             onClear = { onClear.invoke() }
@@ -186,35 +188,33 @@ private fun LandscapeContent(
     topView: @Composable () -> Unit,
     formField: @Composable () -> Unit,
 ) {
-    Row(
+    Column(
         modifier = Modifier.fillMaxSize(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        formField()
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.End
+        topView()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            topView()
-            BottomButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(10.dp),
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.End,
-                onBackPressed = { onBack.invoke() },
-                onNext = { onNext.invoke() },
-                onClear = { onClear.invoke() }
-            )
+            formField()
         }
+        BottomButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(10.dp)
+                .align(Alignment.End),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.End,
+            onBackPressed = { onBack.invoke() },
+            onNext = { onNext.invoke() },
+            onClear = { onClear.invoke() }
+        )
     }
 
 }
-
 
 @Composable
 private fun BottomButton(
@@ -251,12 +251,14 @@ private fun BottomButton(
 private fun printLog(msg: String) = println("CreateMatch: msg -> $msg")
 
 @Preview("Create Match")
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1024, heightDp = 512)
 @Composable
 fun CreateMatchPreview() {
-    CreateMatchScreen(navigator = null)
+    CreateMatchScreen(single = false, navigator = null)
 }
 
-@Preview("Create Match")
+@Preview
+@Preview(device = Devices.PIXEL_4_XL, widthDp = 768, heightDp = 470)
 @Composable
 fun CreateMatchPreview2() {
     CreateMatchScreen(single = false, navigator = null)

@@ -11,10 +11,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.data.toJson
+import com.imams.boardminton.ui.theme.Orientation
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.result.ResultBackNavigator
 
@@ -26,7 +29,7 @@ fun EditPlayersScreen(
     a2: String = "",
     b1: String,
     b2: String = "",
-    result: ResultBackNavigator<String>,
+    result: ResultBackNavigator<String>?,
     vm: CreateMatchVM = hiltViewModel<CreateMatchVM>().apply {
         setupPlayers(a1, a2, b1, b2)
     },
@@ -40,12 +43,12 @@ fun EditPlayersScreen(
     val config = LocalConfiguration.current
 
     @Composable
-    fun singleMatchView(modifier: Modifier) = FieldInputSingleMatch(
+    fun singleMatchView(modifier: Modifier, orientation: Orientation) = FieldInputSingleMatch(
         modifier = modifier,
         pA1 = playerA1,
         pB1 = playerB1,
-        onChangeA1 = { vm.setA1(it) },
-        onChangeB1 = { vm.setB1(it) },
+        orientation = orientation,
+        onChange = vm::updatePlayerName,
         onSwap = { vm.swapSingleMatch() },
         importPerson = {
 
@@ -53,15 +56,12 @@ fun EditPlayersScreen(
     )
 
     @Composable
-    fun doubleMatchView(
-        modifier: Modifier = Modifier,
-    ) = FieldInputDoubleMatch(
+    fun doubleMatchView(modifier: Modifier = Modifier, orientation: Orientation, ) = FieldInputDoubleMatch(
         modifier = modifier,
-        vArrangement = Arrangement.Top,
         pA1 = playerA1, pA2 = playerA2,
         pB1 = playerB1, pB2 = playerB2,
-        onChangeA1 = { vm.setA1(it) }, onChangeA2 = { vm.setA2(it) },
-        onChangeB1 = { vm.setB1(it) }, onChangeB2 = { vm.setB2(it) },
+        orientation = orientation,
+        onChange = vm::updatePlayerName,
         swapA = { vm.swapTeamA() }, swapB = { vm.swapTeamB() },
         swapTeam = { vm.swapDoubleMatch() },
         importPerson = {
@@ -74,16 +74,16 @@ fun EditPlayersScreen(
         if (it) {
             val params = if (singleMatch) listOf(playerA1, playerB1)
             else listOf(playerA1, playerA2, playerB1, playerB2)
-            result.navigateBack(params.toJson())
+            result?.navigateBack(params.toJson())
         } else {
-            result.navigateBack()
+            result?.navigateBack()
         }
     })
 
     @Composable
-    fun formView(modifier: Modifier = Modifier): Unit =
-        if (singleMatch) singleMatchView(modifier = modifier)
-        else doubleMatchView(modifier = modifier)
+    fun formView(modifier: Modifier = Modifier, orientation: Orientation = Orientation.Portrait): Unit =
+        if (singleMatch) singleMatchView(modifier = modifier, orientation)
+        else doubleMatchView(modifier = modifier, orientation)
 
     when (config.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
@@ -95,7 +95,7 @@ fun EditPlayersScreen(
         else -> {
             LandscapeContent(
                 topView = { topView() },
-                formField = { formView(mLandscape) }
+                formField = { formView(mLandscape, Orientation.Landscape) }
             )
         }
     }
@@ -172,20 +172,22 @@ private fun LandscapeContent(
     topView: @Composable () -> Unit,
     formField: @Composable () -> Unit,
 ) {
-    Row(
+    Column(
         modifier = Modifier.fillMaxSize(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.Top,
     ) {
+        topView()
         formField()
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.End
-        ) {
-            topView()
-        }
     }
 
+}
+
+@Preview
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1024, heightDp = 512)
+@Composable
+private fun LandscapePrev() {
+    EditPlayersScreen(single = false,
+        a1 = "Imam Sulthon", a2 = "Some Player", b1 = "Dana White", b2 = "Bandung Bondowoso",
+        result = null
+    )
 }

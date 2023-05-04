@@ -179,7 +179,7 @@ fun ScoreBoardScreen(
                     end.linkTo(parent.end)
                 },
             timer = timer,
-            onSwap = {},
+            onSwap = { scoreVm.swapSide() },
             onEdit = {
                 navigator?.toEditPlayers(single, team1 = game.teamA, team2 = game.teamB)
             },
@@ -254,7 +254,6 @@ private fun TopView(
                 }
         ) {
             OutlinedButton(
-                enabled = false, // todo implement swap side opponent
                 onClick = { onSwap.invoke() },
                 modifier = Modifier
                     .wrapContentSize()

@@ -26,15 +26,15 @@ class GameUseCase @Inject constructor(
     }
 
     override fun addA() {
-        _gameScore.value.run { addA() }
+        _gameScore.value.addA()
     }
 
     override fun addB() {
-        _gameScore.value.run { addB() }
+        _gameScore.value.addB()
     }
 
     override fun minA() {
-        _gameScore.value.run { minA() }
+        _gameScore.value.minA()
     }
 
     override fun minB() {
@@ -42,11 +42,15 @@ class GameUseCase @Inject constructor(
     }
 
     override fun swapServer() {
-        _gameScore.value.run { swapServer() }
+        _gameScore.value.swapServer()
     }
 
     override fun reset() {
         _gameScore.value.reset()
+    }
+
+    override fun swapSide() {
+        _gameScore.value.swapSide()
     }
 
     override fun createSingleMatch(playerA: String, playerB: String) {

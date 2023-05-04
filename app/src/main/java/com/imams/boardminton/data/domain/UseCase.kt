@@ -1,6 +1,7 @@
 package com.imams.boardminton.data.domain
 
 import androidx.compose.runtime.MutableState
+import com.imams.boardminton.data.GameHistory
 import com.imams.boardminton.data.GameScore
 
 interface UseCase {
@@ -19,6 +20,8 @@ interface UseCase {
     fun swapServer()
 
     fun reset()
+
+    fun swapSide()
 
     fun createSingleMatch(playerA: String, playerB: String)
 

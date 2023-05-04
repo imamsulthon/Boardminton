@@ -99,11 +99,26 @@ class GameScore constructor() {
         lastPointB = this.lastPoint(opposite)
         lastPointA = false
     }
-    
+
+    fun swapSide() {
+        teamA = teamB.also { teamB = teamA }
+        pointA = pointB.also { pointB = pointA }
+        onTurnA = onTurnB.also { onTurnB = onTurnA }
+        lastPointA = lastPointB.also { lastPointB = lastPointA }
+    }
+
     private fun Int.notDeuce(opposite: Int) = !this.isEndGame(opposite)
 
     private fun Int.isEndGame(opposite: Int) = this in gamePoint..maxPoint && this - opposite > 1
 
     private fun Int.lastPoint(opposite: Int) = this in gamePoint - 1 until maxPoint - 1 && this - opposite > 0
 
+}
+data class GameHistory(
+    val index: Int,
+    val scoreA: Int,
+    val scoreB: Int,
+) {
+    var scoresA: List<Int>? = null
+    var scoresB: List<Int>? = null
 }

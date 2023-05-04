@@ -2,7 +2,10 @@ package com.imams.boardminton.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -28,21 +31,9 @@ fun MainNameBoardView(
     scoreB: Int,
     single: Boolean = true,
 ) {
-    val teamLabel1 =
-        if (team1?.isSingle() == true) team1.player1.name.prettifyName()
-        else team1?.concatLastName() ?: ""
-    val teamLabel2 =
-        if (team2?.isSingle() == true) team2.player1.name.prettifyName()
-        else team2?.concatLastName() ?: ""
-    Column(
-        modifier = modifier
-            .border(
-                width = 1.dp,
-                color = Color.Black,
-                shape = RoundedCornerShape(1.dp)
-            )
-            .padding(vertical = 10.dp, horizontal = 10.dp)
-    ) {
+    val teamLabel1 = team1.getLabel()
+    val teamLabel2 = team2.getLabel()
+    Column(modifier = modifier.drawBorder()) {
         Text(text = "${if (single) "Single" else "Double"} match", modifier = Modifier.padding(top = 5.dp))
         Row {
             Column {
@@ -117,7 +108,16 @@ fun CourtView(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+private fun Modifier.drawBorder() = this
+    .border(
+        width = 1.dp,
+        color = Color.Black,
+        shape = RoundedCornerShape(1.dp)
+    )
+    .padding(vertical = 10.dp, horizontal = 10.dp)
+private fun TeamPlayer?.getLabel() = if (this?.isSingle() == true) this.player1.name.prettifyName()
+    else this?.concatLastName() ?: ""
+
 @Preview
 @Composable
 fun CourtViewP() {

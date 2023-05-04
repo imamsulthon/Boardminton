@@ -4,9 +4,15 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -32,6 +38,15 @@ fun CreateMatchScreen(
     val playerA2 by rememberSaveable { vm.playerA2 }
     val playerB1 by rememberSaveable { vm.playerB1 }
     val playerB2 by rememberSaveable { vm.playerB2 }
+    val enableNext by rememberSaveable(singleMatch, playerA1, playerA2, playerB1, playerB2) {
+        mutableStateOf(
+            if (singleMatch) playerA1.isNotEmpty() && playerB1.isNotEmpty()
+            else playerA1.isNotEmpty() && playerA2.isNotEmpty() && playerB1.isNotEmpty() && playerB2.isNotEmpty()
+        )
+    }
+    val enableClear by rememberSaveable(singleMatch, playerA1, playerA2, playerB1, playerB2) {
+        mutableStateOf(playerA1.isNotEmpty() || playerA2.isNotEmpty() || playerB1.isNotEmpty() || playerB2.isNotEmpty())
+    }
 
     val config = LocalConfiguration.current
 
@@ -40,6 +55,20 @@ fun CreateMatchScreen(
         else listOf(playerA1, playerA2, playerB1, playerB2)
         navigator?.popBackStack()
         navigator?.toScoreBoard(params, singleMatch)
+    }
+
+    val bottomListener = object : BottomListener {
+        override fun onNext() {
+            gotoScoreBoard()
+        }
+
+        override fun onBackPressed() {
+            navigator?.navigateUp()
+        }
+
+        override fun onClear() {
+            vm.onClearPlayers()
+        }
     }
 
     @Composable
@@ -77,23 +106,33 @@ fun CreateMatchScreen(
             )
         }
     }
+
+    @Composable
+    fun bottomView(orientation: Orientation) = BottomButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(10.dp),
+        horizontalArrangement = if (orientation == Orientation.Landscape) Arrangement.End
+        else Arrangement.SpaceBetween,
+        enableClear = enableClear,
+        enableNext = enableNext,
+        listener = bottomListener
+    )
+
     when (config.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
             PortraitContent(
                 topView = { topView() },
-                onNext = { gotoScoreBoard() },
-                onBack = { navigator?.navigateUp() },
-                onClear = { vm.onClearPlayers() },
-                formField = { formView(mPortrait, orientation = Orientation.Portrait) }
+                formField = { formView(mPortrait, orientation = Orientation.Portrait) },
+                bottomView = { bottomView(orientation = Orientation.Portrait) }
             )
         }
         else -> {
             LandscapeContent(
                 topView = { topView() },
-                onNext = { gotoScoreBoard() },
-                onBack = { navigator?.navigateUp() },
-                onClear = { vm.onClearPlayers() },
-                formField = { formView(mLandscape, orientation = Orientation.Landscape) }
+                formField = { formView(mLandscape, orientation = Orientation.Landscape) },
+                bottomView = { bottomView(orientation = Orientation.Landscape) }
             )
         }
     }
@@ -146,11 +185,9 @@ private fun TopView(
 
 @Composable
 private fun PortraitContent(
-    onNext: () -> Unit,
-    onBack: () -> Unit,
-    onClear: () -> Unit,
     topView: @Composable () -> Unit,
     formField: @Composable () -> Unit,
+    bottomView: @Composable () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -166,27 +203,16 @@ private fun PortraitContent(
             topView()
             formField()
         }
-        BottomButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(10.dp)
-                .align(Alignment.End),
-            onBackPressed = { onBack.invoke() },
-            onNext = { onNext.invoke() },
-            onClear = { onClear.invoke() }
-        )
+        bottomView()
     }
 
 }
 
 @Composable
 private fun LandscapeContent(
-    onNext: () -> Unit,
-    onBack: () -> Unit,
-    onClear: () -> Unit,
     topView: @Composable () -> Unit,
     formField: @Composable () -> Unit,
+    bottomView: @Composable () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -200,18 +226,7 @@ private fun LandscapeContent(
         ) {
             formField()
         }
-        BottomButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(10.dp)
-                .align(Alignment.End),
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.End,
-            onBackPressed = { onBack.invoke() },
-            onNext = { onNext.invoke() },
-            onClear = { onClear.invoke() }
-        )
+        bottomView()
     }
 
 }
@@ -221,9 +236,9 @@ private fun BottomButton(
     modifier: Modifier,
     verticalAlignment: Alignment.Vertical = Alignment.Bottom,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.SpaceBetween,
-    onNext: () -> Unit,
-    onBackPressed: () -> Unit,
-    onClear: () -> Unit,
+    listener: BottomListener,
+    enableClear: Boolean = true,
+    enableNext: Boolean = true,
 ) {
     Row(
         modifier = modifier,
@@ -232,32 +247,40 @@ private fun BottomButton(
     ) {
 
         OutlinedButton(
-            onClick = { onBackPressed.invoke() },
+            onClick = { listener.onBackPressed() },
             modifier = Modifier.padding(end = 5.dp)
         ) {
             Text(text = "Back")
         }
 
-        OutlinedButton(onClick = { onClear.invoke() }) {
+        OutlinedButton(onClick = { listener.onClear() }, enabled = enableClear) {
             Icon(Icons.Outlined.Delete, contentDescription = "clear_icon")
         }
 
-        Button(onClick = { onNext.invoke() }, modifier = Modifier.padding(start = 5.dp)) {
+        Button(
+            onClick = { listener.onNext() },
+            modifier = Modifier.padding(start = 5.dp),
+            enabled = enableNext
+        ) {
             Text(text = "Next")
         }
     }
 }
 
-private fun printLog(msg: String) = println("CreateMatch: msg -> $msg")
+private interface BottomListener {
+    fun onNext()
+    fun onBackPressed()
+    fun onClear()
+}
 
-@Preview("Create Match")
+@Preview(showBackground = true)
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1024, heightDp = 512)
 @Composable
 fun CreateMatchPreview() {
     CreateMatchScreen(single = false, navigator = null)
 }
 
-@Preview
+@Preview(showSystemUi = true)
 @Preview(device = Devices.PIXEL_4_XL, widthDp = 768, heightDp = 470)
 @Composable
 fun CreateMatchPreview2() {

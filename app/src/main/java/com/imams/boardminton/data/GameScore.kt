@@ -116,9 +116,6 @@ class GameScore constructor() {
 }
 data class GameHistory(
     val index: Int,
-    val scoreA: Int,
-    val scoreB: Int,
-) {
-    var scoresA: List<Int>? = null
-    var scoresB: List<Int>? = null
-}
+    var scoresA: Int = 0,
+    var scoresB: Int = 0,
+)

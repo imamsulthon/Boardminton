@@ -9,6 +9,7 @@ import com.imams.boardminton.data.TeamPlayer
 fun Int.even(): Boolean {
     return this % 2 == 0
 }
+fun TeamPlayer?.getLabel() = if (this?.isSingle() == true) this.player1.name.prettifyName() else this?.concatLastName() ?: ""
 
 fun TeamPlayer.concatLastName(): String {
     return this.player1.name.lastNameWith(this.player2?.name ?: "")

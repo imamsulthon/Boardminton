@@ -2,6 +2,7 @@ package com.imams.boardminton.data.domain
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.imams.boardminton.data.GameHistory
 import com.imams.boardminton.data.GameScore
 import javax.inject.Inject
 
@@ -16,6 +17,8 @@ class GameUseCase @Inject constructor(
             mutableStateOf(GameScore().createDoubles())
         }
     }
+
+    private var _history = mutableListOf<GameHistory>()
 
     override fun get(): MutableState<GameScore> {
         return _gameScore
@@ -51,6 +54,10 @@ class GameUseCase @Inject constructor(
 
     override fun swapSide() {
         _gameScore.value.swapSide()
+        val h = _history
+        h.forEach {g ->
+            g.scoresA = g.scoresB.also { g.scoresB = g.scoresA }
+        }
     }
 
     override fun createSingleMatch(playerA: String, playerB: String) {
@@ -70,6 +77,14 @@ class GameUseCase @Inject constructor(
         _gameScore.value.run {
             createDoubles(playerA1, playerA2, playerB1, playerB2)
         }
+    }
+
+    override fun setHistory(history: GameHistory) {
+        _history.add(history)
+    }
+
+    override fun getHistory(): MutableList<GameHistory> {
+        return _history
     }
 
 }

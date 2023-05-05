@@ -27,4 +27,7 @@ interface UseCase {
 
     fun createDoubleMatch(playerA1: String, playerA2: String, playerB1: String, playerB2: String)
 
+    fun setHistory(history: GameHistory)
+    fun getHistory(): MutableList<GameHistory>
+
 }

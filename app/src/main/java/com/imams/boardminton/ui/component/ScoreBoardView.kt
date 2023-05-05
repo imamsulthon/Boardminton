@@ -7,15 +7,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -75,7 +73,6 @@ private fun printLog(msg: String) {
     println("ScoreBoardView $msg")
 }
 
-
 fun boardStyle(onTurn: Boolean, score: Int, callback: ((Int, Boolean) -> Unit)?): Modifier {
     val bgColor = if (onTurn) Purple80 else White
     return Modifier
@@ -102,8 +99,10 @@ fun PlayerNameBoard(
     if (teamPlayer == null) return
     Column(modifier = modifier, horizontalAlignment = alignment) {
         val mod = Modifier.padding(top = 6.dp)
-        PlayerName(modifier = mod, alignment,
-            name = teamPlayer.player1.name.prettifyName(), teamPlayer.player1.onTurn)
+        PlayerName(
+            modifier = mod, alignment,
+            name = teamPlayer.player1.name.prettifyName(), teamPlayer.player1.onTurn
+        )
         AnimatedVisibility(visible = teamPlayer.player2 != null) {
             PlayerName(
                 modifier = mod,
@@ -140,11 +139,13 @@ fun PlayerName(
 fun ButtonPointLeft(
     onClickPlus: () -> Unit,
     onClickMin: () -> Unit,
+    enabled: Boolean,
 ) {
     Row {
         Button(
+            enabled = enabled,
             onClick = { onClickPlus.invoke() },
-            modifier = Modifier.widthIn(min = 60.dp, max = 120.dp)
+            modifier = Modifier.widthIn(min = 60.dp, max = 120.dp),
         ) {
             Text(text = "+1")
         }
@@ -164,6 +165,7 @@ fun ButtonPointLeft(
 fun ButtonPointRight(
     onClickPlus: () -> Unit,
     onClickMin: () -> Unit,
+    enabled: Boolean,
 ) {
     Row {
         OutlinedButton(
@@ -177,10 +179,42 @@ fun ButtonPointRight(
         }
 
         Button(
+            enabled = enabled,
             onClick = { onClickPlus.invoke() },
             modifier = Modifier.widthIn(min = 60.dp, max = 120.dp)
         ) {
             Text(text = "+1")
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GameFinishDialogContent(
+    gameIndex: Int,
+    winner: String,
+    onDone: (Boolean) -> Unit,
+) = Card(
+    modifier = Modifier.wrapContentSize(),
+    shape = RoundedCornerShape(8.dp)
+) {
+    Column(
+        modifier = Modifier
+            .wrapContentSize()
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        val compMod = Modifier.padding(horizontal = 5.dp, vertical = 5.dp)
+        Text(text = "Game $gameIndex Done", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Text(text = "$winner Win", modifier = compMod, color = Green)
+        Row {
+            OutlinedButton(onClick = { onDone.invoke(false) }, modifier = compMod) {
+                Text(text = "Cancel")
+            }
+            OutlinedButton(onClick = { onDone.invoke(true) }, modifier = compMod) {
+                Text(text = "Finish")
+            }
         }
     }
 }
@@ -193,4 +227,10 @@ fun ScoreBoardView() {
         Spacer(modifier = Modifier.size(2.dp))
         BaseScore(score = 13, onTurn = true)
     }
+}
+
+@Preview
+@Composable
+private fun PreviewDialog() {
+    GameFinishDialogContent(gameIndex = 1, winner = "Player 2") {}
 }

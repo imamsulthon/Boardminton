@@ -24,6 +24,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,7 +53,10 @@ fun ScoreBoardScreen(
     val game by remember { scoreVm.game }
     val scoreA by remember { scoreVm.scoreA }
     val scoreB by remember { scoreVm.scoreB }
+    val histories by remember { scoreVm.histories }
     val timer by counterVm.time.observeAsState()
+    val anyWinner by remember { scoreVm.anyWinner }
+    val finishMatch by remember { scoreVm.finishMatch }
 
     resultRecipient?.onNavResult { result ->
         if (result is NavResult.Value) scoreVm.updatePlayers(result.value)
@@ -59,6 +64,23 @@ fun ScoreBoardScreen(
 
     if (jsonPlayers.isEmpty()) scoreVm.setupPlayer(players, single)
     else scoreVm.setupPlayer(jsonPlayers, single)
+
+    if (anyWinner.show) {
+        Dialog(
+            onDismissRequest = { scoreVm.setGameEnd(false) },
+            content = {
+                GameFinishDialogContent(anyWinner.index, anyWinner.by,
+                    onDone = {
+                        if (it) scoreVm.onNewGame() else scoreVm.setGameEnd(false)
+                    }
+                )
+            },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
+        )
+    }
 
     @Composable
     fun mainBoard() {
@@ -70,6 +92,7 @@ fun ScoreBoardScreen(
             team2 = game.teamB,
             scoreA = scoreA,
             scoreB = scoreB,
+            histories = histories,
             single = single,
         )
     }
@@ -216,6 +239,7 @@ fun ScoreBoardScreen(
             bPlus = { scoreVm.plusB() },
             bMin = { scoreVm.minB() },
             swap = { scoreVm.swapServe() },
+            enabled = !finishMatch
         )
     }
 }
@@ -374,6 +398,7 @@ private fun BottomView(
     bPlus: () -> Unit,
     bMin: () -> Unit,
     swap: () -> Unit,
+    enabled: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -382,7 +407,8 @@ private fun BottomView(
     ) {
         ButtonPointLeft(
             onClickPlus = { aPlus.invoke() },
-            onClickMin = { aMin.invoke() }
+            onClickMin = { aMin.invoke() },
+            enabled = enabled
         )
 
         OutlinedButton(
@@ -397,7 +423,8 @@ private fun BottomView(
 
         ButtonPointRight(
             onClickPlus = { bPlus.invoke() },
-            onClickMin = { bMin.invoke() }
+            onClickMin = { bMin.invoke() },
+            enabled = enabled,
         )
     }
 }

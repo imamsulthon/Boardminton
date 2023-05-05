@@ -1,9 +1,13 @@
 package com.imams.boardminton.ui.screen.score
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.imams.boardminton.data.GameHistory
+import com.imams.boardminton.data.GameScore
 import com.imams.boardminton.data.domain.UseCase
 import com.imams.boardminton.data.toList
+import com.imams.boardminton.ui.getLabel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -11,6 +15,8 @@ import javax.inject.Inject
 class ScoreBoardVM @Inject constructor(
     private val useCase: UseCase
 ) : ViewModel() {
+
+    private var gameIndex = 1
 
     private val _players = mutableStateOf("")
     val players = _players
@@ -23,6 +29,14 @@ class ScoreBoardVM @Inject constructor(
 
     private val _scoreB = mutableStateOf(game.value.pointB)
     val scoreB = _scoreB
+
+    private val _histories: MutableState<List<GameHistory>> = mutableStateOf(listOf())
+    val histories = _histories
+
+    private val _anyWinner = mutableStateOf(WinnerState(gameIndex, show = false, by = ""))
+    val anyWinner = _anyWinner
+
+    val finishMatch = mutableStateOf(false)
 
     fun updatePlayers(data: String) {
         _players.value = data
@@ -43,6 +57,7 @@ class ScoreBoardVM @Inject constructor(
             addA()
             _scoreA.value = get().value.pointA
             _game.value = get().value
+            _game.value.checkWinner()
         }
     }
 
@@ -51,6 +66,7 @@ class ScoreBoardVM @Inject constructor(
             addB()
             _scoreB.value = get().value.pointB
             _game.value = get().value
+            _game.value.checkWinner()
         }
     }
 
@@ -92,9 +108,48 @@ class ScoreBoardVM @Inject constructor(
             _scoreA.value = get().value.pointA
             _scoreB.value = get().value.pointB
             _game.value = get().value
+            _histories.value = getHistory()
         }
+    }
+
+    fun setGameEnd(show: Boolean) {
+        _anyWinner.value = _anyWinner.value.copy(show = show)
+    }
+
+    private fun GameScore.checkWinner() {
+        if (gameEnd) {
+            _anyWinner.value = _anyWinner.value.copy(
+                isWin = true, show = true,
+                by = if (server() == "A") teamA.getLabel() else teamB.getLabel()
+            )
+        }
+    }
+
+    fun onNewGame() {
+        useCase.run {
+            setHistory(GameHistory(gameIndex, scoreA.value, scoreB.value))
+            resetWinner()
+            reset()
+            _scoreA.value = get().value.pointA
+            _scoreB.value = get().value.pointB
+            _game.value = get().value
+            _histories.value = getHistory()
+            if (gameIndex > 3) finishMatch.value = true
+        }
+    }
+
+    private fun resetWinner() {
+        gameIndex += 1
+        _anyWinner.value = _anyWinner.value.copy(index = gameIndex, show = false, isWin = false, by = "")
     }
 
     private fun printLog(msg: String) = println("ScoreBoardVM $msg")
 
 }
+
+data class WinnerState(
+    val index: Int,
+    val isWin: Boolean = false,
+    val show: Boolean = true,
+    val by: String,
+)

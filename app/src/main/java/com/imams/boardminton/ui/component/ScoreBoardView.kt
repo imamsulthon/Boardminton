@@ -20,75 +20,123 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Visibility
 import com.imams.boardminton.R
+import com.imams.boardminton.data.GameScore
+import com.imams.boardminton.data.ISide
 import com.imams.boardminton.data.TeamPlayer
 import com.imams.boardminton.ui.prettifyName
 import com.imams.boardminton.ui.theme.*
 
 @Composable
+fun BaseScoreWrapper(
+    index: Int = 1,
+    scoreA: Int,
+    scoreB: Int,
+    game: GameScore,
+    plus: (ISide) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+            .wrapContentHeight(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        BaseScore(
+            score = scoreA,
+            onTurn = game.onTurnA,
+            winner = game.gameEnd,
+            lastPoint = game.lastPointA,
+            callback = { _, _ -> plus.invoke(ISide.A) })
+
+        Column(
+            modifier = Modifier
+                .wrapContentWidth()
+                .padding(horizontal = 10.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = "Game", color = Green, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+            Text(
+                text = index.toString(),
+                color = Green,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 24.sp
+            )
+        }
+
+        BaseScore(
+            score = scoreB,
+            onTurn = game.onTurnB,
+            lastPoint = game.lastPointB,
+            winner = game.gameEnd,
+            callback = { _, _ -> plus.invoke(ISide.B) })
+    }
+}
+
+@Composable
 fun BaseScore(
+    modifier: Modifier = Modifier,
     score: Int,
     onTurn: Boolean,
     lastPoint: Boolean = false,
     winner: Boolean = false,
     callback: ((Int, Boolean) -> Unit)? = null,
-    modifier: Modifier = boardStyle(onTurn, score, callback),
 ) {
-    ConstraintLayout(
+    Box(
         modifier = modifier
+            .scoreMod(onTurn, score, callback)
+            .aspectRatio(0.9f)
     ) {
-        val (tvScore, ivTurn) = createRefs()
-        Image(
-            painter = painterResource(id = R.drawable.ic_cock),
-            contentDescription = "content_turn",
-            modifier = Modifier
-                .width(18.dp)
-                .height(18.dp)
-                .constrainAs(ivTurn) {
-                    top.linkTo(parent.top)
-                    end.linkTo(parent.end)
-                    start.linkTo(parent.start)
-                    visibility = if (onTurn) Visibility.Visible else Visibility.Invisible
-                },
-        )
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+            val (tvScore, ivTurn) = createRefs()
+            Image(
+                painter = painterResource(id = R.drawable.ic_cock),
+                contentDescription = "content_turn",
+                modifier = Modifier
+                    .width(18.dp)
+                    .height(18.dp)
+                    .constrainAs(ivTurn) {
+                        top.linkTo(parent.top)
+                        end.linkTo(parent.end)
+                        start.linkTo(parent.start)
+                        visibility = if (onTurn) Visibility.Visible else Visibility.Invisible
+                    },
+            )
 
-        Text(
-            text = score.toString(), fontSize = 64.sp,
-            color = if (lastPoint) {
-                if (winner) Green else Yellow
-            } else if (onTurn) AppPrimaryColor else AppPrimaryColor,
-            modifier = Modifier
-                .constrainAs(tvScore) {
-                    top.linkTo(ivTurn.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(parent.bottom)
-                }
-                .padding(6.dp)
-        )
+            Text(
+                text = score.toString(), fontSize = 64.sp,
+                color = if (lastPoint) {
+                    if (winner) Green else Yellow
+                } else if (onTurn) AppPrimaryColor else AppPrimaryColor,
+                modifier = Modifier
+                    .constrainAs(tvScore) {
+                        top.linkTo(ivTurn.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        bottom.linkTo(parent.bottom)
+                    }
+                    .padding(6.dp)
+            )
+        }
     }
 
 }
 
-private fun printLog(msg: String) {
-    println("ScoreBoardView $msg")
-}
-
-fun boardStyle(onTurn: Boolean, score: Int, callback: ((Int, Boolean) -> Unit)?): Modifier {
-    val bgColor = if (onTurn) Purple80 else White
-    return Modifier
-        .widthIn(min = 100.dp, max = 160.dp)
-        .heightIn(min = 100.dp, max = 160.dp)
-        .border(
-            width = 2.dp,
-            color = Color.Black,
-            shape = RoundedCornerShape(2.dp)
-        )
-        .background(bgColor)
-        .padding(top = 12.dp, bottom = 24.dp, start = 12.dp, end = 12.dp)
-        .clickable {
-            callback?.invoke(score + 1, true)
-        }
-}
+private fun Modifier.scoreMod(
+    onTurn: Boolean, score: Int,
+    callback: ((Int, Boolean) -> Unit)?
+): Modifier = this
+    .heightIn(min = 80.dp, max = 180.dp)
+    .widthIn(min = 80.dp, max = 180.dp)
+    .border(
+        width = 2.dp,
+        color = Color.Black,
+        shape = RoundedCornerShape(2.dp)
+    )
+    .background(if (onTurn) Purple80 else White)
+    .padding(top = 12.dp, bottom = 24.dp, start = 12.dp, end = 12.dp)
+    .clickable { callback?.invoke(score + 1, true) }
 
 @Composable
 fun PlayerNameBoard(
@@ -117,6 +165,40 @@ fun PlayerNameBoard(
 
 @Composable
 fun ServeIc() = Icon(painterResource(id = R.drawable.ic_cock), contentDescription = "import_icon")
+
+@Composable
+fun PlayerNameWrapper(
+    modifier: Modifier = Modifier,
+    game: GameScore,
+) {
+    ConstraintLayout(
+        modifier = modifier
+    ) {
+        val (left, right) = createRefs()
+        PlayerNameBoard(
+            modifier = Modifier
+                .wrapContentWidth()
+                .constrainAs(left) {
+                    start.linkTo(parent.start)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                },
+            teamPlayer = game.teamA,
+            alignment = Alignment.Start
+        )
+        PlayerNameBoard(
+            modifier = Modifier
+                .wrapContentWidth()
+                .constrainAs(right) {
+                    end.linkTo(parent.end)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                },
+            teamPlayer = game.teamB,
+            alignment = Alignment.End
+        )
+    }
+}
 
 @Composable
 fun PlayerName(
@@ -219,13 +301,12 @@ fun GameFinishDialogContent(
     }
 }
 
-@Preview
+@Preview(showSystemUi = true)
 @Composable
 fun ScoreBoardView() {
-    Row {
-        BaseScore(12, onTurn = false)
-        Spacer(modifier = Modifier.size(2.dp))
-        BaseScore(score = 13, onTurn = true)
+    Column(modifier = Modifier.padding(5.dp)) {
+        BaseScoreWrapper(scoreA = 12, scoreB = 13, game = GameScore(), plus = {})
+        PlayerNameWrapper(game = GameScore())
     }
 }
 

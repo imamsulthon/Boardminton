@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.imams.boardminton.data.Athlete
 import com.imams.boardminton.data.toJson
 import com.imams.boardminton.ui.theme.Orientation
 import com.ramcosta.composedestinations.annotation.Destination
@@ -102,7 +103,6 @@ fun EditPlayersScreen(
 
 }
 
-
 @Composable
 private fun TopView(
     single: Boolean = true,
@@ -182,12 +182,12 @@ private fun LandscapeContent(
 
 }
 
-@Preview
-@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1024, heightDp = 512)
+@Preview(showSystemUi = true)
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1024, heightDp = 512, showSystemUi = true)
 @Composable
 private fun LandscapePrev() {
     EditPlayersScreen(single = false,
-        a1 = "Imam Sulthon", a2 = "Some Player", b1 = "Dana White", b2 = "Bandung Bondowoso",
+        a1 = Athlete.Imam_Sulthon, a2 = Athlete.Taufik_Hidayat, b1 = Athlete.Viktor, b2 = Athlete.Anthony,
         result = null
     )
 }

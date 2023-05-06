@@ -58,17 +58,14 @@ fun CreateMatchScreen(
     }
 
     val bottomListener = object : BottomListener {
-        override fun onNext() {
-            gotoScoreBoard()
-        }
+        override fun onNext() = gotoScoreBoard()
 
         override fun onBackPressed() {
             navigator?.navigateUp()
         }
 
-        override fun onClear() {
-            vm.onClearPlayers()
-        }
+        override fun onClear() = vm.onClearPlayers()
+
     }
 
     @Composable
@@ -88,7 +85,7 @@ fun CreateMatchScreen(
                 onChange = vm::updatePlayerName,
                 onSwap = { vm.swapSingleMatch() },
                 importPerson = {
-
+                    vm.defaultPlayers(singleMatch)
                 }
             )
         } else {
@@ -101,7 +98,7 @@ fun CreateMatchScreen(
                 swapA = { vm.swapTeamA() }, swapB = { vm.swapTeamB() },
                 swapTeam = { vm.swapDoubleMatch() },
                 importPerson = {
-
+                    vm.defaultPlayers(singleMatch)
                 }
             )
         }

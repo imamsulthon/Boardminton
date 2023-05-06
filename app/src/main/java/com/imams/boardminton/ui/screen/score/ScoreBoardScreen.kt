@@ -30,6 +30,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.R
+import com.imams.boardminton.data.ISide
 import com.imams.boardminton.ui.component.*
 import com.imams.boardminton.ui.screen.destinations.EditPlayersScreenDestination
 import com.imams.boardminton.ui.screen.timer.CountTimerViewModel
@@ -101,86 +102,33 @@ fun ScoreBoardScreen(
     fun scoreBoard() {
         Column(
             modifier = Modifier
-                .widthIn(max = 450.dp, min = 250.dp)
-                .verticalScroll(rememberScrollState())
-                .wrapContentHeight(),
-            verticalArrangement = Arrangement.Top,
+                .fillMaxWidth()
+                .widthIn(max = 450.dp)
+                .heightIn(max = 350.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(vertical = 6.dp),
-                verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    BaseScore(
-                        score = scoreA,
-                        onTurn = game.onTurnA,
-                        winner = game.gameEnd,
-                        lastPoint = game.lastPointA,
-                        callback = { _, _ ->
-                            run {
-                                scoreVm.plusA()
-                            }
-                        })
-
-                    Spacer(modifier = Modifier.size(6.dp))
-
-                    BaseScore(
-                        score = scoreB,
-                        onTurn = game.onTurnB,
-                        lastPoint = game.lastPointB,
-                        winner = game.gameEnd,
-                        callback = { _, _ ->
-                            run { scoreVm.plusB() }
-                        })
+            BaseScoreWrapper(scoreA = scoreA, scoreB = scoreB, game = game,
+                plus = {
+                    when (it) {
+                        ISide.A -> scoreVm.plusA()
+                        ISide.B -> scoreVm.plusB()
+                    }
                 }
-            }
-
+            )
             Divider(
                 modifier = Modifier.padding(top = 6.dp),
                 color = Color.Black,
                 thickness = 1.dp
             )
-
-            ConstraintLayout(
+            PlayerNameWrapper(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(top = 6.dp)
-            ) {
-                val (left, right) = createRefs()
-                PlayerNameBoard(
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .constrainAs(left) {
-                            start.linkTo(parent.start)
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                        },
-                    teamPlayer = game.teamA,
-                    alignment = Alignment.Start
-                )
-                PlayerNameBoard(
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .constrainAs(right) {
-                            end.linkTo(parent.end)
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                        },
-                    teamPlayer = game.teamB,
-                    alignment = Alignment.End
-                )
-            }
+                    .padding(top = 6.dp),
+                game = game
+            )
+
         }
     }
 
@@ -442,6 +390,6 @@ private fun printLog(msg: String) {
 
 @Preview(device = Devices.NEXUS_6)
 @Composable
-fun ScoreBoardScreenV() {
+private fun ScoreBoardScreenV() {
     ScoreBoardScreen("listOf()", false, navigator = null, resultRecipient = null)
 }

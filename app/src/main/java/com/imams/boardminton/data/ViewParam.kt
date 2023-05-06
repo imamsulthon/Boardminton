@@ -30,3 +30,7 @@ enum class Serve {
 enum class ITeam {
     A1, A2, B1, B2
 }
+
+enum class ISide {
+    A, B
+}

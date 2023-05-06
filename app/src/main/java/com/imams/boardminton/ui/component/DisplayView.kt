@@ -114,7 +114,7 @@ private fun Modifier.drawBorder() = this
 @Composable
 fun CourtViewP() {
     MainNameBoardView(
-        team1 = doublePlayer(Athlete.IMAM, Athlete.TAUFIK),
+        team1 = doublePlayer(Athlete.Imam_Sulthon, Athlete.Taufik_Hidayat),
         team2 = doublePlayer(Athlete.Viktor, Athlete.Anthony),
         scoreA = 1, scoreB =  14,
         histories = listOf(

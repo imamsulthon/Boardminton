@@ -68,7 +68,7 @@ fun FieldInputSingleMatch(
             onValueChange = {
                 onChange.invoke(ITeam.A1, it)
             },
-            label = "Player Name 1",
+            label = "Player 1 Name",
             endIconClick = { importPerson.invoke(ITeam.A1) }
         )
         Row(
@@ -86,7 +86,7 @@ fun FieldInputSingleMatch(
             onValueChange = {
                 onChange.invoke(ITeam.B1, it)
             },
-            label = "Player Name 2",
+            label = "Player 2 Name",
             keyboardOptions = keyBoardDone(),
             endIconClick = { importPerson.invoke(ITeam.B1) }
         )
@@ -114,7 +114,7 @@ fun FieldInputSingleLandscape(
             onValueChange = {
                 onChange.invoke(ITeam.A1, it)
             },
-            label = "Player Name 1",
+            label = "Player 1 Name",
             endIconClick = { importPerson.invoke(ITeam.A1) }
         )
 
@@ -135,7 +135,7 @@ fun FieldInputSingleLandscape(
             onValueChange = {
                 onChange.invoke(ITeam.B1, it)
             },
-            label = "Player Name 2",
+            label = "Player 2 Name",
             keyboardOptions = keyBoardDone(),
             endIconClick = { importPerson.invoke(ITeam.B1) }
         )
@@ -184,7 +184,7 @@ fun FieldInputDoubleMatch(
             onValueChange = {
                 onChange.invoke(ITeam.A1, it)
             },
-            label = "Player Name 1",
+            label = "Player 1 Name",
             endIconClick = { importPerson.invoke(ITeam.A1) },
         )
         SwapButton({ swapA.invoke() })
@@ -194,7 +194,7 @@ fun FieldInputDoubleMatch(
             onValueChange = {
                 onChange.invoke(ITeam.A2, it)
             },
-            label = "Player Name 2",
+            label = "Player 2 Name",
             endIconClick = { importPerson.invoke(ITeam.A2) },
         )
 
@@ -211,7 +211,7 @@ fun FieldInputDoubleMatch(
             modifier = ipModifierP,
             value = pB1,
             onValueChange = { onChange.invoke(ITeam.B1, it) },
-            label = "Player Name 1",
+            label = "Player 1 Name",
             endIconClick = { importPerson.invoke(ITeam.B1) },
         )
         SwapButton({ swapB.invoke() })
@@ -219,7 +219,7 @@ fun FieldInputDoubleMatch(
             modifier = ipModifierP,
             value = pB2,
             onValueChange = { onChange.invoke(ITeam.B2, it) },
-            label = "Player Name 2",
+            label = "Player 2 Name",
             keyboardOptions = keyBoardDone(),
             endIconClick = { importPerson.invoke(ITeam.B2) },
         )
@@ -257,7 +257,7 @@ private fun FieldInputDoubleLandscape(
                 onValueChange = {
                     onChange.invoke(ITeam.A1, it)
                 },
-                label = "Player Name 1",
+                label = "Player 1 Name",
                 endIconClick = { importPerson.invoke(ITeam.A1) },
             )
             SwapButton({ swapA.invoke() })
@@ -267,7 +267,7 @@ private fun FieldInputDoubleLandscape(
                 onValueChange = {
                     onChange.invoke(ITeam.A2, it)
                 },
-                label = "Player Name 2",
+                label = "Player 2 Name",
                 endIconClick = { importPerson.invoke(ITeam.A2) },
             )
         }
@@ -292,7 +292,7 @@ private fun FieldInputDoubleLandscape(
                 modifier = ipModifierL,
                 value = pB1,
                 onValueChange = { onChange.invoke(ITeam.B1, it) },
-                label = "Player Name 1",
+                label = "Player 1 Name",
                 endIconClick = { importPerson.invoke(ITeam.B1) },
             )
             SwapButton({ swapB.invoke() })
@@ -301,7 +301,7 @@ private fun FieldInputDoubleLandscape(
                 modifier = ipModifierL,
                 value = pB2,
                 onValueChange = { onChange.invoke(ITeam.B2, it) },
-                label = "Player Name 2",
+                label = "Player 2 Name",
                 keyboardOptions = keyBoardDone(),
                 endIconClick = { importPerson.invoke(ITeam.B2) },
             )

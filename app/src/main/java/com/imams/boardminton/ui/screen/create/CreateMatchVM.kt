@@ -15,10 +15,8 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
     val playerA1 = _playerA1
     private val _playerA2 = mutableStateOf("")
     val playerA2 = _playerA2
-
     private val _playerB1 = mutableStateOf("")
     val playerB1 = _playerB1
-
     private val _playerB2 = mutableStateOf("")
     val playerB2 = _playerB2
 
@@ -60,7 +58,7 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
     }
 
     fun swapTeamA() {
-        _playerA1.value = _playerA2.value.also { playerA2.value = playerA1.value }
+        _playerA1.value = _playerA2.value.also { _playerA2.value = _playerA1.value }
     }
 
     fun swapTeamB() {

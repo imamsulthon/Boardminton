@@ -28,6 +28,7 @@ import com.imams.boardminton.ui.theme.*
 
 @Composable
 fun BaseScoreWrapper(
+    modifier: Modifier = Modifier,
     index: Int = 1,
     scoreA: Int,
     scoreB: Int,
@@ -35,7 +36,7 @@ fun BaseScoreWrapper(
     plus: (ISide) -> Unit,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
             .wrapContentHeight(),
@@ -182,7 +183,8 @@ fun PlayerNameWrapper(
                     start.linkTo(parent.start)
                     top.linkTo(parent.top)
                     bottom.linkTo(parent.bottom)
-                },
+                }
+                .fillMaxWidth(.5f),
             teamPlayer = game.teamA,
             alignment = Alignment.Start
         )
@@ -193,7 +195,8 @@ fun PlayerNameWrapper(
                     end.linkTo(parent.end)
                     top.linkTo(parent.top)
                     bottom.linkTo(parent.bottom)
-                },
+                }
+                .fillMaxWidth(.5f),
             teamPlayer = game.teamB,
             alignment = Alignment.End
         )

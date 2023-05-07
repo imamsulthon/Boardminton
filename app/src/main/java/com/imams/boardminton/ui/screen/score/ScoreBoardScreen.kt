@@ -3,8 +3,6 @@ package com.imams.boardminton.ui.screen.score
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Refresh
@@ -84,53 +82,31 @@ fun ScoreBoardScreen(
     }
 
     @Composable
-    fun mainBoard() {
-        MainNameBoardView(
-            modifier = Modifier
-                .widthIn(max = 400.dp, min = 250.dp)
-                .fillMaxWidth(),
-            team1 = game.teamA,
-            team2 = game.teamB,
-            scoreA = scoreA,
-            scoreB = scoreB,
-            histories = histories,
-            single = single,
-        )
-    }
+    fun mainBoard() = MainNameBoardView(
+        modifier = Modifier
+            .widthIn(max = 400.dp, min = 250.dp)
+            .fillMaxWidth(),
+        team1 = game.teamA,
+        team2 = game.teamB,
+        scoreA = scoreA,
+        scoreB = scoreB,
+        histories = histories,
+        single = single,
+    )
 
     @Composable
-    fun scoreBoard() {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 450.dp)
-                .heightIn(max = 350.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            BaseScoreWrapper(scoreA = scoreA, scoreB = scoreB, game = game,
-                plus = {
-                    when (it) {
-                        ISide.A -> scoreVm.plusA()
-                        ISide.B -> scoreVm.plusB()
-                    }
-                }
-            )
-            Divider(
-                modifier = Modifier.padding(top = 6.dp),
-                color = Color.Black,
-                thickness = 1.dp
-            )
-            PlayerNameWrapper(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(top = 6.dp),
-                game = game
-            )
-
+    fun scoreBoard() = UmpireBoard(
+        modifier = Modifier
+            .widthIn(max = 450.dp)
+            .heightIn(max = 350.dp),
+        index = 1, scoreA = scoreA, scoreB = scoreB, game = game,
+        plus = {
+            when (it) {
+                ISide.A -> scoreVm.plusA()
+                ISide.B -> scoreVm.plusB()
+            }
         }
-    }
+    )
 
     ConstraintLayout(
         modifier = Modifier
@@ -278,24 +254,23 @@ private fun ContentView(
     main: @Composable () -> Unit,
 ) {
     val config = LocalConfiguration.current
-    ConstraintLayout(modifier = modifier) {
-        when (config.orientation) {
-            Configuration.ORIENTATION_PORTRAIT -> {
-                PortraitContent(
-                    modifier = modifier,
-                    mainBoard = { main() },
-                    scoreBoard = { board() }
-                )
-            }
-            else -> {
-                LandscapeContent(
-                    modifier = modifier,
-                    mainBoard = { main() },
-                    scoreBoard = { board() }
-                )
-            }
+    when (config.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            PortraitContent(
+                modifier = modifier,
+                mainBoard = { main() },
+                scoreBoard = { board() }
+            )
+        }
+        else -> {
+            LandscapeContent(
+                modifier = modifier,
+                mainBoard = { main() },
+                scoreBoard = { board() }
+            )
         }
     }
+
 }
 
 @Composable
@@ -305,9 +280,7 @@ private fun LandscapeContent(
     scoreBoard: @Composable () -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
+        modifier = modifier.fillMaxSize(),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.SpaceAround
     ) {

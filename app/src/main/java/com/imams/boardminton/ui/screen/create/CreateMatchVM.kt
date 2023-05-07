@@ -4,6 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.imams.boardminton.data.Athlete
+import com.imams.boardminton.data.ISide
 import com.imams.boardminton.data.ITeam
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -36,33 +37,20 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
         }
     }
 
-    fun defaultPlayers(single: Boolean) {
-        _playerA1.value = Athlete.Imam_Sulthon
-        _playerB1.value = Athlete.Kim_Astrup
-        if (single) {
-            _playerA2.value = ""
-            _playerB2.value = ""
-            return
-        }
-        _playerA2.value = Athlete.Anthony
-        _playerB2.value = Athlete.Anders_Skaarup
-    }
-
     fun swapSingleMatch() {
-        _playerA1.value = _playerB1.value.also { _playerB1.value = _playerA1.value }
+        _playerA1.swap(_playerB1)
     }
 
     fun swapDoubleMatch() {
-        _playerA1.value = _playerB1.value.also { _playerB1.value = _playerA1.value }
-        _playerA2.value = _playerB2.value.also { _playerB2.value = _playerA2.value }
+        _playerA1.swap(_playerB1)
+        _playerA2.swap(_playerB2)
     }
 
-    fun swapTeamA() {
-        _playerA1.value = _playerA2.value.also { _playerA2.value = _playerA1.value }
-    }
-
-    fun swapTeamB() {
-        _playerB1.value = _playerB1.value.also { _playerB2.value = _playerB1.value }
+    fun swapPlayerByTeam(side: ISide) {
+        when (side) {
+            ISide.A -> _playerA1.swap(_playerA2)
+            ISide.B -> _playerB1.swap(_playerB2)
+        }
     }
 
     fun importPlayer(target: ITeam) {
@@ -74,6 +62,17 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
         }
     }
 
+    fun onClearPlayers() {
+        _playerA1.value = ""
+        _playerA2.value = ""
+        _playerB1.value = ""
+        _playerB2.value = ""
+    }
+
+    private fun MutableState<String>.swap(with: MutableState<String>) {
+        this.value = with.value.also { with.value = this.value }
+    }
+
     private fun MutableState<String>.update(with: String) {
         this.value = with
     }
@@ -82,11 +81,17 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
         this.value = ""
     }
 
-    fun onClearPlayers() {
-        _playerA1.value = ""
-        _playerA2.value = ""
-        _playerB1.value = ""
-        _playerB2.value = ""
+    // todo delete
+    fun defaultPlayers(single: Boolean) {
+        _playerA1.value = Athlete.Imam_Sulthon
+        _playerB1.value = Athlete.Kim_Astrup
+        if (single) {
+            _playerA2.value = ""
+            _playerB2.value = ""
+            return
+        }
+        _playerA2.value = Athlete.Anthony
+        _playerB2.value = Athlete.Anders_Skaarup
     }
 
 }

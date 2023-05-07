@@ -50,7 +50,7 @@ fun EditPlayersScreen(
         pB1 = playerB1,
         orientation = orientation,
         onChange = vm::updatePlayerName,
-        onSwap = { vm.swapSingleMatch() },
+        swapPlayer = { vm.swapSingleMatch() },
         importPerson = {
 
         }
@@ -63,7 +63,7 @@ fun EditPlayersScreen(
         pB1 = playerB1, pB2 = playerB2,
         orientation = orientation,
         onChange = vm::updatePlayerName,
-        swapA = { vm.swapTeamA() }, swapB = { vm.swapTeamB() },
+        swapPlayer = vm::swapPlayerByTeam,
         swapTeam = { vm.swapDoubleMatch() },
         importPerson = {
             // todo

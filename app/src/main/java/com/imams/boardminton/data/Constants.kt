@@ -9,4 +9,5 @@ object Athlete {
     const val Kim_Astrup = "Kim Astrup"
     const val Anders_Skaarup = "Anders Skaarup Rasmussen"
 
+
 }

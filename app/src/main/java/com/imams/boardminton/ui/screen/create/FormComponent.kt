@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.imams.boardminton.R
+import com.imams.boardminton.data.ISide
 import com.imams.boardminton.data.ITeam
 import com.imams.boardminton.ui.keyBoardDone
 import com.imams.boardminton.ui.keyboardNext
@@ -46,7 +47,7 @@ fun FieldInputSingleMatch(
     pA1: String,
     pB1: String,
     onChange: (ITeam, String) -> Unit,
-    onSwap: () -> Unit,
+    swapPlayer: () -> Unit,
     importPerson: (ITeam) -> Unit,
 ) {
     // Landscape
@@ -56,7 +57,7 @@ fun FieldInputSingleMatch(
             pA1 = pA1,
             pB1 = pB1,
             onChange = onChange::invoke,
-            onSwap = { onSwap.invoke() },
+            onSwap = { swapPlayer.invoke() },
             importPerson = {},
         )
         return
@@ -77,7 +78,7 @@ fun FieldInputSingleMatch(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = "Versus", modifier = Modifier.padding(vertical = 10.dp))
-            SwapButton({ onSwap.invoke() })
+            SwapButton({ swapPlayer.invoke() })
         }
 
         InputPlayer(
@@ -151,8 +152,7 @@ fun FieldInputDoubleMatch(
     pB1: String,
     pB2: String,
     onChange: (ITeam, String) -> Unit,
-    swapA: () -> Unit,
-    swapB: () -> Unit,
+    swapPlayer: (ISide) -> Unit,
     swapTeam: () -> Unit,
     importPerson: (ITeam) -> Unit,
 ) {
@@ -165,8 +165,7 @@ fun FieldInputDoubleMatch(
             pB1 = pB1,
             pB2 = pB2,
             onChange = onChange::invoke,
-            swapA = { swapA.invoke() },
-            swapB = { swapB.invoke() },
+            swapPlayer = swapPlayer::invoke,
             swapTeam = { swapTeam.invoke() },
             importPerson = { importPerson.invoke(it) }
         )
@@ -187,7 +186,7 @@ fun FieldInputDoubleMatch(
             label = "Player 1 Name",
             endIconClick = { importPerson.invoke(ITeam.A1) },
         )
-        SwapButton({ swapA.invoke() })
+        SwapButton({ swapPlayer.invoke(ISide.A) })
         InputPlayer(
             modifier = ipModifierP,
             value = pA2,
@@ -214,7 +213,7 @@ fun FieldInputDoubleMatch(
             label = "Player 1 Name",
             endIconClick = { importPerson.invoke(ITeam.B1) },
         )
-        SwapButton({ swapB.invoke() })
+        SwapButton({ swapPlayer.invoke(ISide.B) })
         InputPlayer(
             modifier = ipModifierP,
             value = pB2,
@@ -236,8 +235,7 @@ private fun FieldInputDoubleLandscape(
     pB1: String,
     pB2: String,
     onChange: (ITeam, String) -> Unit,
-    swapA: () -> Unit,
-    swapB: () -> Unit,
+    swapPlayer: (ISide) -> Unit,
     swapTeam: () -> Unit,
     importPerson: (ITeam) -> Unit,
 ) {
@@ -260,7 +258,7 @@ private fun FieldInputDoubleLandscape(
                 label = "Player 1 Name",
                 endIconClick = { importPerson.invoke(ITeam.A1) },
             )
-            SwapButton({ swapA.invoke() })
+            SwapButton({ swapPlayer.invoke(ISide.A) })
             InputPlayer(
                 modifier = ipModifierL,
                 value = pA2,
@@ -295,8 +293,7 @@ private fun FieldInputDoubleLandscape(
                 label = "Player 1 Name",
                 endIconClick = { importPerson.invoke(ITeam.B1) },
             )
-            SwapButton({ swapB.invoke() })
-
+            SwapButton({ swapPlayer.invoke(ISide.B) })
             InputPlayer(
                 modifier = ipModifierL,
                 value = pB2,
@@ -380,7 +377,7 @@ fun DoubleLandscapeP() {
         pA1 = "playerA1", pA2 = "playerA2",
         pB1 = "playerB1", pB2 = "playerB2",
         onChange = { v, i -> },
-        swapA = { }, swapB = { },
+        swapPlayer = {},
         swapTeam = { },
         importPerson = {}
     )

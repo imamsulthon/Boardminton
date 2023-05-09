@@ -1,6 +1,9 @@
 package com.imams.boardminton.ui.component
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -75,6 +79,7 @@ fun BaseScoreWrapper(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BaseScore(
     modifier: Modifier = Modifier,
@@ -105,11 +110,7 @@ fun BaseScore(
                     },
             )
 
-            Text(
-                text = score.toString(), fontSize = 64.sp,
-                color = if (lastPoint) {
-                    if (winner) Green else Yellow
-                } else if (onTurn) AppPrimaryColor else AppPrimaryColor,
+            AnimatedContent(
                 modifier = Modifier
                     .constrainAs(tvScore) {
                         top.linkTo(ivTurn.bottom)
@@ -117,8 +118,19 @@ fun BaseScore(
                         end.linkTo(parent.end)
                         bottom.linkTo(parent.bottom)
                     }
-                    .padding(6.dp)
-            )
+                    .padding(6.dp),
+                targetState = score,
+                transitionSpec = {
+                    addAnimation().using(SizeTransform(clip = false))
+                }
+            ) { targetCount ->
+                Text(
+                    text = targetCount.toString(), fontSize = 64.sp,
+                    color = if (lastPoint) { if (winner) Green else Yellow }
+                    else if (onTurn) AppPrimaryColor else AppPrimaryColor,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 

@@ -10,8 +10,8 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +31,7 @@ import com.imams.boardminton.R
 import com.imams.boardminton.data.ISide
 import com.imams.boardminton.ui.component.*
 import com.imams.boardminton.ui.screen.destinations.EditPlayersScreenDestination
-import com.imams.boardminton.ui.screen.timer.CountTimerViewModel
+import com.imams.boardminton.ui.screen.timer.CounterTimerVM
 import com.imams.boardminton.ui.screen.toEditPlayers
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -43,7 +43,7 @@ import com.ramcosta.composedestinations.result.ResultRecipient
 fun ScoreBoardScreen(
     players: String,
     single: Boolean,
-    counterVm: CountTimerViewModel = hiltViewModel(),
+    counterVm: CounterTimerVM = hiltViewModel(),
     scoreVm: ScoreBoardVM = hiltViewModel(),
     navigator: DestinationsNavigator?,
     resultRecipient: ResultRecipient<EditPlayersScreenDestination, String>?,
@@ -53,7 +53,7 @@ fun ScoreBoardScreen(
     val scoreA by remember { scoreVm.scoreA }
     val scoreB by remember { scoreVm.scoreB }
     val histories by remember { scoreVm.histories }
-    val timer by counterVm.time.observeAsState()
+    val timeCounterUiState by counterVm.tcUiState.collectAsState()
     val anyWinner by remember { scoreVm.anyWinner }
     val finishMatch by remember { scoreVm.finishMatch }
 
@@ -125,7 +125,7 @@ fun ScoreBoardScreen(
                     top.linkTo(parent.top)
                     end.linkTo(parent.end)
                 },
-            timer = timer,
+            timer = timeCounterUiState.counter,
             onSwap = { scoreVm.swapSide() },
             onEdit = {
                 navigator?.toEditPlayers(single, team1 = game.teamA, team2 = game.teamB)

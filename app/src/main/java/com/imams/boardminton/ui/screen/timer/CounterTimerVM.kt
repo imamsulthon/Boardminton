@@ -39,7 +39,7 @@ class CounterTimerVM @Inject constructor(): ViewModel() {
         timeDuration.toComponents { hours, minutes, seconds, _ ->
             _tcUiState.update {
                 it.copy(
-                    counter = formatTime(hours.pad(), minutes.pad(), seconds.pad())
+                    counter = formatTime(seconds.pad(), minutes.pad(), hours.pad())
                 )
             }
         }

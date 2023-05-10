@@ -1,19 +1,18 @@
 package com.imams.boardminton.ui.component
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -75,6 +74,7 @@ fun BaseScoreWrapper(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BaseScore(
     modifier: Modifier = Modifier,
@@ -84,9 +84,13 @@ fun BaseScore(
     winner: Boolean = false,
     callback: ((Int, Boolean) -> Unit)? = null,
 ) {
+    var before by remember { mutableStateOf(score) }
+    val boardColor by animateColorAsState(if (onTurn) Purple80 else White, tween(500))
     Box(
         modifier = modifier
-            .scoreMod(onTurn, score, callback)
+            .scoreMod(score, callback)
+            .background(boardColor)
+            .padding(vertical = 24.dp, horizontal = 12.dp)
             .aspectRatio(0.9f)
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
@@ -105,11 +109,7 @@ fun BaseScore(
                     },
             )
 
-            Text(
-                text = score.toString(), fontSize = 64.sp,
-                color = if (lastPoint) {
-                    if (winner) Green else Yellow
-                } else if (onTurn) AppPrimaryColor else AppPrimaryColor,
+            AnimatedContent(
                 modifier = Modifier
                     .constrainAs(tvScore) {
                         top.linkTo(ivTurn.bottom)
@@ -117,15 +117,29 @@ fun BaseScore(
                         end.linkTo(parent.end)
                         bottom.linkTo(parent.bottom)
                     }
-                    .padding(6.dp)
-            )
+                    .padding(6.dp),
+                targetState = score,
+                transitionSpec = {
+                    scoreUpDownAnimation(increase = score >= before)
+                        .using(SizeTransform(clip = false))
+                }
+            ) { targetCount ->
+                Text(
+                    text = targetCount.toString(), fontSize = 64.sp,
+                    color = if (lastPoint) {
+                        if (winner) Green else Yellow
+                    } else if (onTurn) AppPrimaryColor else AppPrimaryColor,
+                    textAlign = TextAlign.Center
+                )
+                before = targetCount
+            }
         }
     }
 
 }
 
 private fun Modifier.scoreMod(
-    onTurn: Boolean, score: Int,
+    score: Int,
     callback: ((Int, Boolean) -> Unit)?
 ): Modifier = this
     .heightIn(min = 80.dp, max = 180.dp)
@@ -135,8 +149,6 @@ private fun Modifier.scoreMod(
         color = Color.Black,
         shape = RoundedCornerShape(2.dp)
     )
-    .background(if (onTurn) Purple80 else White)
-    .padding(top = 12.dp, bottom = 24.dp, start = 12.dp, end = 12.dp)
     .clickable { callback?.invoke(score + 1, true) }
 
 @Composable

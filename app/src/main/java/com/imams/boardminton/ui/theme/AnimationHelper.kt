@@ -4,10 +4,11 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 
 @ExperimentalAnimationApi
-fun addAnimation(duration: Int = 800): ContentTransform {
-    return slideInVertically(animationSpec = tween(durationMillis = duration)) { height -> height } + fadeIn(
-        animationSpec = tween(durationMillis = duration)
-    ) with slideOutVertically(animationSpec = tween(durationMillis = duration)) { height -> -height } + fadeOut(
-        animationSpec = tween(durationMillis = duration)
-    )
+fun scoreUpDownAnimation(increase: Boolean, duration: Int = 500): ContentTransform {
+    return slideInVertically(animationSpec = tween(durationMillis = duration)) { height ->
+        if (increase) -height/2 else height
+    } + fadeIn(animationSpec = tween(durationMillis = duration)) with slideOutVertically(
+        animationSpec = tween(durationMillis = duration)) { height ->
+        if (increase) 0 else -height/2
+    } + fadeOut(animationSpec = tween(durationMillis = duration))
 }

@@ -1,5 +1,7 @@
-package com.imams.boardminton.engine.domain
+package com.imams.boardminton.domain
 
+import com.imams.boardminton.domain.impl.BoardEvent
+import com.imams.boardminton.domain.impl.MatchEngineUseCaseImpl
 import com.imams.boardminton.engine.data.model.Side
 import org.junit.Assert
 import org.junit.Test

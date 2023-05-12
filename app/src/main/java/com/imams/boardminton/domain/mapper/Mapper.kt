@@ -1,5 +1,10 @@
-package com.imams.boardminton.engine.domain
+package com.imams.boardminton.domain.mapper
 
+import com.imams.boardminton.domain.model.GameViewParam
+import com.imams.boardminton.domain.model.MatchViewParam
+import com.imams.boardminton.domain.model.PlayerViewParam
+import com.imams.boardminton.domain.model.ScoreViewParam
+import com.imams.boardminton.domain.model.TeamViewParam
 import com.imams.boardminton.engine.data.model.Game
 import com.imams.boardminton.engine.data.model.MatchScore
 import com.imams.boardminton.engine.data.model.Player

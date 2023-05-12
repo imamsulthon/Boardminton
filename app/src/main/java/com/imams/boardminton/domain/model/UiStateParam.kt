@@ -1,6 +1,7 @@
-package com.imams.boardminton.engine.domain
+package com.imams.boardminton.domain.model
 
 import com.imams.boardminton.engine.data.model.MatchType
+import com.imams.boardminton.engine.data.model.Side
 import com.imams.boardminton.engine.data.model.Winner
 
 data class MatchUIState(
@@ -16,9 +17,20 @@ data class MatchUIState(
             player2 = PlayerViewParam(""),
             onServe = false
         ),
+        currentGame = GameViewParam(),
         games = mutableListOf(),
     )
-)
+) {
+    var scoreByCourt = ScoreByCourt(
+        left = match.currentGame.scoreA,
+        right = match.currentGame.scoreB
+    )
+    fun swapScoreCourt() {
+        val temp = scoreByCourt.copy()
+        scoreByCourt = ScoreByCourt(left = temp.right, right = temp.left)
+    }
+
+}
 
 data class MatchViewParam(
     val matchType: MatchType = MatchType.Single,
@@ -54,3 +66,17 @@ data class ScoreViewParam(
     val isLastPoint: Boolean = false,
     val isWin: Boolean = false,
 )
+
+data class ScoreByCourt(
+    val left: ScoreViewParam = ScoreViewParam(),
+    val right: ScoreViewParam = ScoreViewParam(),
+)
+
+data class Court(
+    var left: Side = Side.A,
+    var right: Side = Side.B,
+) {
+    fun swap() {
+        left = right.also { right = left }
+    }
+}

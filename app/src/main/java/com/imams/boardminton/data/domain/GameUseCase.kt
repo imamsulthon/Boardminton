@@ -6,6 +6,7 @@ import com.imams.boardminton.data.GameHistory
 import com.imams.boardminton.data.GameScore
 import javax.inject.Inject
 
+@Deprecated("useNew")
 class GameUseCase @Inject constructor(
     private var matchType: MatchType,
 ): UseCase {

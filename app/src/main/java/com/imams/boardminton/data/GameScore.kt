@@ -76,7 +76,7 @@ class GameScore constructor() {
     }
 
     fun swapServer() {
-        if (onTurnA) serveB() else serveA()
+        onTurnA = onTurnB.also { onTurnB = onTurnA }
     }
     
     fun server(): String = if (onTurnA) "A" else if (onTurnB) "B" else "A"

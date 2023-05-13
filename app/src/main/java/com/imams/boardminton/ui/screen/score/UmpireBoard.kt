@@ -1,6 +1,11 @@
 package com.imams.boardminton.ui.screen.score
 
-import androidx.compose.foundation.layout.*
+import  androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,10 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.imams.boardminton.data.Athlete
-import com.imams.boardminton.data.GameScore
 import com.imams.boardminton.data.ISide
-import com.imams.boardminton.data.doublePlayer
+import com.imams.boardminton.domain.model.ScoreByCourt
 import com.imams.boardminton.ui.component.BaseScore
 import com.imams.boardminton.ui.component.PlayerNameWrapper
 import com.imams.boardminton.ui.theme.Green
@@ -25,10 +28,7 @@ import com.imams.boardminton.ui.theme.Green
 @Composable
 fun UmpireBoard(
     modifier: Modifier,
-    index: Int,
-    scoreA: Int,
-    scoreB: Int,
-    game: GameScore,
+    board: ScoreByCourt,
     plus: (ISide) -> Unit,
 ) {
     ConstraintLayout(
@@ -44,10 +44,10 @@ fun UmpireBoard(
                     bottom.linkTo(div.top)
                     width = Dimension.wrapContent
                 },
-            score = scoreA,
-            onTurn = game.onTurnA,
-            winner = game.gameEnd,
-            lastPoint = game.lastPointA,
+            score = board.left.point,
+            onTurn = board.left.onServe,
+            winner = board.left.isWin,
+            lastPoint = board.left.isLastPoint,
             callback = { _, _ -> plus.invoke(ISide.A) })
 
         Column(
@@ -66,7 +66,7 @@ fun UmpireBoard(
         ) {
             Text(text = "Game", color = Green, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             Text(
-                text = index.toString(),
+                text = board.index.toString(),
                 color = Green,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 24.sp
@@ -82,10 +82,10 @@ fun UmpireBoard(
                     bottom.linkTo(s1.bottom)
                     width = Dimension.wrapContent
                 },
-            score = scoreB,
-            onTurn = game.onTurnB,
-            lastPoint = game.lastPointB,
-            winner = game.gameEnd,
+            score = board.right.point,
+            onTurn = board.right.onServe,
+            lastPoint = board.right.isLastPoint,
+            winner = board.right.isWin,
             callback = { _, _ -> plus.invoke(ISide.B) })
 
         Divider(
@@ -113,7 +113,8 @@ fun UmpireBoard(
                     top.linkTo(div.bottom)
                     height = Dimension.preferredWrapContent
                 },
-            game = game
+            teamA = board.teamLeft,
+            teamB = board.teamRight,
         )
     }
 }
@@ -122,18 +123,4 @@ fun UmpireBoard(
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 512, showSystemUi = true)
 @Composable
 private fun UmpireViewPrev() {
-    val tA = doublePlayer(Athlete.Viktor, Athlete.Anthony)
-    val tb = doublePlayer(Athlete.Kim_Astrup, Athlete.Anders_Skaarup)
-    val game = GameScore().apply {
-        teamA = tA
-        teamB = tb
-    }
-    UmpireBoard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
-        index = 1,
-        scoreA = 18, scoreB = 12,
-        game = game, plus = {}
-    )
 }

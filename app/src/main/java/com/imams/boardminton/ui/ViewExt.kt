@@ -4,15 +4,15 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import com.imams.boardminton.data.TeamPlayer
+import com.imams.boardminton.domain.model.TeamViewParam
 
 fun Int.even(): Boolean {
     return this % 2 == 0
 }
-fun TeamPlayer?.getLabel() = if (this?.isSingle() == true) this.player1.name.prettifyName() else this?.concatLastName() ?: ""
+fun TeamViewParam.getLabel() = if (this.isSingle) this.player1.name.prettifyName() else this.concatLastName() ?: ""
 
-fun TeamPlayer.concatLastName(): String {
-    return this.player1.name.lastNameWith(this.player2?.name ?: "")
+fun TeamViewParam.concatLastName(): String {
+    return this.player1.name.lastNameWith(this.player2.name ?: "")
 }
 
 fun String.lastNameWith(friend: String): String {

@@ -1,4 +1,4 @@
-package com.imams.boardminton.engine.data
+package com.imams.boardminton.engine.implementation
 
 import com.imams.boardminton.engine.data.model.Game
 import com.imams.boardminton.engine.data.model.GameRule

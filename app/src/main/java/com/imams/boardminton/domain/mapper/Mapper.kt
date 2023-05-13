@@ -55,12 +55,12 @@ fun ScoreViewParam.toModel() = Score(
 )
 
 fun Player.toVp() = PlayerViewParam(
-    player = name,
+    name = name,
     onServe = false, // todo
 )
 
 fun PlayerViewParam.toModel() = Player(
-    name = player,
+    name = name,
 )
 
 fun Team.toVp() = TeamViewParam(

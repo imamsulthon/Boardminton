@@ -2,19 +2,19 @@ package com.imams.boardminton.domain.impl
 
 import com.imams.boardminton.domain.mapper.toModel
 import com.imams.boardminton.domain.mapper.toViewParam
+import com.imams.boardminton.domain.model.CourtSide
 import com.imams.boardminton.domain.model.GameViewParam
 import com.imams.boardminton.domain.model.MatchUIState
 import com.imams.boardminton.domain.model.MatchViewParam
+import com.imams.boardminton.domain.model.ScoreByCourt
 import com.imams.boardminton.domain.model.TeamViewParam
-import com.imams.boardminton.engine.data.MatchEngine
 import com.imams.boardminton.engine.data.model.MatchType
 import com.imams.boardminton.engine.data.model.Side
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.imams.boardminton.engine.implementation.MatchEngine
 
+class CombinedMatchBoardUseCaseImpl: MatchBoardUseCase {
 
-class MatchEngineUseCaseImpl: MatchEngineUseCase {
-
-    lateinit var engine: MatchEngine
+    private lateinit var engine: MatchEngine
 
     override fun create(
         matchType: MatchType,
@@ -39,6 +39,10 @@ class MatchEngineUseCaseImpl: MatchEngineUseCase {
         engine = MatchEngine(matchViewParam.toModel())
     }
 
+    override fun updatePlayers(matchType: MatchType, a1: String, a2: String, b1: String, b2: String) {
+        engine.updatePlayers(matchType, a1, a2, b1, b2)
+    }
+
     override fun execute(event: BoardEvent) {
         when (event) {
             is BoardEvent.PointTo -> {
@@ -50,8 +54,10 @@ class MatchEngineUseCaseImpl: MatchEngineUseCase {
             is BoardEvent.ServeTo -> {
                 engine.serveTo(event.side)
             }
-            else -> {
-                // todo add other event here
+            is BoardEvent.SwapServer -> {
+                engine.swapServer()
+            }
+            else -> { // todo add other event here
             }
         }
     }
@@ -61,25 +67,43 @@ class MatchEngineUseCaseImpl: MatchEngineUseCase {
     }
 
     override fun asState(): MatchUIState {
-        return MatchUIState(match = get())
+        return MatchUIState(match = get()).apply {
+        }
     }
 
-    override fun asStateFlow(): MutableStateFlow<MatchUIState> {
-        return MutableStateFlow(asState())
+    override fun asStateByCourtConfig(courtSide: CourtSide): MatchUIState {
+        return MatchUIState(match = get()).apply {
+            val left = if (courtSide.left == Side.A) this.match.currentGame.scoreA
+            else this.match.currentGame.scoreB
+            val right = if (courtSide.right == Side.A) this.match.currentGame.scoreA
+            else this.match.currentGame.scoreB
+            val tLeft = if (courtSide.left == Side.A) this.match.teamA
+            else this.match.teamB
+            val tRight = if (courtSide.right == Side.A) this.match.teamA
+            else this.match.teamB
+            scoreByCourt = ScoreByCourt(
+                index = this.match.currentGame.index,
+                left = left,
+                right = right,
+                teamLeft = tLeft,
+                teamRight = tRight,
+            )
+        }
     }
 
 }
 
-interface MatchEngineUseCase {
+interface MatchBoardUseCase {
 
     fun create(matchType: MatchType, teamA: TeamViewParam, teamB: TeamViewParam, prevGames: MutableList<GameViewParam>)
     fun create(a1: String, a2: String)
     fun create(a1: String, a2: String, b1: String, b2: String)
     fun create(matchViewParam: MatchViewParam)
+    fun updatePlayers(matchType: MatchType, a1: String, a2: String, b1: String, b2: String)
     fun execute(event: BoardEvent)
     fun get(): MatchViewParam
     fun asState(): MatchUIState
-    fun asStateFlow(): MutableStateFlow<MatchUIState>
+    fun asStateByCourtConfig(courtSide: CourtSide): MatchUIState
 
 }
 
@@ -87,5 +111,7 @@ sealed class BoardEvent{
     data class PointTo(val side: Side): BoardEvent()
     data class MinTo(val side: Side): BoardEvent()
     data class ServeTo(val side: Side): BoardEvent()
+    object SwapServer: BoardEvent()
+    object SwapBoardSide: BoardEvent()
     object Other: BoardEvent()
 }

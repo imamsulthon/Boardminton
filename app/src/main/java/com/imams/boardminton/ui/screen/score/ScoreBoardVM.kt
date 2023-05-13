@@ -1,146 +1,123 @@
 package com.imams.boardminton.ui.screen.score
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.imams.boardminton.data.GameHistory
+import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.data.GameScore
-import com.imams.boardminton.data.domain.UseCase
 import com.imams.boardminton.data.toList
-import com.imams.boardminton.ui.getLabel
+import com.imams.boardminton.domain.impl.BoardEvent
+import com.imams.boardminton.domain.impl.MatchBoardUseCase
+import com.imams.boardminton.domain.model.CourtSide
+import com.imams.boardminton.domain.model.MatchUIState
+import com.imams.boardminton.engine.data.model.MatchType
+import com.imams.boardminton.engine.data.model.Side
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ScoreBoardVM @Inject constructor(
-    private val useCase: UseCase
+    private val useCase: MatchBoardUseCase
 ) : ViewModel() {
 
-    private var gameIndex = 1
+    private var alreadySetup = false
 
-    private val _players = mutableStateOf("")
-    val players = _players
+    private val _matchUiState = MutableStateFlow(MatchUIState())
+    val matchUIState: StateFlow<MatchUIState> = _matchUiState.asStateFlow()
 
-    private val _game = mutableStateOf(useCase.get2())
-    val game = _game
-
-    private val _scoreA = mutableStateOf(game.value.pointA)
-    val scoreA = _scoreA
-
-    private val _scoreB = mutableStateOf(game.value.pointB)
-    val scoreB = _scoreB
-
-    private val _histories: MutableState<List<GameHistory>> = mutableStateOf(listOf())
-    val histories = _histories
-
-    private val _anyWinner = mutableStateOf(WinnerState(gameIndex, show = false, by = ""))
-    val anyWinner = _anyWinner
-
-    val finishMatch = mutableStateOf(false)
-
-    fun updatePlayers(data: String) {
-        _players.value = data
-    }
+    private var courtSide = CourtSide(
+        left = Side.A,
+        right = Side.B,
+    )
 
     fun setupPlayer(json: String, single: Boolean) {
         val data = json.toList()
         printLog("setupPlayer $single $data")
-        if (single) {
-            useCase.createSingleMatch(data[0], data[1])
-        } else {
-            useCase.createDoubleMatch(data[0], data[1], data[2], data[3])
+        if (alreadySetup) return
+        _matchUiState.update {
+            if (single) {
+                useCase.create(data[0], data[1])
+            } else {
+                useCase.create(data[0], data[1], data[2], data[3])
+            }
+            it.copy(match = useCase.get())
+        }
+        alreadySetup = true
+    }
+
+    fun updatePlayers(json: String, single: Boolean) {
+        viewModelScope.launch {
+            val data = json.toList()
+            printLog("updatePlayer $single $data")
+            val t = if (single) MatchType.Single else MatchType.Double
+            _matchUiState.update {
+                useCase.updatePlayers(t, data[0], data[1],data[2],data[3])
+                it.copy(match = useCase.get())
+            }
         }
     }
 
     fun plusA() {
-        useCase.run {
-            addA()
-            _scoreA.value = get().value.pointA
-            _game.value = get().value
-            _game.value.checkWinner()
+        _matchUiState.update {
+            useCase.execute(BoardEvent.PointTo(Side.A))
+            it.copy(match = useCase.get())
         }
     }
 
     fun plusB() {
-        useCase.run {
-            addB()
-            _scoreB.value = get().value.pointB
-            _game.value = get().value
-            _game.value.checkWinner()
+        _matchUiState.update {
+            useCase.execute(BoardEvent.PointTo(Side.B))
+            it.copy(match = useCase.get())
         }
     }
 
     fun minA() {
-        useCase.run {
-            minA()
-            _scoreA.value = get().value.pointA
-            _game.value = get().value
+        _matchUiState.update {
+            useCase.execute(BoardEvent.MinTo(Side.A))
+            it.copy(match = useCase.get())
         }
     }
 
     fun minB() {
-        useCase.run {
-            minB()
-            _scoreB.value = get().value.pointB
-            _game.value = get().value
+        _matchUiState.update {
+            useCase.execute(BoardEvent.MinTo(Side.B))
+            it.copy(match = useCase.get())
         }
     }
 
     fun swapServe() {
-        useCase.run {
-            swapServer()
-            _game.value = get().value
+        _matchUiState.update {
+            useCase.execute(BoardEvent.SwapServer)
+            it.copy(match = useCase.get())
         }
     }
 
     fun reset() {
-        useCase.run {
-            reset()
-            _scoreA.value = get().value.pointA
-            _scoreB.value = get().value.pointB
-            _game.value = get().value
-        }
+
     }
 
     fun swapSide() {
-        useCase.run {
-            swapSide()
-            _scoreA.value = get().value.pointA
-            _scoreB.value = get().value.pointB
-            _game.value = get().value
-            _histories.value = getHistory()
-        }
+
     }
 
     fun setGameEnd(show: Boolean) {
-        _anyWinner.value = _anyWinner.value.copy(show = show)
+//        _anyWinner.value = _anyWinner.value.copy(show = show)
     }
 
     private fun GameScore.checkWinner() {
-        if (gameEnd) {
-            _anyWinner.value = _anyWinner.value.copy(
-                isWin = true, show = true,
-                by = if (server() == "A") teamA.getLabel() else teamB.getLabel()
-            )
-        }
+
     }
 
     fun onNewGame() {
-        useCase.run {
-            setHistory(GameHistory(gameIndex, scoreA.value, scoreB.value))
-            resetWinner()
-            reset()
-            _scoreA.value = get().value.pointA
-            _scoreB.value = get().value.pointB
-            _game.value = get().value
-            _histories.value = getHistory()
-            if (gameIndex > 3) finishMatch.value = true
-        }
+
     }
 
     private fun resetWinner() {
-        gameIndex += 1
-        _anyWinner.value = _anyWinner.value.copy(index = gameIndex, show = false, isWin = false, by = "")
+//        gameIndex += 1
+//        _anyWinner.value = _anyWinner.value.copy(index = gameIndex, show = false, isWin = false, by = "")
     }
 
     private fun printLog(msg: String) = println("ScoreBoardVM $msg")

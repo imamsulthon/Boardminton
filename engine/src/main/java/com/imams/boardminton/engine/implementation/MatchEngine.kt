@@ -1,4 +1,4 @@
-package com.imams.boardminton.engine.data
+package com.imams.boardminton.engine.implementation
 
 import com.imams.boardminton.engine.data.model.Game
 import com.imams.boardminton.engine.data.model.MatchRule
@@ -14,7 +14,7 @@ class MatchEngine(
     private val matchType: MatchType,
     private var teamA: Team,
     private var teamB: Team,
-    private var prevGames: MutableList<Game> = mutableListOf(),
+    private var previousGames: MutableList<Game> = mutableListOf(),
 ) {
 
     private val rule: MatchRule = MatchRule()
@@ -25,8 +25,8 @@ class MatchEngine(
 
     private val currentGame by lazy { gameEngine.asGame() }
 
-    private val prevGameWinner by lazy {
-        if (prevGames.isNotEmpty()) prevGames.last().winner else Winner.None
+    private val previousGameWinner by lazy {
+        if (previousGames.isNotEmpty()) previousGames.last().winner else Winner.None
     }
 
     private var winner: Winner = Winner.None
@@ -39,6 +39,7 @@ class MatchEngine(
         Team(Player(a1), Player(a1)),
         Team(Player(b1), Player(b1))
     ) {
+        printLog("cons Single")
         gameIndex = 1
     }
 
@@ -50,6 +51,7 @@ class MatchEngine(
         Team(Player(a1), Player(a2)),
         Team(Player(b1), Player(b2)),
     ) {
+        printLog("cons Double")
         gameIndex = 1
     }
 
@@ -61,6 +63,11 @@ class MatchEngine(
         if (gameIndex >= rule.maxGame) return
         this.gameIndex = gameIndex
         gameEngine = GameEngine(this.gameIndex, Score(), Score())
+    }
+
+    fun updatePlayers(matchType: MatchType, a1: String, a2: String = "", b1: String, b2: String = "") {
+        teamA = Team(Player(a1), Player(a2))
+        teamB = Team(Player(b1), Player(b2))
     }
     
     /**
@@ -83,6 +90,10 @@ class MatchEngine(
         gameEngine.serveTo(side)
     }
 
+    fun swapServer() {
+        gameEngine.revertServer()
+    }
+
     /**
      *
      */
@@ -95,15 +106,15 @@ class MatchEngine(
 
     private fun trySetWinner() {
         if (gameIndex < 1) return
-        if (prevGameWinner == Winner.None) return
-        if (prevGameWinner == currentGame.winner) winner = currentGame.winner
+        if (previousGameWinner == Winner.None) return
+        if (previousGameWinner == currentGame.winner) winner = currentGame.winner
     }
 
     /**
      *
      */
     private fun addPreviousGame() {
-        prevGames.add(gameIndex - 1, currentGame)
+        previousGames.add(gameIndex - 1, currentGame)
         createNewGame(gameIndex +1)
     }
 
@@ -111,7 +122,7 @@ class MatchEngine(
     fun getMatchScore() = MatchScore(
         type = matchType,
         currentGame = currentGame,
-        games = prevGames,
+        games = previousGames,
         teamA = teamA,
         teamB = teamB,
         winner = winner,

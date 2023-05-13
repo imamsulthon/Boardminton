@@ -1,6 +1,6 @@
 package com.imams.boardminton.engine.match
 
-import com.imams.boardminton.engine.data.MatchEngine
+import com.imams.boardminton.engine.implementation.MatchEngine
 import com.imams.boardminton.engine.data.model.MatchType
 import com.imams.boardminton.engine.data.model.Player
 import com.imams.boardminton.engine.data.model.Side

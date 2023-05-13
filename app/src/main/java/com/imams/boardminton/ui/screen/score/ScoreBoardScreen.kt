@@ -2,7 +2,19 @@ package com.imams.boardminton.ui.screen.score
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Refresh
@@ -12,6 +24,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,14 +35,15 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.R
 import com.imams.boardminton.data.ISide
-import com.imams.boardminton.ui.component.*
+import com.imams.boardminton.ui.component.ButtonPointLeft
+import com.imams.boardminton.ui.component.ButtonPointRight
+import com.imams.boardminton.ui.component.MainNameBoardView
+import com.imams.boardminton.ui.component.TimeCounterView
 import com.imams.boardminton.ui.screen.destinations.EditPlayersScreenDestination
 import com.imams.boardminton.ui.screen.timer.CounterTimerVM
 import com.imams.boardminton.ui.screen.toEditPlayers
@@ -48,49 +62,45 @@ fun ScoreBoardScreen(
     navigator: DestinationsNavigator?,
     resultRecipient: ResultRecipient<EditPlayersScreenDestination, String>?,
 ) {
-    val jsonPlayers by remember { scoreVm.players }
-    val game by remember { scoreVm.game }
-    val scoreA by remember { scoreVm.scoreA }
-    val scoreB by remember { scoreVm.scoreB }
-    val histories by remember { scoreVm.histories }
+
+    // todo should use Side Effect?
+    scoreVm.setupPlayer(players, single)
+
+    val uiState by scoreVm.matchUIState.collectAsState()
     val timeCounterUiState by counterVm.tcUiState.collectAsState()
-    val anyWinner by remember { scoreVm.anyWinner }
-    val finishMatch by remember { scoreVm.finishMatch }
+    val finishMatch by remember { mutableStateOf(false) }
 
     resultRecipient?.onNavResult { result ->
-        if (result is NavResult.Value) scoreVm.updatePlayers(result.value)
+        if (result is NavResult.Value) scoreVm.updatePlayers(result.value, single)
     }
 
-    if (jsonPlayers.isEmpty()) scoreVm.setupPlayer(players, single)
-    else scoreVm.setupPlayer(jsonPlayers, single)
-
-    if (anyWinner.show) {
-        Dialog(
-            onDismissRequest = { scoreVm.setGameEnd(false) },
-            content = {
-                GameFinishDialogContent(anyWinner.index, anyWinner.by,
-                    onDone = {
-                        if (it) scoreVm.onNewGame() else scoreVm.setGameEnd(false)
-                    }
-                )
-            },
-            properties = DialogProperties(
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false
-            )
-        )
-    }
+//    if (anyWinner.show) {
+//        Dialog(
+//            onDismissRequest = { scoreVm.setGameEnd(false) },
+//            content = {
+//                GameFinishDialogContent(anyWinner.index, anyWinner.by,
+//                    onDone = {
+//                        if (it) scoreVm.onNewGame() else scoreVm.setGameEnd(false)
+//                    }
+//                )
+//            },
+//            properties = DialogProperties(
+//                dismissOnBackPress = false,
+//                dismissOnClickOutside = false
+//            )
+//        )
+//    }
 
     @Composable
     fun mainBoard() = MainNameBoardView(
         modifier = Modifier
             .widthIn(max = 400.dp, min = 250.dp)
             .fillMaxWidth(),
-        team1 = game.teamA,
-        team2 = game.teamB,
-        scoreA = scoreA,
-        scoreB = scoreB,
-        histories = histories,
+        team1 = uiState.match.teamA,
+        team2 = uiState.match.teamB,
+        scoreA = uiState.match.currentGame.scoreA.point,
+        scoreB = uiState.match.currentGame.scoreB.point,
+        histories = uiState.match.games,
         single = single,
     )
 
@@ -99,7 +109,7 @@ fun ScoreBoardScreen(
         modifier = Modifier
             .widthIn(max = 450.dp)
             .heightIn(max = 350.dp),
-        index = 1, scoreA = scoreA, scoreB = scoreB, game = game,
+        board = uiState.scoreByCourt,
         plus = {
             when (it) {
                 ISide.A -> scoreVm.plusA()
@@ -128,7 +138,11 @@ fun ScoreBoardScreen(
             timer = timeCounterUiState.counter,
             onSwap = { scoreVm.swapSide() },
             onEdit = {
-                navigator?.toEditPlayers(single, team1 = game.teamA, team2 = game.teamB)
+                navigator?.toEditPlayers(
+                    single,
+                    team1 = uiState.match.teamA,
+                    team2 = uiState.match.teamB
+                )
             },
             onReset = { scoreVm.reset() }
         )

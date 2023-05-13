@@ -1,7 +1,7 @@
 package com.imams.boardminton.engine.game
 
 import com.imams.boardminton.engine.data.model.Game
-import com.imams.boardminton.engine.data.GameEngine
+import com.imams.boardminton.engine.implementation.GameEngine
 import com.imams.boardminton.engine.data.model.Score
 import com.imams.boardminton.engine.data.model.Side
 import org.junit.Assert

@@ -1,5 +1,6 @@
 package com.imams.boardminton.data
 
+@Deprecated("use game engine")
 class GameScore constructor() {
 
     private val gamePoint = 21
@@ -114,6 +115,8 @@ class GameScore constructor() {
     private fun Int.lastPoint(opposite: Int) = this in gamePoint - 1 until maxPoint - 1 && this - opposite > 0
 
 }
+
+@Deprecated("use view params")
 data class GameHistory(
     val index: Int,
     var scoresA: Int = 0,

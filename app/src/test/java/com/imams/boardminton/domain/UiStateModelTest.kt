@@ -1,6 +1,6 @@
 package com.imams.boardminton.domain
 
-import com.imams.boardminton.domain.model.Court
+import com.imams.boardminton.domain.model.CourtSide
 import com.imams.boardminton.engine.data.model.Side
 import org.junit.Assert
 import org.junit.Test
@@ -9,7 +9,7 @@ class UiStateModelTest {
 
     @Test
     fun court_to_side_test() {
-        val court = Court()
+        val court = CourtSide()
         execute(court.left)
         execute(court.right)
 

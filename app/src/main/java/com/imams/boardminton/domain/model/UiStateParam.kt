@@ -19,17 +19,15 @@ data class MatchUIState(
         ),
         currentGame = GameViewParam(),
         games = mutableListOf(),
-    )
+    ),
 ) {
     var scoreByCourt = ScoreByCourt(
+        index = match.currentGame.index,
         left = match.currentGame.scoreA,
-        right = match.currentGame.scoreB
+        right = match.currentGame.scoreB,
+        teamLeft = match.teamA,
+        teamRight = match.teamB
     )
-    fun swapScoreCourt() {
-        val temp = scoreByCourt.copy()
-        scoreByCourt = ScoreByCourt(left = temp.right, right = temp.left)
-    }
-
 }
 
 data class MatchViewParam(
@@ -46,10 +44,12 @@ data class TeamViewParam(
     val player1: PlayerViewParam,
     val player2: PlayerViewParam,
     val onServe: Boolean,
-)
+) {
+    val isSingle = player2.name.isEmpty()
+}
 
 data class PlayerViewParam(
-    val player: String,
+    val name: String,
     val onServe: Boolean = false,
 )
 
@@ -68,11 +68,14 @@ data class ScoreViewParam(
 )
 
 data class ScoreByCourt(
+    val index: Int,
     val left: ScoreViewParam = ScoreViewParam(),
     val right: ScoreViewParam = ScoreViewParam(),
+    val teamLeft: TeamViewParam,
+    val teamRight: TeamViewParam,
 )
 
-data class Court(
+data class CourtSide(
     var left: Side = Side.A,
     var right: Side = Side.B,
 ) {

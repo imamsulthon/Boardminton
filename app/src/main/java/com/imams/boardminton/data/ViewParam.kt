@@ -1,13 +1,15 @@
 package com.imams.boardminton.data
 
+@Deprecated("use ViewParam")
 fun singlePlayer(name: String, onTurn: Boolean = false) = TeamPlayer(
     Player(name, onTurn), null
 )
-
+@Deprecated("use ViewParam")
 fun doublePlayer(name1: String, name2: String, onTurn: Boolean = false) = TeamPlayer(
     Player(name1, onTurn), Player(name2)
 )
 
+@Deprecated("use ViewParam")
 data class TeamPlayer(
     val player1: Player,
     val player2: Player? = null,
@@ -18,6 +20,7 @@ data class TeamPlayer(
     fun isSingle(): Boolean = player2 == null
 }
 
+@Deprecated("use ViewParam")
 data class Player(
     var name: String,
     var onTurn: Boolean = false

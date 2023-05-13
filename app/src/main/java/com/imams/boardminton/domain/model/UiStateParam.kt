@@ -1,12 +1,10 @@
 package com.imams.boardminton.domain.model
 
-import com.imams.boardminton.data.ISide
-import com.imams.boardminton.engine.data.model.MatchType
 import com.imams.boardminton.engine.data.model.Winner
 
 data class MatchUIState(
     val match : MatchViewParam = MatchViewParam(
-        matchType = MatchType.Single,
+        matchType = IMatchType.Single,
         teamA = TeamViewParam(
             player1 = PlayerViewParam(""),
             player2 = PlayerViewParam(""),
@@ -21,7 +19,7 @@ data class MatchUIState(
         games = mutableListOf(),
     ),
 ) {
-    var scoreByCourt = ScoreByCourt(
+    var scoreByCourt: ScoreByCourt = ScoreByCourt(
         index = match.currentGame.index,
         left = match.currentGame.scoreA,
         right = match.currentGame.scoreB,
@@ -31,7 +29,7 @@ data class MatchUIState(
 }
 
 data class MatchViewParam(
-    val matchType: MatchType = MatchType.Single,
+    val matchType: IMatchType = IMatchType.Single,
     val currentGame: GameViewParam = GameViewParam(),
     val teamA: TeamViewParam,
     val teamB: TeamViewParam,

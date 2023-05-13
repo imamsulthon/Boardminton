@@ -1,6 +1,6 @@
 package com.imams.boardminton.domain
 
-import com.imams.boardminton.data.ISide
+import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.CourtSide
 import com.imams.boardminton.engine.data.model.Side
 import org.junit.Assert

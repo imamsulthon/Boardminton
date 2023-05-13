@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.imams.boardminton.data.ISide
+import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ScoreByCourt
 import com.imams.boardminton.ui.component.BaseScore
 import com.imams.boardminton.ui.component.PlayerNameWrapper

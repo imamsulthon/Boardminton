@@ -11,16 +11,16 @@ import com.imams.boardminton.engine.data.model.Player
 import com.imams.boardminton.engine.data.model.Score
 import com.imams.boardminton.engine.data.model.Team
 
-fun MatchViewParam.toModel() = MatchScore(
-    type = matchType,
-    currentGame = currentGame.toModel(),
-    games = games.map { it.toModel() }.toMutableList(),
-    teamA = teamA.toModel(),
-    teamB = teamB.toModel(),
+fun MatchViewParam.toVp() = MatchScore(
+    type = matchType.toModel(),
+    currentGame = currentGame.toVp(),
+    games = games.map { it.toVp() }.toMutableList(),
+    teamA = teamA.toVp(),
+    teamB = teamB.toVp(),
 )
 
 fun MatchScore.toViewParam() = MatchViewParam(
-    matchType = type,
+    matchType = type.toVp(),
     currentGame = currentGame.toVp(),
     games = games.map { it.toVp() }.toMutableList(),
     teamA = teamA.toVp(),
@@ -35,10 +35,10 @@ fun Game.toVp() = GameViewParam(
     winner = winner
 )
 
-fun GameViewParam.toModel() = Game(
+fun GameViewParam.toVp() = Game(
     index = index,
-    scoreA = scoreA.toModel(),
-    scoreB = scoreB.toModel(),
+    scoreA = scoreA.toVp(),
+    scoreB = scoreB.toVp(),
     winner = winner
 )
 
@@ -50,7 +50,7 @@ fun Score.toVp() = ScoreViewParam(
     isWin = isWin,
 )
 
-fun ScoreViewParam.toModel() = Score(
+fun ScoreViewParam.toVp() = Score(
     point = point,
 )
 
@@ -59,7 +59,7 @@ fun Player.toVp() = PlayerViewParam(
     onServe = false, // todo
 )
 
-fun PlayerViewParam.toModel() = Player(
+fun PlayerViewParam.toVp() = Player(
     name = name,
 )
 
@@ -69,7 +69,7 @@ fun Team.toVp() = TeamViewParam(
     onServe = false, // todo
 )
 
-fun TeamViewParam.toModel() = Team(
-    player1 = player1.toModel(),
-    player2 = player2.toModel()
+fun TeamViewParam.toVp() = Team(
+    player1 = player1.toVp(),
+    player2 = player2.toVp()
 )

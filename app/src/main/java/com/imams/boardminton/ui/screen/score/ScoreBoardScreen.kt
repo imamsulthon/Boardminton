@@ -39,7 +39,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.R
-import com.imams.boardminton.data.ISide
+import com.imams.boardminton.domain.mapper.isSingle
+import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.ui.component.ButtonPointLeft
 import com.imams.boardminton.ui.component.ButtonPointRight
 import com.imams.boardminton.ui.component.MainNameBoardView
@@ -101,7 +102,7 @@ fun ScoreBoardScreen(
         scoreA = uiState.match.currentGame.scoreA.point,
         scoreB = uiState.match.currentGame.scoreB.point,
         histories = uiState.match.games,
-        single = single,
+        single = uiState.match.matchType.isSingle(),
     )
 
     @Composable

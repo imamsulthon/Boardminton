@@ -1,5 +1,6 @@
 package com.imams.boardminton.domain
 
+import com.imams.boardminton.data.ISide
 import com.imams.boardminton.domain.model.CourtSide
 import com.imams.boardminton.engine.data.model.Side
 import org.junit.Assert
@@ -13,20 +14,20 @@ class UiStateModelTest {
         execute(court.left)
         execute(court.right)
 
-        Assert.assertEquals(Side.A, court.left)
-        Assert.assertEquals(Side.B, court.right)
+        Assert.assertEquals(ISide.A, court.left)
+        Assert.assertEquals(ISide.B, court.right)
 
         court.swap()
         execute(court.left)
 
-        Assert.assertEquals(Side.B, court.left)
+        Assert.assertEquals(ISide.B, court.left)
         Assert.assertEquals(Side.A, court.right)
     }
 
-    private fun execute(side: Side) {
+    private fun execute(side: ISide) {
         when (side) {
-            Side.A -> println("is side ${side.name}")
-            Side.B -> println("is side ${side.name}")
+            ISide.A -> println("is side ${side.name}")
+            ISide.B -> println("is side ${side.name}")
         }
     }
 

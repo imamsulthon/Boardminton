@@ -20,7 +20,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Visibility
 import com.imams.boardminton.R
 import com.imams.boardminton.domain.model.TeamViewParam
-import com.imams.boardminton.ui.prettifyName
+import com.imams.boardminton.ui.utils.prettifyName
 import com.imams.boardminton.ui.theme.*
 
 @OptIn(ExperimentalAnimationApi::class)

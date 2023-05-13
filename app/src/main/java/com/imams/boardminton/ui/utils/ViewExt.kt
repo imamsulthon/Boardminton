@@ -1,4 +1,4 @@
-package com.imams.boardminton.ui
+package com.imams.boardminton.ui.utils
 
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.ImeAction
@@ -9,10 +9,10 @@ import com.imams.boardminton.domain.model.TeamViewParam
 fun Int.even(): Boolean {
     return this % 2 == 0
 }
-fun TeamViewParam.getLabel() = if (this.isSingle) this.player1.name.prettifyName() else this.concatLastName() ?: ""
+fun TeamViewParam.getLabel() = if (this.isSingle) this.player1.name.prettifyName() else this.concatLastName()
 
 fun TeamViewParam.concatLastName(): String {
-    return this.player1.name.lastNameWith(this.player2.name ?: "")
+    return this.player1.name.lastNameWith(this.player2.name)
 }
 
 fun String.lastNameWith(friend: String): String {

@@ -1,7 +1,7 @@
 package com.imams.boardminton.domain.model
 
+import com.imams.boardminton.data.ISide
 import com.imams.boardminton.engine.data.model.MatchType
-import com.imams.boardminton.engine.data.model.Side
 import com.imams.boardminton.engine.data.model.Winner
 
 data class MatchUIState(
@@ -76,8 +76,8 @@ data class ScoreByCourt(
 )
 
 data class CourtSide(
-    var left: Side = Side.A,
-    var right: Side = Side.B,
+    var left: ISide = ISide.A,
+    var right: ISide = ISide.B,
 ) {
     fun swap() {
         left = right.also { right = left }

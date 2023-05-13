@@ -1,5 +1,6 @@
 package com.imams.boardminton.domain.impl
 
+import com.imams.boardminton.data.ISide
 import com.imams.boardminton.domain.mapper.toModel
 import com.imams.boardminton.domain.mapper.toViewParam
 import com.imams.boardminton.domain.model.CourtSide
@@ -73,13 +74,13 @@ class CombinedMatchBoardUseCaseImpl: MatchBoardUseCase {
 
     override fun asStateByCourtConfig(courtSide: CourtSide): MatchUIState {
         return MatchUIState(match = get()).apply {
-            val left = if (courtSide.left == Side.A) this.match.currentGame.scoreA
+            val left = if (courtSide.left == ISide.A) this.match.currentGame.scoreA
             else this.match.currentGame.scoreB
-            val right = if (courtSide.right == Side.A) this.match.currentGame.scoreA
+            val right = if (courtSide.right == ISide.A) this.match.currentGame.scoreA
             else this.match.currentGame.scoreB
-            val tLeft = if (courtSide.left == Side.A) this.match.teamA
+            val tLeft = if (courtSide.left == ISide.A) this.match.teamA
             else this.match.teamB
-            val tRight = if (courtSide.right == Side.A) this.match.teamA
+            val tRight = if (courtSide.right == ISide.A) this.match.teamA
             else this.match.teamB
             scoreByCourt = ScoreByCourt(
                 index = this.match.currentGame.index,

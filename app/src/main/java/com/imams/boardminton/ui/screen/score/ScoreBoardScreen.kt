@@ -136,7 +136,7 @@ fun ScoreBoardScreen(
                     end.linkTo(parent.end)
                 },
             timer = timeCounterUiState.counter,
-            onSwap = { scoreVm.swapSide() },
+            onSwap = { scoreVm.swapCourt() },
             onEdit = {
                 navigator?.toEditPlayers(
                     single,

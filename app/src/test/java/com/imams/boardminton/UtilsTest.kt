@@ -1,8 +1,8 @@
 package com.imams.boardminton
 
-import com.imams.boardminton.ui.even
-import com.imams.boardminton.ui.lastName
-import com.imams.boardminton.ui.prettifyName
+import com.imams.boardminton.ui.utils.even
+import com.imams.boardminton.ui.utils.lastName
+import com.imams.boardminton.ui.utils.prettifyName
 import org.junit.Assert
 import org.junit.Test
 

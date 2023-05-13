@@ -2,7 +2,7 @@ package com.imams.boardminton.ui.screen.score
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.imams.boardminton.data.GameScore
+import com.imams.boardminton.data.ISide
 import com.imams.boardminton.data.toList
 import com.imams.boardminton.domain.impl.BoardEvent
 import com.imams.boardminton.domain.impl.MatchBoardUseCase
@@ -29,8 +29,8 @@ class ScoreBoardVM @Inject constructor(
     val matchUIState: StateFlow<MatchUIState> = _matchUiState.asStateFlow()
 
     private var courtSide = CourtSide(
-        left = Side.A,
-        right = Side.B,
+        left = ISide.A,
+        right = ISide.B,
     )
 
     fun setupPlayer(json: String, single: Boolean) {
@@ -99,25 +99,8 @@ class ScoreBoardVM @Inject constructor(
 
     }
 
-    fun swapSide() {
+    fun swapCourt() {
 
-    }
-
-    fun setGameEnd(show: Boolean) {
-//        _anyWinner.value = _anyWinner.value.copy(show = show)
-    }
-
-    private fun GameScore.checkWinner() {
-
-    }
-
-    fun onNewGame() {
-
-    }
-
-    private fun resetWinner() {
-//        gameIndex += 1
-//        _anyWinner.value = _anyWinner.value.copy(index = gameIndex, show = false, isWin = false, by = "")
     }
 
     private fun printLog(msg: String) = println("ScoreBoardVM $msg")

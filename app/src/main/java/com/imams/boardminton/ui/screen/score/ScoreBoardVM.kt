@@ -24,14 +24,10 @@ class ScoreBoardVM @Inject constructor(
 ) : ViewModel() {
 
     private var alreadySetup = false
+    private var courtConfig = CourtSide(left = ISide.A, right = ISide.B)
 
-    private val _matchUiState = MutableStateFlow(MatchUIState())
+    private val _matchUiState = MutableStateFlow(MatchUIState().apply { courtSide = courtConfig })
     val matchUIState: StateFlow<MatchUIState> = _matchUiState.asStateFlow()
-
-    private var courtConfig = CourtSide(
-        left = ISide.A,
-        right = ISide.B,
-    )
 
     fun setupPlayer(json: String, single: Boolean) {
         val data = json.toList()
@@ -43,7 +39,7 @@ class ScoreBoardVM @Inject constructor(
             } else {
                 useCase.create(data[0], data[1], data[2], data[3])
             }
-            it.copy(match = useCase.get())
+            it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
         }
         alreadySetup = true
     }
@@ -55,59 +51,51 @@ class ScoreBoardVM @Inject constructor(
             val t = if (single) IMatchType.Single else IMatchType.Double
             _matchUiState.update {
                 useCase.updatePlayers(t, data[0], data[1], data[2], data[3])
-                it.copy(match = useCase.get())
+                it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
             }
         }
     }
 
-    fun plusA() {
-        _matchUiState.update {
-            useCase.execute(BoardEvent.PointTo(ISide.A))
-            it.copy(match = useCase.get())
+    fun pointTo(onCourt: Court) {
+        viewModelScope.launch {
+            val side = onCourt.asSide(courtConfig)
+            _matchUiState.update {
+                useCase.execute(BoardEvent.PointTo(side))
+                it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
+            }
         }
     }
 
-    fun plusB() {
-        _matchUiState.update {
-            useCase.execute(BoardEvent.PointTo(ISide.B))
-            it.copy(match = useCase.get())
-        }
-    }
-
-    fun minA() {
-        _matchUiState.update {
-            useCase.execute(BoardEvent.MinTo(ISide.A))
-            it.copy(match = useCase.get())
-        }
-    }
-
-    fun minB() {
-        _matchUiState.update {
-            useCase.execute(BoardEvent.MinTo(ISide.B))
-            it.copy(match = useCase.get())
-        }
-    }
-
-    fun someEvent(onCourt: Court) {
-        val side = onCourt.asSide(courtConfig)
-        _matchUiState.update {
-            useCase.execute(BoardEvent.PointTo(side))
-            it.copy(match = useCase.get())
+    fun minusPoint(onCourt: Court) {
+        viewModelScope.launch {
+            val side = onCourt.asSide(courtConfig)
+            _matchUiState.update {
+                useCase.execute(BoardEvent.MinTo(side))
+                it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
+            }
         }
     }
 
     fun swapServe() {
-        _matchUiState.update {
-            useCase.execute(BoardEvent.SwapServer)
-            it.copy(match = useCase.get())
+        viewModelScope.launch {
+            _matchUiState.update {
+                useCase.execute(BoardEvent.SwapServer)
+                it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
+            }
+        }
+    }
+
+    fun swapCourt() {
+        viewModelScope.launch {
+            _matchUiState.update {
+                courtConfig.swap()
+                it.apply { this.setScoreByCourt(courtConfig) }
+            }
         }
     }
 
     fun reset() {
 
-    }
-
-    fun swapCourt() {
     }
 
     private fun Court.asSide(config: CourtSide) = when (this) {

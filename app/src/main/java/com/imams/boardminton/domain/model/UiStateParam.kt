@@ -3,7 +3,7 @@ package com.imams.boardminton.domain.model
 import com.imams.boardminton.engine.data.model.Winner
 
 data class MatchUIState(
-    val match : MatchViewParam = MatchViewParam(
+    val match: MatchViewParam = MatchViewParam(
         matchType = IMatchType.Single,
         teamA = TeamViewParam(
             player1 = PlayerViewParam(""),
@@ -19,13 +19,32 @@ data class MatchUIState(
         games = mutableListOf(),
     ),
 ) {
-    var scoreByCourt: ScoreByCourt = ScoreByCourt(
-        index = match.currentGame.index,
-        left = match.currentGame.scoreA,
-        right = match.currentGame.scoreB,
-        teamLeft = match.teamA,
-        teamRight = match.teamB
-    )
+    var courtSide: CourtSide = CourtSide()
+    var scoreByCourt: ScoreByCourt = getByCourt(courtSide)
+
+    fun setScoreByCourt(courtSide: CourtSide) {
+        this.courtSide = courtSide
+        scoreByCourt = getByCourt(courtSide)
+    }
+
+    private fun getByCourt(courtSide: CourtSide): ScoreByCourt {
+        val left = if (courtSide.left == ISide.A) match.currentGame.scoreA
+        else match.currentGame.scoreB
+        val right = if (courtSide.right == ISide.A) match.currentGame.scoreA
+        else match.currentGame.scoreB
+        val teamOnLeft = if (courtSide.left == ISide.A) match.teamA
+        else match.teamB
+        val teamOnRight = if (courtSide.right == ISide.A) match.teamA
+        else match.teamB
+        return ScoreByCourt(
+            index = match.currentGame.index,
+            left = left,
+            right = right,
+            teamLeft = teamOnLeft,
+            teamRight = teamOnRight,
+        )
+    }
+
 }
 
 data class MatchViewParam(
@@ -37,7 +56,7 @@ data class MatchViewParam(
     var winner: Winner = Winner.None
 )
 
-// UI State Model
+// region UI State Model
 data class TeamViewParam(
     val player1: PlayerViewParam,
     val player2: PlayerViewParam,
@@ -80,4 +99,5 @@ data class CourtSide(
     fun swap() {
         left = right.also { right = left }
     }
+// endregion
 }

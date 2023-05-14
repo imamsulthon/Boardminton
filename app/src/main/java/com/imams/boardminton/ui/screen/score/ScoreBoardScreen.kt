@@ -40,6 +40,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.R
 import com.imams.boardminton.domain.mapper.isSingle
+import com.imams.boardminton.domain.model.Court
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.ui.component.ButtonPointLeft
 import com.imams.boardminton.ui.component.ButtonPointRight
@@ -113,8 +114,8 @@ fun ScoreBoardScreen(
         board = uiState.scoreByCourt,
         plus = {
             when (it) {
-                ISide.A -> scoreVm.plusA()
-                ISide.B -> scoreVm.plusB()
+                ISide.A -> scoreVm.pointTo(Court.Left)
+                ISide.B -> scoreVm.pointTo(Court.Right)
             }
         }
     )
@@ -173,10 +174,10 @@ fun ScoreBoardScreen(
                     start.linkTo(parent.start)
                     bottom.linkTo(parent.bottom)
                 },
-            aPlus = { scoreVm.plusA() },
-            aMin = { scoreVm.minA() },
-            bPlus = { scoreVm.plusB() },
-            bMin = { scoreVm.minB() },
+            aPlus = { scoreVm.pointTo(Court.Left) },
+            aMin = { scoreVm.minusPoint(Court.Left) },
+            bPlus = { scoreVm.pointTo(Court.Right) },
+            bMin = { scoreVm.minusPoint(Court.Right) },
             swap = { scoreVm.swapServe() },
             enabled = !finishMatch
         )

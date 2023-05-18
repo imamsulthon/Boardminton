@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.imams.boardminton.ui.theme.BoardmintonTheme
+import com.imams.boardminton.ui.theme.BoardMintonTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            BoardmintonTheme {
+            BoardMintonTheme {
                 DestinationsNavHost(navGraph = NavGraphs.root)
             }
         }

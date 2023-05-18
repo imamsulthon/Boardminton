@@ -10,16 +10,19 @@ import com.imams.boardminton.engine.data.model.MatchScore
 import com.imams.boardminton.engine.data.model.Player
 import com.imams.boardminton.engine.data.model.Score
 import com.imams.boardminton.engine.data.model.Team
+import com.imams.boardminton.engine.data.model.Winner
+import com.imams.boardminton.ui.utils.getLabel
 
-fun MatchViewParam.toVp() = MatchScore(
+fun MatchViewParam.toModel() = MatchScore(
     type = matchType.toModel(),
-    currentGame = currentGame.toVp(),
-    games = games.map { it.toVp() }.toMutableList(),
-    teamA = teamA.toVp(),
-    teamB = teamB.toVp(),
+    currentGame = currentGame.toModel(),
+    games = games.map { it.toModel() }.toMutableList(),
+    teamA = teamA.toModel(),
+    teamB = teamB.toModel(),
+    winner = this.winner,
 )
 
-fun MatchScore.toViewParam() = MatchViewParam(
+fun MatchScore.toVp() = MatchViewParam(
     matchType = type.toVp(),
     currentGame = currentGame.toVp(),
     games = games.map { it.toVp() }.toMutableList(),
@@ -32,13 +35,15 @@ fun Game.toVp() = GameViewParam(
     index = index,
     scoreA = scoreA.toVp(),
     scoreB = scoreB.toVp(),
+    onServe = onServe,
     winner = winner
 )
 
-fun GameViewParam.toVp() = Game(
+fun GameViewParam.toModel() = Game(
     index = index,
-    scoreA = scoreA.toVp(),
-    scoreB = scoreB.toVp(),
+    scoreA = scoreA.toModel(),
+    scoreB = scoreB.toModel(),
+    onServe = onServe,
     winner = winner
 )
 
@@ -50,7 +55,7 @@ fun Score.toVp() = ScoreViewParam(
     isWin = isWin,
 )
 
-fun ScoreViewParam.toVp() = Score(
+fun ScoreViewParam.toModel() = Score(
     point = point,
 )
 
@@ -59,7 +64,7 @@ fun Player.toVp() = PlayerViewParam(
     onServe = false, // todo
 )
 
-fun PlayerViewParam.toVp() = Player(
+fun PlayerViewParam.toModel() = Player(
     name = name,
 )
 
@@ -69,7 +74,17 @@ fun Team.toVp() = TeamViewParam(
     onServe = false, // todo
 )
 
-fun TeamViewParam.toVp() = Team(
-    player1 = player1.toVp(),
-    player2 = player2.toVp()
+fun TeamViewParam.toModel() = Team(
+    player1 = player1.toModel(),
+    player2 = player2.toModel()
 )
+
+fun MatchViewParam.gameWinnerBy(): String {
+    return if (currentGame.winner == Winner.A) teamA.getLabel()
+    else teamB.getLabel()
+}
+
+fun MatchViewParam.matchWinnerBy(): String {
+    return if (winner == Winner.A) teamA.getLabel()
+    else teamB.getLabel()
+}

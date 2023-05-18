@@ -18,17 +18,16 @@ class MatchEngine(
 ) {
 
     private val rule: MatchRule = MatchRule()
-
     private var gameIndex: Int = 1
-
-    private var gameEngine: GameEngine = GameEngine(gameIndex)
-
-    private val currentGame by lazy { gameEngine.asGame() }
+    private var gameEngine: GameEngine
 
     private val previousGameWinner by lazy {
         if (previousGames.isNotEmpty()) previousGames.last().winner else Winner.None
     }
 
+    /**
+     * Value for Match Winner
+     */
     private var winner: Winner = Winner.None
 
     /**
@@ -36,10 +35,9 @@ class MatchEngine(
      */
     constructor(a1: String, b1: String) : this(
         MatchType.Single,
-        Team(Player(a1), Player(a1)),
-        Team(Player(b1), Player(b1))
+        Team(Player(a1), Player("")),
+        Team(Player(b1), Player(""))
     ) {
-        printLog("cons Single")
         gameIndex = 1
     }
 
@@ -51,27 +49,27 @@ class MatchEngine(
         Team(Player(a1), Player(a2)),
         Team(Player(b1), Player(b2)),
     ) {
-        printLog("cons Double")
         gameIndex = 1
     }
 
-    constructor(match: MatchScore): this(match.type, match.teamA, match.teamA, match.games,) {
+    /**
+     * Create Match with existing [match]
+     */
+    constructor(match: MatchScore): this(match.type, match.teamA, match.teamA, match.games) {
         gameIndex = match.currentGame.index
     }
 
-    private fun createNewGame(gameIndex: Int) {
-        if (gameIndex >= rule.maxGame) return
-        this.gameIndex = gameIndex
-        gameEngine = GameEngine(this.gameIndex, Score(), Score())
+    init {
+        gameEngine = GameEngine(gameIndex)
     }
 
     fun updatePlayers(matchType: MatchType, a1: String, a2: String = "", b1: String, b2: String = "") {
-        teamA = Team(Player(a1), Player(a2))
-        teamB = Team(Player(b1), Player(b2))
+        teamA = Team(Player(a1), if (matchType == MatchType.Double) Player(a2) else Player(""))
+        teamB = Team(Player(b1), if (matchType == MatchType.Double) Player(b2) else Player(""))
     }
     
     /**
-     *
+     * Add 1 point to [side] on current [gameEngine]
      */
     fun pointTo(side: Side) {
         gameEngine.pointTo(side)
@@ -79,49 +77,68 @@ class MatchEngine(
     }
 
     /**
-     *
+     * Minus 1 point to [side] on current [gameEngine]
      */
     fun minTo(side: Side) {
         gameEngine.minPoint(side)
         executeMatchRules()
     }
 
+    /**
+     * Set the side whose on serve in the current game
+     */
     fun serveTo(side: Side) {
         gameEngine.serveTo(side)
     }
 
+    /**
+     * Revert/swap the side whose on serve in the current game.
+     */
     fun swapServer() {
         gameEngine.revertServer()
+    }
+
+    /**
+     * reset game engine
+     */
+    fun resetGame() {
+        gameEngine.reset()
+        executeMatchRules()
+    }
+
+    /**
+     * Create new game engine
+     */
+    fun createNewGame(onIndex: Int) {
+        if (onIndex > rule.maxGame) return
+        // add current game as history
+        previousGames.add(gameEngine.asGame())
+        if (previousGameWinner == Winner.None && previousGameWinner == gameEngine.asGame().winner) return
+        // create new game engine
+        gameIndex = onIndex
+        gameEngine = GameEngine(gameIndex, Score(), Score())
     }
 
     /**
      *
      */
     private fun executeMatchRules() {
-        if (currentGame.winner != Winner.None) {
-            addPreviousGame()
-        }
-        trySetWinner()
-    }
-
-    private fun trySetWinner() {
-        if (gameIndex < 1) return
-        if (previousGameWinner == Winner.None) return
-        if (previousGameWinner == currentGame.winner) winner = currentGame.winner
+        trySetWinnerByMatch()
     }
 
     /**
-     *
+     * try set Winner of match
      */
-    private fun addPreviousGame() {
-        previousGames.add(gameIndex - 1, currentGame)
-        createNewGame(gameIndex +1)
+    private fun trySetWinnerByMatch() {
+        if (gameIndex < 1) return
+        if (previousGameWinner == Winner.None) return
+        if (previousGameWinner == gameEngine.asGame().winner) winner = gameEngine.asGame().winner
     }
 
     // region getter
     fun getMatchScore() = MatchScore(
         type = matchType,
-        currentGame = currentGame,
+        currentGame = gameEngine.asGame(),
         games = previousGames,
         teamA = teamA,
         teamB = teamB,

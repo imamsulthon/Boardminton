@@ -8,12 +8,12 @@ import com.imams.boardminton.engine.data.model.Side
 import com.imams.boardminton.engine.data.model.Winner
 
 class GameEngine constructor(
-    private var index: Int = 1,
-    private var scoreA: Score = Score(),
-    private var scoreB: Score = Score(),
-    private val rules: GameRule = GameRule(),
+    private val index: Int = 1,
+    private val scoreA: Score = Score(),
+    private val scoreB: Score = Score(),
 ) {
 
+    private val rules: GameRule = GameRule()
     private var onServe: OnServe = OnServe.NONE
     private var winner: Winner = Winner.None
     var hasReachInterval = false
@@ -62,6 +62,10 @@ class GameEngine constructor(
         }
     }
 
+
+    /**
+     * Set the side whose on serve.
+     */
     fun serveTo(side: Side) {
         when (side) {
             Side.A -> scoreA.onServe = true.also {
@@ -75,6 +79,9 @@ class GameEngine constructor(
         }
     }
 
+    /**
+     * Revert/swap the side whose on serve.
+     */
     fun revertServer() {
         scoreA.onServe = scoreB.onServe.also { scoreB.onServe = scoreA.onServe }
         onServe = when (onServe) {
@@ -151,12 +158,6 @@ class GameEngine constructor(
         this.lastPoint = this.point.lastPoint(opponent.point)
     }
 
-    private fun whoIsWinner(a: Score, b: Score) = when {
-        a.isWin -> Winner.A
-        b.isWin -> Winner.B
-        else -> Winner.None
-    }
-
     /**
      * A game is on deuce if the [scoreA] or [scoreB] relative to its opponent is
      * 1 point in difference while both score reached in range 20 to 30 at the same time
@@ -166,8 +167,7 @@ class GameEngine constructor(
     }
 
     /**
-     * Game is end if
-     * [this] Score reach point in range between [rules] maximum point [21] to advance point [30].
+     * Game is end if [this] Score reach point in range between [rules] maximum point [21] to advance point [30].
      * ```
      * Score A = 21 vs [opponent] Score B = 19. A Win
      * Score A = 25 vs [opponent] Score B = 23. A Win

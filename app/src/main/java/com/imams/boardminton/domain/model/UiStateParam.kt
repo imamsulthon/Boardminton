@@ -1,5 +1,6 @@
 package com.imams.boardminton.domain.model
 
+import com.imams.boardminton.engine.data.model.OnServe
 import com.imams.boardminton.engine.data.model.Winner
 
 data class MatchUIState(
@@ -53,7 +54,7 @@ data class MatchViewParam(
     val teamA: TeamViewParam,
     val teamB: TeamViewParam,
     val games: MutableList<GameViewParam> = mutableListOf(),
-    var winner: Winner = Winner.None
+    val winner: Winner = Winner.None
 )
 
 // region UI State Model
@@ -74,6 +75,7 @@ data class GameViewParam(
     val index: Int = 1,
     val scoreA: ScoreViewParam = ScoreViewParam(),
     val scoreB: ScoreViewParam = ScoreViewParam(),
+    val onServe: OnServe = OnServe.NONE,
     val winner: Winner = Winner.None
 )
 
@@ -100,4 +102,16 @@ data class CourtSide(
         left = right.also { right = left }
     }
 // endregion
+}
+
+data class WinnerState(
+    val type: Type,
+    val index: Int,
+    val show: Boolean = true,
+    val isWin: Boolean = false,
+    val by: String,
+) {
+    enum class Type {
+        Game, Match
+    }
 }

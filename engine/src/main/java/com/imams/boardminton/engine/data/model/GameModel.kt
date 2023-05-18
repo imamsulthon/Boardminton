@@ -28,8 +28,8 @@ data class Game(
     val index: Int = 0,
     val scoreA: Score = Score(),
     val scoreB: Score = Score(),
-    var onServe: OnServe = OnServe.NONE,
-    var winner: Winner = Winner.None,
+    val onServe: OnServe = OnServe.NONE,
+    val winner: Winner = Winner.None,
 )
 
 data class Player(

@@ -5,11 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.data.toList
 import com.imams.boardminton.domain.impl.BoardEvent
 import com.imams.boardminton.domain.impl.MatchBoardUseCase
+import com.imams.boardminton.domain.mapper.any
+import com.imams.boardminton.domain.mapper.gameWinnerBy
+import com.imams.boardminton.domain.mapper.matchWinnerBy
 import com.imams.boardminton.domain.model.Court
 import com.imams.boardminton.domain.model.CourtSide
 import com.imams.boardminton.domain.model.IMatchType
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.MatchUIState
+import com.imams.boardminton.domain.model.WinnerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,10 +33,51 @@ class ScoreBoardVM @Inject constructor(
     private val _matchUiState = MutableStateFlow(MatchUIState().apply { courtSide = courtConfig })
     val matchUIState: StateFlow<MatchUIState> = _matchUiState.asStateFlow()
 
+    private val _winnerState = MutableStateFlow(WinnerState(WinnerState.Type.Game, 1, isWin = false, show = false, by = ""))
+    val winnerState: StateFlow<WinnerState> = _winnerState.asStateFlow()
+
+    init {
+        observeWinner()
+    }
+
+    private fun observeWinner() {
+        viewModelScope.launch {
+            matchUIState.collect {
+                it.match.currentGame.let { g ->
+                    if (g.scoreA.point > 19 || g.scoreB.point > 19) {
+                        printLog("check: Winner ${g.winner}, game $g")
+                    }
+                }
+                when {
+                    it.match.winner.any() -> {
+                        _winnerState.update { state ->
+                            state.copy(
+                                type = WinnerState.Type.Match,
+                                isWin = true,
+                                show = true,
+                                by = it.match.matchWinnerBy()
+                            )
+                        }
+                    }
+                    it.match.currentGame.winner.any() -> {
+                        _winnerState.update { state ->
+                            state.copy(
+                                type = WinnerState.Type.Game,
+                                index = it.match.currentGame.index,
+                                isWin = true,
+                                show = true,
+                                by = it.match.gameWinnerBy()
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fun setupPlayer(json: String, single: Boolean) {
-        val data = json.toList()
-        printLog("setupPlayer $single $data")
         if (alreadySetup) return
+        val data = json.toList()
         _matchUiState.update {
             if (single) {
                 useCase.create(data[0], data[1])
@@ -47,7 +92,6 @@ class ScoreBoardVM @Inject constructor(
     fun updatePlayers(json: String, single: Boolean) {
         viewModelScope.launch {
             val data = json.toList()
-            printLog("updatePlayer $single $data")
             val t = if (single) IMatchType.Single else IMatchType.Double
             _matchUiState.update {
                 useCase.updatePlayers(t, data[0], data[1], data[2], data[3])
@@ -94,8 +138,34 @@ class ScoreBoardVM @Inject constructor(
         }
     }
 
-    fun reset() {
+    fun resetGame() {
+        useCase.execute(BoardEvent.ResetGame)
+        _matchUiState.update {
+            it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
+        }
+    }
 
+    fun onGameEndDialog(finishIt: Boolean, type: WinnerState.Type) {
+        if (type == WinnerState.Type.Match) {
+            onEndMatch()
+            _winnerState.update { it.copy(show = false) }
+        } else if (finishIt) {
+            onNewGame()
+            _winnerState.update { it.copy(show = false) }
+        } else {
+            _winnerState.update { it.copy(show = false) }
+        }
+    }
+
+    private fun onEndMatch() {
+        // todo
+    }
+
+    private fun onNewGame() {
+        _matchUiState.update {
+            useCase.execute(BoardEvent.OnNewGame(it.match.currentGame.index + 1))
+            it.copy(match = useCase.getMatch()).apply { this.setScoreByCourt(courtConfig) }
+        }
     }
 
     private fun Court.asSide(config: CourtSide) = when (this) {
@@ -106,10 +176,3 @@ class ScoreBoardVM @Inject constructor(
     private fun printLog(msg: String) = println("ScoreBoardVM $msg")
 
 }
-
-data class WinnerState(
-    val index: Int,
-    val isWin: Boolean = false,
-    val show: Boolean = true,
-    val by: String,
-)

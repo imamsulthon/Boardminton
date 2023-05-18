@@ -1,13 +1,11 @@
 package com.imams.boardminton.domain.impl
 
 import com.imams.boardminton.domain.mapper.toModel
-import com.imams.boardminton.domain.mapper.toViewParam
 import com.imams.boardminton.domain.mapper.toVp
 import com.imams.boardminton.domain.model.CourtSide
 import com.imams.boardminton.domain.model.GameViewParam
 import com.imams.boardminton.domain.model.IMatchType
 import com.imams.boardminton.domain.model.ISide
-import com.imams.boardminton.domain.model.MatchUIState
 import com.imams.boardminton.domain.model.MatchViewParam
 import com.imams.boardminton.domain.model.ScoreByCourt
 import com.imams.boardminton.domain.model.TeamViewParam
@@ -28,8 +26,8 @@ class CombinedMatchBoardUseCaseImpl : MatchBoardUseCase {
         prevGames: MutableList<GameViewParam>
     ) {
         engine = MatchEngine(
-            matchType.toModel(), teamA.toVp(), teamB.toVp(),
-            prevGames.map { it.toVp() }.toMutableList()
+            matchType.toModel(), teamA.toModel(), teamB.toModel(),
+            prevGames.map { it.toModel() }.toMutableList()
         )
     }
 
@@ -53,7 +51,7 @@ class CombinedMatchBoardUseCaseImpl : MatchBoardUseCase {
      * Use this method when resume match with existing data from saved repository
      */
     override fun create(matchViewParam: MatchViewParam) {
-        engine = MatchEngine(matchViewParam.toVp())
+        engine = MatchEngine(matchViewParam.toModel())
     }
 
     /**
@@ -81,9 +79,14 @@ class CombinedMatchBoardUseCaseImpl : MatchBoardUseCase {
             is BoardEvent.SwapServer -> {
                 engine.swapServer()
             }
-            is BoardEvent.ResetGame -> {
+            is BoardEvent.SwapBoardSide -> {
+                // todo
             }
-            else -> { // todo add other event here
+            is BoardEvent.OnNewGame -> {
+                engine.createNewGame(event.index)
+            }
+            is BoardEvent.ResetGame -> {
+                engine.resetGame()
             }
         }
     }
@@ -92,14 +95,7 @@ class CombinedMatchBoardUseCaseImpl : MatchBoardUseCase {
      * Return updated values of the match after executing certain event on [MatchEngine] as [MatchViewParam]
      */
     override fun getMatch(): MatchViewParam {
-        return engine.getMatchScore().toViewParam()
-    }
-
-    /**
-     * Return updated values of the match after executing certain event on [MatchEngine] as UI State data class [MatchUIState]
-     */
-    override fun asState(): MatchUIState {
-        return MatchUIState(match = getMatch())
+        return engine.getMatchScore().toVp()
     }
 
     override fun getScore(courtSide: CourtSide): ScoreByCourt {
@@ -133,7 +129,6 @@ interface MatchBoardUseCase {
     fun updatePlayers(matchType: IMatchType, a1: String, a2: String, b1: String, b2: String)
     fun execute(event: BoardEvent)
     fun getMatch(): MatchViewParam
-    fun asState(): MatchUIState
     fun getScore(courtSide: CourtSide): ScoreByCourt
 
 }
@@ -144,5 +139,6 @@ sealed class BoardEvent {
     data class ServeTo(val side: ISide) : BoardEvent()
     object SwapServer : BoardEvent()
     object SwapBoardSide : BoardEvent()
+    data class OnNewGame(val index: Int): BoardEvent()
     object ResetGame: BoardEvent()
 }

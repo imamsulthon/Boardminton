@@ -1,9 +1,10 @@
 package com.imams.boardminton.engine.game
 
 import com.imams.boardminton.engine.data.model.Game
-import com.imams.boardminton.engine.implementation.GameEngine
 import com.imams.boardminton.engine.data.model.Score
 import com.imams.boardminton.engine.data.model.Side
+import com.imams.boardminton.engine.data.model.Winner
+import com.imams.boardminton.engine.implementation.GameEngine
 import org.junit.Assert
 import org.junit.Test
 
@@ -57,8 +58,20 @@ class GameEngineTest {
 
         val game = gameEngine.asGame()
 
-        Assert.assertEquals(true, gameEngine.asGame().scoreA.lastPoint)
-        Assert.assertEquals(false, gameEngine.asGame().scoreB.lastPoint)
+        Assert.assertEquals(true, game.scoreA.lastPoint)
+        Assert.assertEquals(false, game.scoreB.lastPoint)
+    }
+
+    @Test
+    fun check_winner() {
+        val gameEngine = GameEngine(1, Score(19), Score(16))
+        gameEngine.serveTo(Side.A) // init server
+        gameEngine.apply {
+            pointTo(Side.A)
+            pointTo(Side.A)
+        }
+        Assert.assertEquals(Winner.A, gameEngine.asGame().winner)
+
     }
 
 }

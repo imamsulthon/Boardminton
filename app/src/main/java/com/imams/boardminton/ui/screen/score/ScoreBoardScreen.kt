@@ -24,8 +24,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,19 +33,25 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.R
 import com.imams.boardminton.domain.mapper.isSingle
+import com.imams.boardminton.domain.mapper.none
 import com.imams.boardminton.domain.model.Court
 import com.imams.boardminton.domain.model.ISide
+import com.imams.boardminton.domain.model.MatchUIState
 import com.imams.boardminton.ui.component.ButtonPointLeft
 import com.imams.boardminton.ui.component.ButtonPointRight
+import com.imams.boardminton.ui.component.GameFinishDialogContent
 import com.imams.boardminton.ui.component.MainNameBoardView
 import com.imams.boardminton.ui.component.TimeCounterView
 import com.imams.boardminton.ui.screen.destinations.EditPlayersScreenDestination
 import com.imams.boardminton.ui.screen.timer.CounterTimerVM
+import com.imams.boardminton.ui.screen.timer.TimeCounterUiState
 import com.imams.boardminton.ui.screen.toEditPlayers
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -69,30 +73,38 @@ fun ScoreBoardScreen(
     scoreVm.setupPlayer(players, single)
 
     val uiState by scoreVm.matchUIState.collectAsState()
-    val timeCounterUiState by counterVm.tcUiState.collectAsState()
-    val finishMatch by remember { mutableStateOf(false) }
+    val timerUiState by counterVm.tcUiState.collectAsState()
+    val winnerState by scoreVm.winnerState.collectAsState()
 
     resultRecipient?.onNavResult { result ->
         if (result is NavResult.Value) scoreVm.updatePlayers(result.value, single)
     }
 
-//    if (anyWinner.show) {
-//        Dialog(
-//            onDismissRequest = { scoreVm.setGameEnd(false) },
-//            content = {
-//                GameFinishDialogContent(anyWinner.index, anyWinner.by,
-//                    onDone = {
-//                        if (it) scoreVm.onNewGame() else scoreVm.setGameEnd(false)
-//                    }
-//                )
-//            },
-//            properties = DialogProperties(
-//                dismissOnBackPress = false,
-//                dismissOnClickOutside = false
-//            )
-//        )
-//    }
+    if (winnerState.show) {
+        Dialog(
+            onDismissRequest = { scoreVm.onGameEndDialog(false, winnerState.type) },
+            content = {
+                GameFinishDialogContent(winnerState, onDone = scoreVm::onGameEndDialog)
+            },
+            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false))
+    }
 
+    ScoreBoardScreen(
+        uiState = uiState,
+        timerUiState = timerUiState,
+        scoreVm = scoreVm,
+        navigator = navigator
+    )
+
+}
+
+@Composable
+private fun ScoreBoardScreen(
+    uiState: MatchUIState,
+    timerUiState: TimeCounterUiState,
+    scoreVm: ScoreBoardVM,
+    navigator: DestinationsNavigator?
+) {
     @Composable
     fun mainBoard() = MainNameBoardView(
         modifier = Modifier
@@ -137,16 +149,16 @@ fun ScoreBoardScreen(
                     top.linkTo(parent.top)
                     end.linkTo(parent.end)
                 },
-            timer = timeCounterUiState.counter,
+            timer = timerUiState.counter,
             onSwap = { scoreVm.swapCourt() },
             onEdit = {
                 navigator?.toEditPlayers(
-                    single,
+                    uiState.match.matchType.isSingle(),
                     team1 = uiState.match.teamA,
                     team2 = uiState.match.teamB
                 )
             },
-            onReset = { scoreVm.reset() }
+            onReset = { scoreVm.resetGame() }
         )
 
         ContentView(
@@ -179,7 +191,7 @@ fun ScoreBoardScreen(
             bPlus = { scoreVm.pointTo(Court.Right) },
             bMin = { scoreVm.minusPoint(Court.Right) },
             swap = { scoreVm.swapServe() },
-            enabled = !finishMatch
+            enabled = uiState.match.currentGame.winner.none()
         )
     }
 }

@@ -20,8 +20,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Visibility
 import com.imams.boardminton.R
 import com.imams.boardminton.domain.model.TeamViewParam
-import com.imams.boardminton.ui.utils.prettifyName
+import com.imams.boardminton.domain.model.WinnerState
 import com.imams.boardminton.ui.theme.*
+import com.imams.boardminton.ui.utils.prettifyName
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -237,9 +238,8 @@ fun ButtonPointRight(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameFinishDialogContent(
-    gameIndex: Int,
-    winner: String,
-    onDone: (Boolean) -> Unit,
+    state: WinnerState,
+    onDone: (Boolean, WinnerState.Type) -> Unit,
 ) = Card(
     modifier = Modifier.wrapContentSize(),
     shape = RoundedCornerShape(8.dp)
@@ -252,13 +252,16 @@ fun GameFinishDialogContent(
         verticalArrangement = Arrangement.Center
     ) {
         val compMod = Modifier.padding(horizontal = 5.dp, vertical = 5.dp)
-        Text(text = "Game $gameIndex Done", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        Text(text = "$winner Win", modifier = compMod, color = Green)
+
+        val title = if (state.type == WinnerState.Type.Game) "Game ${state.index} Done"
+        else "Match Done"
+        Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Text(text = "Winner by: ${state.by}", modifier = compMod, color = Green)
         Row {
-            OutlinedButton(onClick = { onDone.invoke(false) }, modifier = compMod) {
+            OutlinedButton(onClick = { onDone.invoke(false, state.type) }, modifier = compMod) {
                 Text(text = "Cancel")
             }
-            OutlinedButton(onClick = { onDone.invoke(true) }, modifier = compMod) {
+            OutlinedButton(onClick = { onDone.invoke(true, state.type) }, modifier = compMod) {
                 Text(text = "Finish")
             }
         }
@@ -268,5 +271,10 @@ fun GameFinishDialogContent(
 @Preview
 @Composable
 private fun PreviewDialog() {
-    GameFinishDialogContent(gameIndex = 1, winner = "Player 2") {}
+    GameFinishDialogContent(
+        WinnerState(type = WinnerState.Type.Game, index = 1, by = "Imams" , show = true, isWin = true),
+        onDone = { _, _ -> {
+
+        }}
+    )
 }

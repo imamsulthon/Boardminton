@@ -4,8 +4,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.imams.boardminton.data.Athlete
-import com.imams.boardminton.data.ISide
-import com.imams.boardminton.data.ITeam
+import com.imams.boardminton.domain.model.ISide
+import com.imams.boardminton.domain.model.ITeam
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

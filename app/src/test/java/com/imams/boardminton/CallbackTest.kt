@@ -1,6 +1,6 @@
 package com.imams.boardminton
 
-import com.imams.boardminton.data.ITeam
+import com.imams.boardminton.domain.model.ITeam
 import org.junit.Assert
 import org.junit.Test
 

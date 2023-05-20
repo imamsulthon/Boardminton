@@ -19,60 +19,10 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Visibility
 import com.imams.boardminton.R
-import com.imams.boardminton.data.GameScore
-import com.imams.boardminton.data.ISide
-import com.imams.boardminton.data.TeamPlayer
-import com.imams.boardminton.ui.prettifyName
+import com.imams.boardminton.domain.model.TeamViewParam
+import com.imams.boardminton.domain.model.WinnerState
 import com.imams.boardminton.ui.theme.*
-
-@Composable
-fun BaseScoreWrapper(
-    modifier: Modifier = Modifier,
-    index: Int = 1,
-    scoreA: Int,
-    scoreB: Int,
-    game: GameScore,
-    plus: (ISide) -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp)
-            .wrapContentHeight(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top
-    ) {
-        BaseScore(
-            score = scoreA,
-            onTurn = game.onTurnA,
-            winner = game.gameEnd,
-            lastPoint = game.lastPointA,
-            callback = { _, _ -> plus.invoke(ISide.A) })
-
-        Column(
-            modifier = Modifier
-                .wrapContentWidth()
-                .padding(horizontal = 10.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = "Game", color = Green, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
-            Text(
-                text = index.toString(),
-                color = Green,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 24.sp
-            )
-        }
-
-        BaseScore(
-            score = scoreB,
-            onTurn = game.onTurnB,
-            lastPoint = game.lastPointB,
-            winner = game.gameEnd,
-            callback = { _, _ -> plus.invoke(ISide.B) })
-    }
-}
+import com.imams.boardminton.ui.utils.prettifyName
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -153,23 +103,22 @@ private fun Modifier.scoreMod(
 
 @Composable
 fun PlayerNameBoard(
-    teamPlayer: TeamPlayer?,
+    teamPlayer: TeamViewParam,
     modifier: Modifier,
     alignment: Alignment.Horizontal = Alignment.Start,
 ) {
-    if (teamPlayer == null) return
     Column(modifier = modifier, horizontalAlignment = alignment) {
         val mod = Modifier.padding(top = 6.dp)
         PlayerName(
             modifier = mod, alignment,
-            name = teamPlayer.player1.name.prettifyName(), teamPlayer.player1.onTurn
+            name = teamPlayer.player1.name.prettifyName(), teamPlayer.player1.onServe
         )
-        AnimatedVisibility(visible = teamPlayer.player2 != null) {
+        AnimatedVisibility(visible = !teamPlayer.isSingle) {
             PlayerName(
                 modifier = mod,
                 alignment,
-                name = teamPlayer.player2?.name?.prettifyName() ?: "",
-                teamPlayer.player2?.onTurn ?: false,
+                name = teamPlayer.player2.name.prettifyName(),
+                teamPlayer.player2.onServe,
             )
         }
     }
@@ -182,7 +131,8 @@ fun ServeIc() = Icon(painterResource(id = R.drawable.ic_cock), contentDescriptio
 @Composable
 fun PlayerNameWrapper(
     modifier: Modifier = Modifier,
-    game: GameScore,
+    teamA: TeamViewParam,
+    teamB: TeamViewParam,
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -197,7 +147,7 @@ fun PlayerNameWrapper(
                     bottom.linkTo(parent.bottom)
                 }
                 .fillMaxWidth(.5f),
-            teamPlayer = game.teamA,
+            teamPlayer = teamA,
             alignment = Alignment.Start
         )
         PlayerNameBoard(
@@ -209,7 +159,7 @@ fun PlayerNameWrapper(
                     bottom.linkTo(parent.bottom)
                 }
                 .fillMaxWidth(.5f),
-            teamPlayer = game.teamB,
+            teamPlayer = teamB,
             alignment = Alignment.End
         )
     }
@@ -288,9 +238,8 @@ fun ButtonPointRight(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameFinishDialogContent(
-    gameIndex: Int,
-    winner: String,
-    onDone: (Boolean) -> Unit,
+    state: WinnerState,
+    onDone: (Boolean, WinnerState.Type) -> Unit,
 ) = Card(
     modifier = Modifier.wrapContentSize(),
     shape = RoundedCornerShape(8.dp)
@@ -303,30 +252,29 @@ fun GameFinishDialogContent(
         verticalArrangement = Arrangement.Center
     ) {
         val compMod = Modifier.padding(horizontal = 5.dp, vertical = 5.dp)
-        Text(text = "Game $gameIndex Done", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        Text(text = "$winner Win", modifier = compMod, color = Green)
+
+        val title = if (state.type == WinnerState.Type.Game) "Game ${state.index} Done"
+        else "Match Done"
+        Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Text(text = "Winner by: ${state.by}", modifier = compMod, color = Green)
         Row {
-            OutlinedButton(onClick = { onDone.invoke(false) }, modifier = compMod) {
+            OutlinedButton(onClick = { onDone.invoke(false, state.type) }, modifier = compMod) {
                 Text(text = "Cancel")
             }
-            OutlinedButton(onClick = { onDone.invoke(true) }, modifier = compMod) {
+            OutlinedButton(onClick = { onDone.invoke(true, state.type) }, modifier = compMod) {
                 Text(text = "Finish")
             }
         }
     }
 }
 
-@Preview(showSystemUi = true)
-@Composable
-fun ScoreBoardView() {
-    Column(modifier = Modifier.padding(5.dp)) {
-        BaseScoreWrapper(scoreA = 12, scoreB = 13, game = GameScore(), plus = {})
-        PlayerNameWrapper(game = GameScore())
-    }
-}
-
 @Preview
 @Composable
 private fun PreviewDialog() {
-    GameFinishDialogContent(gameIndex = 1, winner = "Player 2") {}
+    GameFinishDialogContent(
+        WinnerState(type = WinnerState.Type.Game, index = 1, by = "Imams" , show = true, isWin = true),
+        onDone = { _, _ -> {
+
+        }}
+    )
 }

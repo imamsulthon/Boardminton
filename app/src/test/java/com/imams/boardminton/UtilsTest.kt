@@ -1,8 +1,8 @@
 package com.imams.boardminton
 
-import com.imams.boardminton.ui.even
-import com.imams.boardminton.ui.lastName
-import com.imams.boardminton.ui.prettifyName
+import com.imams.boardminton.ui.utils.even
+import com.imams.boardminton.ui.utils.lastName
+import com.imams.boardminton.ui.utils.prettifyName
 import org.junit.Assert
 import org.junit.Test
 
@@ -45,7 +45,7 @@ class UtilsTest {
         val `3name` = "Ahmad Rudi Sugiorto"
         Assert.assertEquals(`3name`.prettifyName(), "Ahmad R. Sugiorto")
 
-        val longName = "Maitland Willow Harding Lescott Baxter"
+        val longName = "Muhammad Willow Harding Lescott Baxter"
         Assert.assertEquals(longName.prettifyName(), "M. W. H. L. Baxter")
 
         val longName2 = "Maitlandwillow HardingLescott"

@@ -1,7 +1,14 @@
 package com.imams.boardminton.ui.screen.create
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
@@ -21,16 +28,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.imams.boardminton.ui.screen.toScoreBoard
+import com.imams.boardminton.data.toJson
 import com.imams.boardminton.ui.theme.Orientation
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@Destination
 @Composable
 fun CreateMatchScreen(
-    single: Boolean = true,
-    navigator: DestinationsNavigator?,
+    single: Boolean,
+    toScoreBoard: (String, String) -> Unit,
+    onBackPressed: () -> Unit,
     vm: CreateMatchVM = hiltViewModel(),
 ) {
     var singleMatch by rememberSaveable { mutableStateOf(single) }
@@ -51,17 +56,14 @@ fun CreateMatchScreen(
     val config = LocalConfiguration.current
 
     fun gotoScoreBoard() {
-        val params = if (singleMatch) listOf(playerA1, playerB1)
-        else listOf(playerA1, playerA2, playerB1, playerB2)
-        navigator?.popBackStack()
-        navigator?.toScoreBoard(params, singleMatch)
+        toScoreBoard.invoke(if (singleMatch) "single" else "double", listOf(playerA1, playerA2, playerB1, playerB2).toJson())
     }
 
     val bottomListener = object : BottomListener {
         override fun onNext() = gotoScoreBoard()
 
         override fun onBackPressed() {
-            navigator?.navigateUp()
+            onBackPressed.invoke()
         }
 
         override fun onClear() = vm.onClearPlayers()
@@ -83,7 +85,7 @@ fun CreateMatchScreen(
                 pB1 = playerB1,
                 orientation = orientation,
                 onChange = vm::updatePlayerName,
-                swapPlayer = { vm.swapSingleMatch() },
+                swapPlayer = vm::swapSingleMatch,
                 importPerson = {
                     vm.defaultPlayers(singleMatch)
                 }
@@ -274,12 +276,12 @@ private interface BottomListener {
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1024, heightDp = 512)
 @Composable
 fun CreateMatchPreview() {
-    CreateMatchScreen(single = false, navigator = null)
+    CreateMatchScreen(single = false, toScoreBoard = { _, _ -> }, onBackPressed = {})
 }
 
 @Preview(showSystemUi = true)
 @Preview(device = Devices.PIXEL_4_XL, widthDp = 768, heightDp = 470)
 @Composable
 fun CreateMatchPreview2() {
-    CreateMatchScreen(single = false, navigator = null)
+    CreateMatchScreen(single = false, toScoreBoard = { _, _ -> }, onBackPressed = {})
 }

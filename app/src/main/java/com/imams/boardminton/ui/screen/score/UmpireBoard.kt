@@ -1,6 +1,6 @@
 package com.imams.boardminton.ui.screen.score
 
-import  androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -23,7 +23,7 @@ import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ScoreByCourt
 import com.imams.boardminton.ui.component.BaseScore
 import com.imams.boardminton.ui.component.PlayerNameWrapper
-import com.imams.boardminton.ui.theme.Green
+import com.imams.boardminton.ui.theme.seed
 
 @Composable
 fun UmpireBoard(
@@ -64,10 +64,10 @@ fun UmpireBoard(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Game", color = Green, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+            Text(text = "Game", color = seed, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             Text(
                 text = board.index.toString(),
-                color = Green,
+                color = seed,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 24.sp
             )

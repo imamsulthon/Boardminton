@@ -80,7 +80,7 @@ class ScoreBoardVM @Inject constructor(
         val data = json.toList()
         _matchUiState.update {
             if (single) {
-                useCase.create(data[0], data[1])
+                useCase.create(data[0], data[2])
             } else {
                 useCase.create(data[0], data[1], data[2], data[3])
             }

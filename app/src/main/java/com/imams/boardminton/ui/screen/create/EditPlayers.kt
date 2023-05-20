@@ -1,12 +1,18 @@
 package com.imams.boardminton.ui.screen.create
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,26 +22,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.imams.boardminton.data.Athlete
 import com.imams.boardminton.data.toJson
 import com.imams.boardminton.ui.theme.Orientation
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.result.ResultBackNavigator
 
-@Destination
 @Composable
 fun EditPlayersScreen(
     single: Boolean,
-    a1: String,
-    a2: String = "",
-    b1: String,
-    b2: String = "",
-    result: ResultBackNavigator<String>?,
+    players: String,
+    onApply: (String) -> Unit,
+    onCancel: () -> Unit,
     vm: CreateMatchVM = hiltViewModel<CreateMatchVM>().apply {
-        setupPlayers(a1, a2, b1, b2)
+        setupPlayers(single, players)
     },
 ) {
-    val singleMatch by rememberSaveable { mutableStateOf(single) }
     val playerA1 by rememberSaveable { vm.playerA1 }
     val playerA2 by rememberSaveable { vm.playerA2 }
     val playerB1 by rememberSaveable { vm.playerB1 }
@@ -50,40 +49,40 @@ fun EditPlayersScreen(
         pB1 = playerB1,
         orientation = orientation,
         onChange = vm::updatePlayerName,
-        swapPlayer = { vm.swapSingleMatch() },
-        importPerson = {
-
-        }
+        swapPlayer = vm::swapSingleMatch,
+        importPerson = {}
     )
 
     @Composable
-    fun doubleMatchView(modifier: Modifier = Modifier, orientation: Orientation, ) = FieldInputDoubleMatch(
-        modifier = modifier,
-        pA1 = playerA1, pA2 = playerA2,
-        pB1 = playerB1, pB2 = playerB2,
-        orientation = orientation,
-        onChange = vm::updatePlayerName,
-        swapPlayer = vm::swapPlayerByTeam,
-        swapTeam = { vm.swapDoubleMatch() },
-        importPerson = {
-            // todo
-        }
-    )
+    fun doubleMatchView(modifier: Modifier = Modifier, orientation: Orientation) =
+        FieldInputDoubleMatch(
+            modifier = modifier,
+            pA1 = playerA1, pA2 = playerA2,
+            pB1 = playerB1, pB2 = playerB2,
+            orientation = orientation,
+            onChange = vm::updatePlayerName,
+            swapPlayer = vm::swapPlayerByTeam,
+            swapTeam = vm::swapDoubleMatch,
+            importPerson = {}
+        )
 
     @Composable
     fun topView() = TopView(onApply = {
         if (it) {
-            val params = if (singleMatch) listOf(playerA1, playerB1)
+            val params = if (single) listOf(playerA1, playerB1)
             else listOf(playerA1, playerA2, playerB1, playerB2)
-            result?.navigateBack(params.toJson())
+            onApply.invoke(params.toJson())
         } else {
-            result?.navigateBack()
+            onCancel.invoke()
         }
     })
 
     @Composable
-    fun formView(modifier: Modifier = Modifier, orientation: Orientation = Orientation.Portrait): Unit =
-        if (singleMatch) singleMatchView(modifier = modifier, orientation)
+    fun formView(
+        modifier: Modifier = Modifier,
+        orientation: Orientation = Orientation.Portrait
+    ): Unit =
+        if (single) singleMatchView(modifier = modifier, orientation)
         else doubleMatchView(modifier = modifier, orientation)
 
     when (config.orientation) {
@@ -100,7 +99,6 @@ fun EditPlayersScreen(
             )
         }
     }
-
 }
 
 @Composable
@@ -186,8 +184,5 @@ private fun LandscapeContent(
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1024, heightDp = 512, showSystemUi = true)
 @Composable
 private fun LandscapePrev() {
-    EditPlayersScreen(single = false,
-        a1 = Athlete.Imam_Sulthon, a2 = Athlete.Taufik_Hidayat, b1 = Athlete.Viktor, b2 = Athlete.Anthony,
-        result = null
-    )
+
 }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.imams.boardminton.data.Athlete
+import com.imams.boardminton.data.toList
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ITeam
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +22,13 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
     private val _playerB2 = mutableStateOf("")
     val playerB2 = _playerB2
 
-    fun setupPlayers(a1: String = "", a2: String = "", b1: String = "", b2: String = "") {
+    fun setupPlayers(isSingle: Boolean, json: String) {
+        val data = json.toList()
+        if (isSingle) setupPlayers(a1 = data[0], b1 = data[0])
+        else setupPlayers(data[0], data[1], data[2], data[3])
+    }
+
+    private fun setupPlayers(a1: String = "", a2: String = "", b1: String = "", b2: String = "") {
         _playerA1.value = a1
         _playerA2.value = a2
         _playerB1.value = b1

@@ -22,8 +22,10 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,35 +40,31 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import com.imams.boardminton.R
+import com.imams.boardminton.data.toJson
 import com.imams.boardminton.domain.mapper.isSingle
 import com.imams.boardminton.domain.mapper.none
 import com.imams.boardminton.domain.model.Court
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.MatchUIState
+import com.imams.boardminton.domain.model.TeamViewParam
 import com.imams.boardminton.ui.component.ButtonPointLeft
 import com.imams.boardminton.ui.component.ButtonPointRight
 import com.imams.boardminton.ui.component.GameFinishDialogContent
 import com.imams.boardminton.ui.component.MainNameBoardView
 import com.imams.boardminton.ui.component.TimeCounterView
-import com.imams.boardminton.ui.screen.destinations.EditPlayersScreenDestination
 import com.imams.boardminton.ui.screen.timer.CounterTimerVM
 import com.imams.boardminton.ui.screen.timer.TimeCounterUiState
-import com.imams.boardminton.ui.screen.toEditPlayers
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.result.NavResult
-import com.ramcosta.composedestinations.result.ResultRecipient
 
-@Destination
 @Composable
 fun ScoreBoardScreen(
-    players: String,
     single: Boolean,
+    players: String,
+    onEdit: (Boolean, String) -> Unit,
     counterVm: CounterTimerVM = hiltViewModel(),
     scoreVm: ScoreBoardVM = hiltViewModel(),
-    navigator: DestinationsNavigator?,
-    resultRecipient: ResultRecipient<EditPlayersScreenDestination, String>?,
+    savedStateHandle: SavedStateHandle?,
 ) {
 
     // todo should use Side Effect?
@@ -76,8 +74,14 @@ fun ScoreBoardScreen(
     val timerUiState by counterVm.tcUiState.collectAsState()
     val winnerState by scoreVm.winnerState.collectAsState()
 
-    resultRecipient?.onNavResult { result ->
-        if (result is NavResult.Value) scoreVm.updatePlayers(result.value, single)
+    if (savedStateHandle != null) {
+        val editResult by savedStateHandle.getLiveData<String>("players").observeAsState()
+        LaunchedEffect(editResult) {
+            editResult?.let {
+                scoreVm.updatePlayers(it, single)
+                savedStateHandle.remove<String>("players")
+            }
+        }
     }
 
     if (winnerState.show) {
@@ -86,14 +90,17 @@ fun ScoreBoardScreen(
             content = {
                 GameFinishDialogContent(winnerState, onDone = scoreVm::onGameEndDialog)
             },
-            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false))
+            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+        )
     }
 
     ScoreBoardScreen(
         uiState = uiState,
         timerUiState = timerUiState,
         scoreVm = scoreVm,
-        navigator = navigator
+        toEditPlayers = { isSingle, a, b ->
+            onEdit.invoke(isSingle, listOf(a.player1.name, a.player2.name, b.player1.name, b.player2.name).toJson())
+        }
     )
 
 }
@@ -103,7 +110,7 @@ private fun ScoreBoardScreen(
     uiState: MatchUIState,
     timerUiState: TimeCounterUiState,
     scoreVm: ScoreBoardVM,
-    navigator: DestinationsNavigator?
+    toEditPlayers: (Boolean, TeamViewParam, TeamViewParam) -> Unit,
 ) {
     @Composable
     fun mainBoard() = MainNameBoardView(
@@ -152,10 +159,10 @@ private fun ScoreBoardScreen(
             timer = timerUiState.counter,
             onSwap = { scoreVm.swapCourt() },
             onEdit = {
-                navigator?.toEditPlayers(
+                toEditPlayers.invoke(
                     uiState.match.matchType.isSingle(),
-                    team1 = uiState.match.teamA,
-                    team2 = uiState.match.teamB
+                    uiState.match.teamA,
+                    uiState.match.teamB,
                 )
             },
             onReset = { scoreVm.resetGame() }
@@ -392,5 +399,5 @@ private fun printLog(msg: String) {
 @Preview(device = Devices.NEXUS_6)
 @Composable
 private fun ScoreBoardScreenV() {
-    ScoreBoardScreen("listOf()", false, navigator = null, resultRecipient = null)
+    ScoreBoardScreen(false, "listOf()", onEdit = {_, _, ->}, savedStateHandle = null)
 }

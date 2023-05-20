@@ -24,16 +24,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.imams.boardminton.R
-import com.imams.boardminton.ui.screen.destinations.HomeScreenDestination
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
 
-@Destination(start = true)
 @Composable
-fun BoardmintonSplashView(
-    navigator: DestinationsNavigator?
-) {
+fun BoardmintonSplashView() {
     var startAnimation by remember { mutableStateOf(false) }
     val alphaAnim = animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0f,
@@ -42,8 +36,6 @@ fun BoardmintonSplashView(
     LaunchedEffect(key1 = true) {
         startAnimation = true
         delay(3000)
-        navigator?.popBackStack()
-        navigator?.navigate(HomeScreenDestination())
     }
     Splash(alpha = alphaAnim.value)
 }
@@ -71,12 +63,12 @@ private fun Splash(alpha: Float) {
 @Preview(uiMode = UI_MODE_TYPE_NORMAL)
 @Composable
 fun SplashScreenPreview() {
-    BoardmintonSplashView(navigator = null)
+    BoardmintonSplashView()
 }
 
 
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun SplashScreenPreviewDark() {
-    BoardmintonSplashView(navigator = null)
+    BoardmintonSplashView()
 }

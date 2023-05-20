@@ -24,15 +24,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.imams.boardminton.R
-import com.imams.boardminton.ui.screen.destinations.CreateMatchScreenDestination
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@Destination
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun HomeScreen(
-    navigator: DestinationsNavigator?
+    onCreateMatch: (String) -> Unit
 ) {
     Scaffold(
         modifier = Modifier
@@ -48,7 +44,10 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .padding(padding)
                 .verticalScroll(rememberScrollState()),
-            navigator = navigator
+            onCreateMatch = {
+                if (it) onCreateMatch.invoke("single")
+                else onCreateMatch.invoke("double")
+            }
         )
     }
 }
@@ -74,7 +73,7 @@ private fun HomeAppBar() {
 @Composable
 internal fun HomeContent(
     modifier: Modifier,
-    navigator: DestinationsNavigator?
+    onCreateMatch: (Boolean) -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -85,10 +84,10 @@ internal fun HomeContent(
             label = "Create New Match"
         ) {
             ItemMenu(label = "Single Match") {
-                navigator?.navigate(CreateMatchScreenDestination())
+                onCreateMatch.invoke(true)
             }
             ItemMenu(label = "Double Match") {
-                navigator?.navigate(CreateMatchScreenDestination(single = false))
+                onCreateMatch.invoke(false)
             }
         }
 
@@ -146,5 +145,5 @@ private fun ItemMenu(
 @Preview(showSystemUi = true, uiMode = UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen(navigator = null)
+    HomeScreen(onCreateMatch = {})
 }

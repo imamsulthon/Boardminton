@@ -10,11 +10,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.imams.boardminton.navigation.Destination.CreateMatch
+import com.imams.boardminton.navigation.Destination.CreatePlayer
 import com.imams.boardminton.navigation.Destination.EditPlayers
 import com.imams.boardminton.navigation.Destination.Home
 import com.imams.boardminton.navigation.Destination.ScoreBoard
 import com.imams.boardminton.ui.screen.create.CreateMatchScreen
 import com.imams.boardminton.ui.screen.create.EditPlayersScreen
+import com.imams.boardminton.ui.screen.create.player.CreatePlayerScreen
 import com.imams.boardminton.ui.screen.home.HomeScreen
 import com.imams.boardminton.ui.screen.score.ScoreBoardScreen
 
@@ -56,6 +58,8 @@ sealed class Destination(protected val route: String, vararg params: String) {
 
     }
 
+    object CreatePlayer: DestinationNoArgs("create-player")
+
 }
 
 @Composable
@@ -64,9 +68,10 @@ fun BoardMintonNavHost(
 ) {
     NavHost(navController = navController, startDestination = Home.fullRoute) {
         composable(Home.fullRoute) {
-            HomeScreen {
-                navController.navigate(CreateMatch.invoke(it))
-            }
+            HomeScreen(
+                onCreateMatch = { navController.navigate(CreateMatch.invoke(it)) },
+                onCreatePlayer = { navController.navigate(CreatePlayer.fullRoute) }
+            )
         }
 
         composable(
@@ -123,6 +128,12 @@ fun BoardMintonNavHost(
                     navController.popBackStack()
                 },
                 onCancel = navController::navigateUp
+            )
+        }
+
+        composable(CreatePlayer.fullRoute) {
+            CreatePlayerScreen(
+                onSave = {}
             )
         }
     }

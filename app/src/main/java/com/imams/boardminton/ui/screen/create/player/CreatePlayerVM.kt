@@ -36,6 +36,8 @@ class CreatePlayerVM @Inject constructor(
             is CreatePlayerEvent.LastName -> _uiState.update { it.copy(lastName = event.name) }
             is CreatePlayerEvent.HandPlay -> _uiState.update { it.copy(handPlay = event.value) }
             is CreatePlayerEvent.Gender -> _uiState.update { it.copy(gender = event.value) }
+            is CreatePlayerEvent.Height -> _uiState.update { it.copy(height = event.value) }
+            is CreatePlayerEvent.Weight -> _uiState.update { it.copy(weight = event.value) }
             is CreatePlayerEvent.Clear -> _uiState.update { CreatePlayerState() }
         }
     }
@@ -65,11 +67,15 @@ data class CreatePlayerState(
     val lastName: String = "",
     val handPlay: String = "",
     val gender: String = "",
+    val height: Int = 0,
+    val weight: Int = 0,
 )
 
 sealed class CreatePlayerEvent {
     data class FirstName(val name: String): CreatePlayerEvent()
     data class LastName(val name: String): CreatePlayerEvent()
+    data class Height(val value: Int): CreatePlayerEvent()
+    data class Weight(val value: Int): CreatePlayerEvent()
     data class HandPlay(val value: String): CreatePlayerEvent()
     data class Gender(val value: String): CreatePlayerEvent()
     object Clear: CreatePlayerEvent()

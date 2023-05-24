@@ -26,4 +26,8 @@ class PlayerRepositoryImpl @Inject constructor(
         dao.addPlayer(player.toEntity())
     }
 
+    override suspend fun removePlayer(player: Player) {
+        dao.delete(player.toEntity(true))
+    }
+
 }

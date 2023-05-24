@@ -98,11 +98,11 @@ internal fun HomeContent(
         MenuGroup(
             label = "Create New Player"
         ) {
-            ItemMenu(label = "Single Player") {
-                onCreatePlayer.invoke("single")
+            ItemMenu(label = "New Player") {
+                onCreatePlayer.invoke("create")
             }
-            ItemMenu(label = "Double Player", enabled = false) {
-                // todo
+            ItemMenu(label = "Registered Players", enabled = true) {
+                onCreatePlayer.invoke("seeAll")
             }
         }
     }

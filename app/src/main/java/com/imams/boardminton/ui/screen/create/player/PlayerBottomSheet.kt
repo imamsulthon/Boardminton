@@ -17,7 +17,7 @@ import com.imams.boardminton.data.Athlete
 
 @Composable
 fun PlayerBottomSheetContent(list: List<CreatePlayerState>) {
-    LazyColumn(modifier = Modifier.padding(vertical = 10.dp)) {
+    LazyColumn(modifier = Modifier.padding(10.dp)) {
         item {
             Text(
                 text = "Registered Players (${list.size})",
@@ -35,7 +35,11 @@ fun PlayerBottomSheetContent(list: List<CreatePlayerState>) {
                 tonalElevation = 2.dp,
                 shadowElevation = 2.dp,
                 headlineContent = {
-                    Text("${it.id}. ${it.firstName} ${it.lastName} (${it.gender}/${it.handPlay})")
+                    var label = "${it.id}. ${it.firstName} ${it.lastName}"
+                    if (it.gender.isNotEmpty() || it.handPlay.isNotEmpty()) {
+                        label = label + " " + "(${it.gender}/${it.handPlay})"
+                    }
+                    Text(label)
                 },
             )
         }
@@ -43,12 +47,16 @@ fun PlayerBottomSheetContent(list: List<CreatePlayerState>) {
 
 }
 
+@Composable
+fun BottomDialogFilter() {
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSheet() {
     val list = mutableListOf<CreatePlayerState>()
-    list.add(CreatePlayerState(1, Athlete.Viktor, "", "", ""))
-    list.add(CreatePlayerState(2, Athlete.Imam_Sulthon, "", "", ""))
+    list.add(CreatePlayerState(1, Athlete.Viktor, "", "Left", "Man"))
+    list.add(CreatePlayerState(2, Athlete.Imam_Sulthon, "", "Right", "Man"))
     list.add(CreatePlayerState(3, Athlete.Taufik_Hidayat, "", "", ""))
     list.add(CreatePlayerState(4, "Anthony", "Ginting", "", ""))
     PlayerBottomSheetContent(list = list)

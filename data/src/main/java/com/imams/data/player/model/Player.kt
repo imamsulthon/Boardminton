@@ -1,7 +1,7 @@
 package com.imams.data.player.model
 
 data class Player(
-    val id: Int = 0,
+    var id: Int = 0,
     val firstName: String,
     val lastName: String,
     val gender: String,

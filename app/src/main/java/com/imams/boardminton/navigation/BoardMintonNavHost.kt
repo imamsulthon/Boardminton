@@ -18,6 +18,7 @@ import com.imams.boardminton.ui.screen.create.CreateMatchScreen
 import com.imams.boardminton.ui.screen.create.EditPlayersScreen
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerScreen
 import com.imams.boardminton.ui.screen.home.HomeScreen
+import com.imams.boardminton.ui.screen.player.RegisteredPlayersScreen
 import com.imams.boardminton.ui.screen.score.ScoreBoardScreen
 
 sealed class Destination(protected val route: String, vararg params: String) {
@@ -60,6 +61,8 @@ sealed class Destination(protected val route: String, vararg params: String) {
 
     object CreatePlayer: DestinationNoArgs("create-player")
 
+    object AllPlayers: DestinationNoArgs("registered-players")
+
 }
 
 @Composable
@@ -70,7 +73,12 @@ fun BoardMintonNavHost(
         composable(Home.fullRoute) {
             HomeScreen(
                 onCreateMatch = { navController.navigate(CreateMatch.invoke(it)) },
-                onCreatePlayer = { navController.navigate(CreatePlayer.fullRoute) }
+                onCreatePlayer = {
+                    when (it) {
+                        "create" -> { navController.navigate(CreatePlayer.fullRoute) }
+                        "seeAll" -> { navController.navigate(Destination.AllPlayers.fullRoute) }
+                    }
+                }
             )
         }
 
@@ -134,6 +142,14 @@ fun BoardMintonNavHost(
         composable(CreatePlayer.fullRoute) {
             CreatePlayerScreen(
                 onSave = {}
+            )
+        }
+
+        composable(Destination.AllPlayers.fullRoute) {
+            RegisteredPlayersScreen(
+                addNewPlayer = {
+                    navController.navigate(CreatePlayer.fullRoute)
+                }
             )
         }
     }

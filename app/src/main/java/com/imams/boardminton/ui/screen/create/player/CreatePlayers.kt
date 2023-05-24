@@ -5,28 +5,25 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.MailOutline
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -42,7 +39,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -118,8 +116,10 @@ internal fun CreatePlayerContent(
             data = uiState,
             onFirstName = { event.invoke(CreatePlayerEvent.FirstName(it)) },
             onLastName = { event.invoke(CreatePlayerEvent.LastName(it)) },
+            onHeight = { event.invoke(CreatePlayerEvent.Height(it)) },
+            onWeight = { event.invoke(CreatePlayerEvent.Weight(it)) },
             onHandPlay = { event.invoke(CreatePlayerEvent.HandPlay(it)) },
-            onGender = {event.invoke(CreatePlayerEvent.Clear)}
+            onGender = { event.invoke(CreatePlayerEvent.Gender(it)) }
         )
     }
 }
@@ -131,6 +131,8 @@ internal fun FormContent(
     onFirstName: (String) -> Unit,
     onLastName: (String) -> Unit,
     onHandPlay: (String) -> Unit,
+    onWeight: (Int) -> Unit,
+    onHeight: (Int) -> Unit,
     onGender: (String) -> Unit,
 ) {
     Column(
@@ -141,24 +143,50 @@ internal fun FormContent(
     ) {
         // first name
         InputField(
-            modifier = ipModifierP,
+            modifier = ipModifierP.padding(vertical = 5.dp),
             value = data.firstName,
             label = "First Name",
             onValueChange = { onFirstName.invoke(it) },
-        ) {}
+        )
         // last name
         InputField(
-            modifier = ipModifierP,
+            modifier = ipModifierP.padding(vertical = 5.dp),
             value = data.lastName,
             label = "Last Name",
             onValueChange = { onLastName.invoke(it) },
-        ) {}
+        )
 
-        HandPlays(modifier = Modifier.fillMaxWidth()) {
-            onHandPlay.invoke(it)
+        Row(
+            modifier = ipModifierP.padding(vertical = 5.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            InputField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(end = 10.dp),
+                value = if (data.height == 0) "" else data.height.toString(),
+                onValueChange = { onHeight.invoke(it.toInt()) },
+                label = "Height",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+            InputField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(start = 10.dp),
+                value = if (data.weight == 0) "" else data.weight.toString(),
+                onValueChange = { onWeight.invoke(it.toInt()) },
+                label = "Weight",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
         }
-
-        GenderField(modifier = Modifier.fillMaxWidth(), onSelected = {onGender.invoke(it)})
+        HandPlays(modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 5.dp)) { onHandPlay.invoke(it) }
+        GenderField(modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp), onSelected = { onGender.invoke(it) })
     }
 
 }
@@ -169,36 +197,29 @@ private fun InputField(
     modifier: Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    label: String = "Player",
+    label: String,
     keyboardOptions: KeyboardOptions = keyboardNext(),
-    endIconClick: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-
-    @Composable
-    fun endIcon() = IconButton(onClick = { endIconClick.invoke() }) {
-        Icon(Icons.Outlined.Person, contentDescription = "import_icon")
-    }
-
     OutlinedTextField(
         modifier = modifier,
         value = value,
         onValueChange = { onValueChange.invoke(it) },
         label = { Text(text = label) },
-        trailingIcon = { endIcon() },
         keyboardOptions = keyboardOptions,
         keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
     )
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HandPlays(
     modifier: Modifier,
     onSelected: (String) -> Unit,
 ) {
-    val radioOptions = listOf("Left", "Right")
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0]) }
+    val radioOptions = listOf("Left", "Right", "Both")
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[1]) }
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -207,45 +228,36 @@ private fun HandPlays(
         Text(
             text = "Hand Play: ",
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(),
+            modifier = Modifier.padding(end = 10.dp),
         )
-        Row(Modifier.selectableGroup()) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .selectableGroup()
+        ) {
             radioOptions.forEach { text ->
-                Row(
-                    Modifier
-                        .wrapContentWidth()
-                        .height(56.dp)
-                        .selectable(
-                            selected = (text == selectedOption),
-                            onClick = {
-                                onOptionSelected(text).also {
-                                    onSelected.invoke(
-                                        selectedOption
-                                    )
-                                }
-                            },
-                            role = Role.RadioButton
+                InputChip(
+                    modifier = Modifier.padding(horizontal = 5.dp),
+                    selected = text == selectedOption,
+                    onClick = {
+                        onOptionSelected(text)
+                            .also { onSelected.invoke(selectedOption) }
+                    },
+                    label = {
+                        Text(
+                            modifier = Modifier.padding(5.dp),
+                            text = text, textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.bodyLarge,
                         )
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    RadioButton(
-                        selected = (text == selectedOption),
-                        onClick = null
-                    )
-                    Text(
-                        text = text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
+                    }
+                )
             }
         }
     }
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GenderField(
     modifier: Modifier,
@@ -261,39 +273,31 @@ private fun GenderField(
         Text(
             text = "Gender: ",
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(),
+            modifier = Modifier.padding(end = 10.dp),
         )
         Row(Modifier.selectableGroup()) {
             radioOptions.forEach { text ->
-                Row(
-                    Modifier
-                        .wrapContentWidth()
-                        .height(56.dp)
-                        .selectable(
-                            selected = (text == selectedOption),
-                            onClick = {
-                                onOptionSelected(text).also {
-                                    onSelected.invoke(
-                                        selectedOption
-                                    )
-                                }
-                            },
-                            role = Role.RadioButton
+                InputChip(
+                    modifier = Modifier.padding(horizontal = 5.dp),
+                    selected = text == selectedOption,
+                    onClick = {
+                        onOptionSelected(text)
+                            .also { onSelected.invoke(selectedOption) }
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Outlined.Person,
+                            contentDescription = "Localized description"
                         )
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    RadioButton(
-                        selected = (text == selectedOption),
-                        onClick = null
-                    )
-                    Text(
-                        text = text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
+                    },
+                    label = {
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(5.dp)
+                        )
+                    }
+                )
             }
         }
     }
@@ -315,7 +319,7 @@ private fun TopView(
         actions = {
             IconButton(onClick = { onClick.invoke() }, enabled = true) {
                 Icon(
-                    imageVector = Icons.Outlined.MailOutline,
+                    imageVector = Icons.Outlined.AccountCircle,
                     contentDescription = "Localized description"
                 )
             }
@@ -340,7 +344,8 @@ private fun BottomView(
             OutlinedButton(onClick = { onClear.invoke() }, enabled = enableClear) {
                 Text(text = "Clear")
             }
-            OutlinedButton(enabled = enableSave, onClick = { onSave.invoke() },
+            OutlinedButton(
+                enabled = enableSave, onClick = { onSave.invoke() },
                 modifier = Modifier.padding(start = 10.dp)
             ) {
                 Text(text = "Save")

@@ -14,7 +14,7 @@ object PlayerMapper {
         handPlay = handPlay,
     )
 
-    fun Player.toEntity() = PlayerEntity(
+    fun Player.toEntity(withId: Boolean = false) = PlayerEntity(
         firstName = firstName,
         lastName = lastName,
         fullName = "$firstName $lastName",
@@ -22,6 +22,8 @@ object PlayerMapper {
         weight = weight,
         height = height,
         handPlay = handPlay,
-    )
+    ).also {
+        if (withId) it.id = id
+    }
 
 }

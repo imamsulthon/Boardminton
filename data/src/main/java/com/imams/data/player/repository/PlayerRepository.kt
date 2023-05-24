@@ -11,4 +11,6 @@ interface PlayerRepository {
 
     suspend fun addPlayer(player: Player)
 
+    suspend fun removePlayer(player: Player)
+
 }

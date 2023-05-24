@@ -36,4 +36,9 @@ object UseCaseMapper {
         firstName = firstName, lastName = lastName, handPlay = handPlay, gender = gender
     )
 
+    fun CreatePlayerState.toModel() = Player(
+        id = id,
+        firstName = firstName, lastName = lastName, handPlay = handPlay, gender = gender
+    )
+
 }

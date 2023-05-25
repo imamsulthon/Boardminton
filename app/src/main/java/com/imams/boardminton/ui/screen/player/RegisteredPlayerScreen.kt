@@ -15,12 +15,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
@@ -29,7 +28,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -42,6 +43,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,10 +55,12 @@ import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 @Composable
 fun RegisteredPlayersScreen(
     viewModel: RegisteredPlayersVM = hiltViewModel(),
+    onBackPressed: () -> Unit,
     addNewPlayer: () -> Unit,
 ) {
     val list by viewModel.savePlayers.collectAsState()
     RegisteredPlayersScreen(list = list,
+        onBackPressed = onBackPressed::invoke,
         addNewPlayer = { addNewPlayer.invoke() },
         remove = { viewModel.removePlayer(it) }
     )
@@ -65,20 +70,29 @@ fun RegisteredPlayersScreen(
 @Composable
 internal fun RegisteredPlayersScreen(
     list: List<CreatePlayerState>,
+    onBackPressed: () -> Unit,
     addNewPlayer: () -> Unit,
     remove: (CreatePlayerState) -> Unit,
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopBar(playerSize = list.size, onActionClick = { addNewPlayer.invoke() })
+            TopBar(playerSize = list.size,
+                onBackPressed = onBackPressed::invoke,
+                onActionClick = { }
+            )
         },
         bottomBar = {
             BottomBar(
                 onFilter = { }, onSort = { },
                 enableFilter = false, enableSort = false
             )
-        }
+        },
+        floatingActionButton = {
+            SmallFloatingActionButton(onClick = { addNewPlayer.invoke() }) {
+                Icon(Icons.Filled.Add, contentDescription = "Localized description")
+            }
+        },
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -149,14 +163,12 @@ private fun PlayerItem(
 ) {
     ListItem(
         leadingContent = {
-            val ic = if (item.gender.isEmpty()) Icons.Outlined.Person
-            else if (item.gender.equals("man", true))
-                Icons.Filled.Person
-            else Icons.Rounded.Person
-            Icon(
-                ic,
-                contentDescription = "Localized description"
-            )
+            val icon = when (item.gender.toLowerCase(Locale.current)) {
+                "man" -> Icons.Rounded.Person
+                "woman" -> Icons.Outlined.Person
+                else -> Icons.Outlined.Person
+            }
+            Icon(icon, contentDescription = "Localized description")
         },
         trailingContent = {
             Text(text = item.handPlay)
@@ -168,7 +180,10 @@ private fun PlayerItem(
             Text(label, fontWeight = FontWeight.Bold)
         },
         supportingContent = {
-            Text(text = "ID: ${item.id}, H: ${item.height} cm / W: ${item.weight} kg", fontSize = 10.sp)
+            Text(
+                text = "ID: ${item.id}, Height: ${item.height} cm / Weight: ${item.weight} kg",
+                fontSize = 10.sp
+            )
         }
     )
 }
@@ -177,6 +192,7 @@ private fun PlayerItem(
 @Composable
 private fun TopBar(
     playerSize: Int,
+    onBackPressed: () -> Unit,
     onActionClick: () -> Unit
 ) {
     TopAppBar(
@@ -184,14 +200,15 @@ private fun TopBar(
             val label = if (playerSize > 0) "Registered Players ($playerSize)" else "Registered Player"
             Text(text = label)
         },
-        actions = {
-            IconButton(onClick = { onActionClick.invoke() }) {
+        navigationIcon = {
+            IconButton(onClick = { onBackPressed.invoke() }) {
                 Icon(
-                    Icons.Default.Add,
+                    Icons.Default.ArrowBack,
                     contentDescription = "Localized description"
                 )
             }
-        }
+        },
+        actions = {}
     )
 }
 
@@ -202,7 +219,7 @@ private fun BottomBar(
     enableFilter: Boolean = true,
     enableSort: Boolean = true,
 ) {
-    BottomAppBar {
+    BottomAppBar(tonalElevation = 1.dp) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -210,7 +227,7 @@ private fun BottomBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            Button(
+            OutlinedButton(
                 enabled = enableSort,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -219,7 +236,7 @@ private fun BottomBar(
                 onClick = { onSort.invoke() }) {
                 Text(text = "Sort")
             }
-            Button(enabled = enableFilter,
+            OutlinedButton(enabled = enableFilter,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -237,7 +254,9 @@ private fun ListContent() {
     val list = mutableListOf<CreatePlayerState>()
     list.add(CreatePlayerState(1, Athlete.Viktor, "", "Left", "Man"))
     list.add(CreatePlayerState(2, Athlete.Imam_Sulthon, "", "Right", "Man"))
-    list.add(CreatePlayerState(3, Athlete.Taufik_Hidayat, "", "Right", "Woman"))
+    list.add(CreatePlayerState(3, Athlete.Taufik_Hidayat, "", "Right", "Man"))
     list.add(CreatePlayerState(4, "Anthony", "Ginting", "Left", "Woman"))
-    RegisteredPlayersScreen(list, addNewPlayer = {}, remove = {})
+    list.add(CreatePlayerState(5, "Carolina", "Marin", "Left", "Woman"))
+    list.add(CreatePlayerState(6, "Susi", "Susanti", "Left", "Woman"))
+    RegisteredPlayersScreen(list, onBackPressed = {}, addNewPlayer = {}, remove = {})
 }

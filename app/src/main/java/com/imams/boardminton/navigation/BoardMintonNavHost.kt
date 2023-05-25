@@ -1,6 +1,8 @@
 package com.imams.boardminton.navigation
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -140,13 +142,17 @@ fun BoardMintonNavHost(
         }
 
         composable(CreatePlayer.fullRoute) {
+            val context = LocalContext.current
             CreatePlayerScreen(
-                onSave = {}
+                onSave = {
+                    Toast.makeText(context, "Success save", Toast.LENGTH_LONG).show()
+                }
             )
         }
 
         composable(Destination.AllPlayers.fullRoute) {
             RegisteredPlayersScreen(
+                onBackPressed = navController::navigateUp,
                 addNewPlayer = {
                     navController.navigate(CreatePlayer.fullRoute)
                 }

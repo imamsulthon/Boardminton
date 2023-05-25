@@ -1,17 +1,27 @@
 package com.imams.boardminton.ui.screen.create
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.imams.boardminton.data.Athlete
+import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.data.toList
+import com.imams.boardminton.domain.impl.CreatePlayerUseCase
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ITeam
+import com.imams.boardminton.ui.component.printLog
+import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CreateMatchVM @Inject constructor() : ViewModel() {
+class CreateMatchVM @Inject constructor(
+    private val useCase: CreatePlayerUseCase,
+) : ViewModel() {
 
     private val _playerA1 = mutableStateOf("")
     val playerA1 = _playerA1
@@ -21,6 +31,14 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
     val playerB1 = _playerB1
     private val _playerB2 = mutableStateOf("")
     val playerB2 = _playerB2
+
+    private val _savePlayers = mutableStateListOf<CreatePlayerState>()
+    private val _savePlayersFlow = MutableStateFlow(_savePlayers)
+    val savePlayers: StateFlow<List<CreatePlayerState>> = _savePlayersFlow
+
+    init {
+        initOptionalPlayers()
+    }
 
     fun setupPlayers(isSingle: Boolean, json: String) {
         val data = json.toList()
@@ -44,6 +62,10 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
         }
     }
 
+    fun updatePlayerName(iTeam: ITeam, data: CreatePlayerState) {
+        updatePlayerName(iTeam, "${data.firstName} ${data.lastName}")
+    }
+
     fun swapSingleMatch() {
         _playerA1.swap(_playerB1)
     }
@@ -57,15 +79,6 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
         when (side) {
             ISide.A -> _playerA1.swap(_playerA2)
             ISide.B -> _playerB1.swap(_playerB2)
-        }
-    }
-
-    fun importPlayer(target: ITeam) {
-        when (target) {
-            ITeam.A1 -> _playerA1.importRes()
-            ITeam.A2 -> _playerA2.importRes()
-            ITeam.B1 -> _playerB1.importRes()
-            ITeam.B2 -> _playerB2.importRes()
         }
     }
 
@@ -84,21 +97,42 @@ class CreateMatchVM @Inject constructor() : ViewModel() {
         this.value = with
     }
 
-    private fun MutableState<String>.importRes() {
-        this.value = ""
+    private fun initOptionalPlayers() {
+        viewModelScope.launch {
+            viewModelScope.launch {
+                useCase.getAllPlayers().collectLatest {
+                    _savePlayers.clear()
+                    _savePlayers.addAll(it)
+                }
+            }
+        }
+    }
+    fun saveInputPlayer(single: Boolean) {
+
     }
 
-    // todo delete
-    fun defaultPlayers(single: Boolean) {
-        _playerA1.value = Athlete.Imam_Sulthon
-        _playerB1.value = Athlete.Kim_Astrup
+    fun randomPlayers(single: Boolean) {
+        val optionals = _savePlayersFlow.value.toList().shuffled().take(4)
+        printLog("defaultPlayers size ${optionals.size}")
         if (single) {
+            optionals.forEachIndexed { index, player ->
+                when (index) {
+                    0 -> _playerA1.value = player.fullName
+                    1 -> _playerB1.value = player.fullName
+                }
+            }
             _playerA2.value = ""
             _playerB2.value = ""
-            return
+        } else {
+            optionals.forEachIndexed { index, player ->
+                when (index) {
+                    0 -> _playerA1.value = player.fullName
+                    1 -> _playerA2.value = player.fullName
+                    2 -> _playerB1.value = player.fullName
+                    3 -> _playerB2.value = player.fullName
+                }
+            }
         }
-        _playerA2.value = Athlete.Anthony
-        _playerB2.value = Athlete.Anders_Skaarup
     }
 
 }

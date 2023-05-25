@@ -47,6 +47,7 @@ class CreatePlayerVM @Inject constructor(
             useCase.createPlayer(data)
             delay(500)
             callback?.invoke()
+            _uiState.update { CreatePlayerState() }
         }
     }
 
@@ -69,7 +70,9 @@ data class CreatePlayerState(
     val gender: String = "",
     val height: Int = 0,
     val weight: Int = 0,
-)
+) {
+    val fullName = "$firstName $lastName"
+}
 
 sealed class CreatePlayerEvent {
     data class FirstName(val name: String): CreatePlayerEvent()

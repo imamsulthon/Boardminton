@@ -16,6 +16,9 @@ interface PlayerDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addPlayer(entity: PlayerEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addPlayers(entities: List<PlayerEntity>)
+
     @Query("SELECT * FROM player_entity WHERE first_name LIKE :first AND " +
             "last_name LIKE :last LIMIT 1")
     suspend fun findByName(first: String, last: String): PlayerEntity

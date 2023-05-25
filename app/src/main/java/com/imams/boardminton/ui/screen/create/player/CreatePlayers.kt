@@ -39,9 +39,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -90,7 +92,10 @@ internal fun CreatePlayerContent(
     onSave: () -> Unit,
     onCheckSavePlayers: () -> Unit,
 ) {
-    val enableSave by rememberSaveable(uiState) { mutableStateOf(uiState.firstName.isNotEmpty()) }
+    val enableSave by rememberSaveable(uiState) {
+        mutableStateOf(uiState.firstName.isNotEmpty() && uiState.gender.isNotEmpty()
+                && uiState.handPlay.isNotEmpty())
+    }
     val enableClear by rememberSaveable(uiState) {
         mutableStateOf(uiState.firstName.isNotEmpty() || uiState.lastName.isNotEmpty())
     }
@@ -142,19 +147,29 @@ internal fun FormContent(
             .verticalScroll(rememberScrollState())
     ) {
         // first name
-        InputField(
+        Row(
             modifier = ipModifierP.padding(vertical = 5.dp),
-            value = data.firstName,
-            label = "First Name",
-            onValueChange = { onFirstName.invoke(it) },
-        )
-        // last name
-        InputField(
-            modifier = ipModifierP.padding(vertical = 5.dp),
-            value = data.lastName,
-            label = "Last Name",
-            onValueChange = { onLastName.invoke(it) },
-        )
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            InputField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(end = 10.dp),
+                value = data.firstName,
+                label = "First Name",
+                onValueChange = { onFirstName.invoke(it) },
+            )
+            InputField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(start = 10.dp),
+                value = data.lastName,
+                label = "Last Name",
+                onValueChange = { onLastName.invoke(it) },
+            )
+        }
 
         Row(
             modifier = ipModifierP.padding(vertical = 5.dp),
@@ -166,9 +181,15 @@ internal fun FormContent(
                     .weight(1f)
                     .padding(end = 10.dp),
                 value = if (data.height == 0) "" else data.height.toString(),
-                onValueChange = { onHeight.invoke(it.toInt()) },
+                onValueChange = {
+                    onHeight.invoke(if (it.isEmpty()) 0 else if (it.length <= 3) it.toInt() else 250)
+                },
+                suffix = { Text(text = "cm") },
                 label = "Height",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                )
             )
             InputField(
                 modifier = Modifier
@@ -176,19 +197,24 @@ internal fun FormContent(
                     .weight(1f)
                     .padding(start = 10.dp),
                 value = if (data.weight == 0) "" else data.weight.toString(),
-                onValueChange = { onWeight.invoke(it.toInt()) },
+                onValueChange = {
+                    onWeight.invoke(if (it.isEmpty()) 0 else if (it.length <= 3) it.toInt() else 200)
+                },
+                suffix = { Text(text = "kg") },
                 label = "Weight",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                )
             )
         }
-        HandPlays(modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 5.dp)) { onHandPlay.invoke(it) }
-        GenderField(modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 5.dp), onSelected = { onGender.invoke(it) })
+        GenderField(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+            onSelected = onGender::invoke, initSelect = data.gender
+        )
+        HandPlays(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+            initSelect = data.handPlay, onSelected = onHandPlay::invoke
+        )
     }
-
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -198,6 +224,9 @@ private fun InputField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
+    suffix: (@Composable () -> Unit)? = null,
+    supportingText: (@Composable () -> Unit)? = null,
+    isError: Boolean = false,
     keyboardOptions: KeyboardOptions = keyboardNext(),
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -206,6 +235,9 @@ private fun InputField(
         value = value,
         onValueChange = { onValueChange.invoke(it) },
         label = { Text(text = label) },
+        suffix = suffix,
+        isError = isError,
+        supportingText = supportingText,
         keyboardOptions = keyboardOptions,
         keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
     )
@@ -216,10 +248,11 @@ private fun InputField(
 @Composable
 private fun HandPlays(
     modifier: Modifier,
+    initSelect: String = "",
     onSelected: (String) -> Unit,
 ) {
     val radioOptions = listOf("Left", "Right", "Both")
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[1]) }
+    var selectedOption by remember { mutableStateOf(initSelect) }
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -240,8 +273,8 @@ private fun HandPlays(
                     modifier = Modifier.padding(horizontal = 5.dp),
                     selected = text == selectedOption,
                     onClick = {
-                        onOptionSelected(text)
-                            .also { onSelected.invoke(selectedOption) }
+                        selectedOption = if (selectedOption == text) "" else text
+                        onSelected.invoke(selectedOption)
                     },
                     label = {
                         Text(
@@ -261,10 +294,11 @@ private fun HandPlays(
 @Composable
 private fun GenderField(
     modifier: Modifier,
+    initSelect: String = "",
     onSelected: (String) -> Unit,
 ) {
     val radioOptions = listOf("Man", "Woman")
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0]) }
+    var selectedOption by remember { mutableStateOf(initSelect) }
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -281,8 +315,8 @@ private fun GenderField(
                     modifier = Modifier.padding(horizontal = 5.dp),
                     selected = text == selectedOption,
                     onClick = {
-                        onOptionSelected(text)
-                            .also { onSelected.invoke(selectedOption) }
+                        selectedOption = text
+                        onSelected.invoke(selectedOption)
                     },
                     leadingIcon = {
                         Icon(
@@ -311,7 +345,7 @@ private fun TopView(
     CenterAlignedTopAppBar(
         title = {
             Text(
-                "Create Players",
+                "Create Player",
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -334,7 +368,7 @@ private fun BottomView(
     onClear: () -> Unit,
     onSave: () -> Unit,
 ) {
-    Surface(tonalElevation = 2.dp, shadowElevation = 2.dp) {
+    Surface(tonalElevation = 1.dp, shadowElevation = 1.dp) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -353,7 +387,7 @@ private fun BottomView(
         }
     }
 }
-
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1024, heightDp = 512)
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun CreatePlayerPreview() {

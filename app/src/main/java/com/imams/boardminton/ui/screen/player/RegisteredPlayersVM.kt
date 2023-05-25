@@ -3,8 +3,8 @@ package com.imams.boardminton.ui.screen.player
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.imams.boardminton.domain.impl.UseCaseMapper.toModel
-import com.imams.boardminton.domain.impl.UseCaseMapper.toState
+import com.imams.boardminton.domain.mapper.UseCaseMapper.toModel
+import com.imams.boardminton.domain.mapper.UseCaseMapper.toState
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.data.player.repository.PlayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,7 +39,7 @@ class RegisteredPlayersVM @Inject constructor(
 
     fun removePlayer(item: CreatePlayerState) {
         viewModelScope.launch {
-            repository.removePlayer(item.toModel())
+            repository.removePlayer(item.toModel(true))
             printLog("removePlayer")
         }
     }

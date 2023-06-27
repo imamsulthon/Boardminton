@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.data.toList
 import com.imams.boardminton.domain.impl.BoardEvent
 import com.imams.boardminton.domain.impl.MatchBoardUseCase
+import com.imams.boardminton.domain.mapper.MatchRepoMapper.toRepo
 import com.imams.boardminton.domain.mapper.any
 import com.imams.boardminton.domain.mapper.gameWinnerBy
 import com.imams.boardminton.domain.mapper.matchWinnerBy
@@ -14,6 +15,7 @@ import com.imams.boardminton.domain.model.IMatchType
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.MatchUIState
 import com.imams.boardminton.domain.model.WinnerState
+import com.imams.data.match.repository.MatchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +26,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ScoreBoardVM @Inject constructor(
-    private val useCase: MatchBoardUseCase
+    private val useCase: MatchBoardUseCase,
+    private val repository: MatchRepository,
 ) : ViewModel() {
 
     private var alreadySetup = false
@@ -171,6 +174,13 @@ class ScoreBoardVM @Inject constructor(
     private fun Court.asSide(config: CourtSide) = when (this) {
         Court.Left -> config.left
         Court.Right -> config.right
+    }
+
+    fun saveGame(callback: () -> Unit) {
+        viewModelScope.launch {
+            repository.updateMatch(matchUIState.value.match.toRepo())
+            callback.invoke()
+        }
     }
 
     private fun printLog(msg: String) = println("ScoreBoardVM $msg")

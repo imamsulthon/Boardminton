@@ -7,10 +7,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.data.toList
 import com.imams.boardminton.domain.impl.CreatePlayerUseCase
+import com.imams.boardminton.domain.mapper.MatchRepoMapper.toJson
+import com.imams.boardminton.domain.model.GameViewParam
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ITeam
+import com.imams.boardminton.domain.model.PlayerViewParam
+import com.imams.boardminton.domain.model.TeamViewParam
 import com.imams.boardminton.ui.component.printLog
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
+import com.imams.data.match.model.Match
+import com.imams.data.match.repository.MatchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +27,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateMatchVM @Inject constructor(
     private val useCase: CreatePlayerUseCase,
+    private val repository: MatchRepository,
 ) : ViewModel() {
 
     private val _playerA1 = mutableStateOf("")
@@ -107,8 +114,20 @@ class CreateMatchVM @Inject constructor(
             }
         }
     }
-    fun saveInputPlayer(single: Boolean) {
 
+    fun saveInputPlayer(single: Boolean) {
+        viewModelScope.launch {
+            repository.saveMatch(
+                Match(
+                    type = if (single) "single" else "double",
+                    teamA = TeamViewParam(PlayerViewParam(playerA1.value), PlayerViewParam(playerA2.value), false).toJson(),
+                    teamB = TeamViewParam(PlayerViewParam(playerB1.value), PlayerViewParam(playerB2.value), false).toJson(),
+                    currentGame = GameViewParam().toJson(),
+                    games = listOf<GameViewParam>().toJson(),
+                    winner = "none",
+                    lastUpdate = System.currentTimeMillis().toString(),
+            ))
+        }
     }
 
     fun randomPlayers(single: Boolean) {

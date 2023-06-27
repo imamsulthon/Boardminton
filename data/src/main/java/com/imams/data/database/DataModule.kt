@@ -2,6 +2,7 @@ package com.imams.data.database
 
 import android.app.Application
 import androidx.room.Room
+import com.imams.data.match.dao.MatchDao
 import com.imams.data.player.dao.PlayerDao
 import dagger.Module
 import dagger.Provides
@@ -26,6 +27,12 @@ object DataModule {
     @Singleton
     fun provideRegistrationDao(database: AppDatabase): PlayerDao {
         return database.playerDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providesMatchDao(database: AppDatabase): MatchDao {
+        return database.matchDao()
     }
 
 }

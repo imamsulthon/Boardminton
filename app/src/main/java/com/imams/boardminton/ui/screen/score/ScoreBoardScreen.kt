@@ -1,6 +1,7 @@
 package com.imams.boardminton.ui.screen.score
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -65,7 +66,13 @@ fun ScoreBoardScreen(
     counterVm: CounterTimerVM = hiltViewModel(),
     scoreVm: ScoreBoardVM = hiltViewModel(),
     savedStateHandle: SavedStateHandle?,
+    onBackPressed: () -> Unit,
 ) {
+
+    BackHandler(true) {
+        printLog("onBackHandler")
+        scoreVm.saveGame(onBackPressed)
+    }
 
     // todo should use Side Effect?
     scoreVm.setupPlayer(players, single)
@@ -399,5 +406,5 @@ private fun printLog(msg: String) {
 @Preview(device = Devices.NEXUS_6)
 @Composable
 private fun ScoreBoardScreenV() {
-    ScoreBoardScreen(false, "listOf()", onEdit = {_, _, ->}, savedStateHandle = null)
+    ScoreBoardScreen(false, "listOf()", onEdit = {_, _, ->}, savedStateHandle = null, onBackPressed = {})
 }

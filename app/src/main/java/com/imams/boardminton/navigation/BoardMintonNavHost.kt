@@ -2,7 +2,10 @@ package com.imams.boardminton.navigation
 
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -23,6 +26,7 @@ import com.imams.boardminton.ui.screen.create.EditPlayersScreen
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerScreen
 import com.imams.boardminton.ui.screen.create.player.EditPlayerCreatedScreen
 import com.imams.boardminton.ui.screen.home.HomeScreen
+import com.imams.boardminton.ui.screen.home.HomeScreenVM
 import com.imams.boardminton.ui.screen.player.RegisteredPlayersScreen
 import com.imams.boardminton.ui.screen.score.ScoreBoardScreen
 
@@ -75,11 +79,16 @@ sealed class Destination(protected val route: String, vararg params: String) {
 
 @Composable
 fun BoardMintonNavHost(
+    viewModel: HomeScreenVM = hiltViewModel<HomeScreenVM>().apply { getLatestMatch() },
     navController: NavHostController = rememberNavController(),
 ) {
+
+    val latestMatch by viewModel.latestMatch.collectAsState()
+
     NavHost(navController = navController, startDestination = Home.fullRoute) {
         composable(Home.fullRoute) {
             HomeScreen(
+                uiState = latestMatch,
                 onCreateMatch = { navController.navigate(CreateMatch.invoke(it)) },
                 onCreatePlayer = {
                     when (it) {
@@ -121,7 +130,8 @@ fun BoardMintonNavHost(
                 onEdit = { _, json ->
                     navController.navigate(EditPlayers.invoke(type ?: "single", json))
                 },
-                savedStateHandle = it.savedStateHandle
+                savedStateHandle = it.savedStateHandle,
+                onBackPressed = navController::popBackStack
             )
         }
 

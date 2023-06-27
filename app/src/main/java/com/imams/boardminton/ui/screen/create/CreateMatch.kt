@@ -1,6 +1,7 @@
 package com.imams.boardminton.ui.screen.create
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -166,6 +167,11 @@ fun CreateMatchScreen(
             openBottomSheet = false
         },
     )
+
+    BackHandler(true) {
+        println("CreateMatch onBackHandler")
+        vm.saveInputPlayer(singleMatch)
+    }
 
 }
 

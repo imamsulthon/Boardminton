@@ -1,6 +1,7 @@
 package com.imams.boardminton.ui.screen.home
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,9 +28,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.imams.boardminton.R
+import com.imams.boardminton.data.Athlete
+import com.imams.boardminton.domain.model.MatchUIState
+import com.imams.boardminton.domain.model.PlayerViewParam
+import com.imams.boardminton.domain.model.ScoreByCourt
+import com.imams.boardminton.domain.model.ScoreViewParam
+import com.imams.boardminton.domain.model.TeamViewParam
+import com.imams.boardminton.ui.component.MainNameBoardView
 
 @Composable
 fun HomeScreen(
+    uiState: MatchUIState? = null,
     onCreateMatch: (String) -> Unit,
     onCreatePlayer: (String) -> Unit,
 ) {
@@ -50,7 +59,8 @@ fun HomeScreen(
                 if (it) onCreateMatch.invoke("single")
                 else onCreateMatch.invoke("double")
             },
-            onCreatePlayer = onCreatePlayer::invoke
+            onCreatePlayer = onCreatePlayer::invoke,
+            uiState = uiState
         )
     }
 }
@@ -78,6 +88,7 @@ internal fun HomeContent(
     modifier: Modifier,
     onCreateMatch: (Boolean) -> Unit,
     onCreatePlayer: (String) -> Unit,
+    uiState: MatchUIState? = null,
 ) {
     Column(
         modifier = modifier,
@@ -103,6 +114,28 @@ internal fun HomeContent(
             }
             ItemMenu(label = "Registered Players", enabled = true) {
                 onCreatePlayer.invoke("seeAll")
+            }
+        }
+        AnimatedVisibility(visible = uiState != null) {
+            if (uiState != null) {
+                Text(
+                    text = "On Going Match",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                )
+            }
+        }
+        AnimatedVisibility(visible = uiState != null) {
+            if (uiState != null) {
+                MainNameBoardView(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                    team1 = uiState.match.teamA,
+                    team2 = uiState.match.teamB,
+                    scoreA = uiState.match.currentGame.scoreA.point,
+                    scoreB =uiState.match.currentGame.scoreB.point,
+                    histories = uiState.match.games
+                )
             }
         }
     }
@@ -164,6 +197,22 @@ private fun ItemMenu(
 
 @Preview(showSystemUi = true, uiMode = UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
-fun HomeScreenPreview() {
+private fun HomeScreenPreview() {
     HomeScreen(onCreateMatch = {}, onCreatePlayer = {})
+}
+
+@Preview
+@Composable
+private fun HomeContentWithCurrentMatch() {
+    val latestMatch = ScoreByCourt(
+        index = 1,
+        left = ScoreViewParam(15, false, false, false),
+        right = ScoreViewParam(15, false, false, false),
+        teamLeft = TeamViewParam(
+            player1 = PlayerViewParam(Athlete.Imam_Sulthon, false),
+            PlayerViewParam(Athlete.Taufik_Hidayat), false),
+        teamRight = TeamViewParam(
+            player1 = PlayerViewParam(Athlete.Kim_Astrup, false),
+            PlayerViewParam(Athlete.Viktor), true),
+    )
 }

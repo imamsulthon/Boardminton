@@ -57,12 +57,17 @@ fun RegisteredPlayersScreen(
     viewModel: RegisteredPlayersVM = hiltViewModel(),
     onBackPressed: () -> Unit,
     addNewPlayer: () -> Unit,
+    onEditPlayer: (id: Int) -> Unit,
 ) {
     val list by viewModel.savePlayers.collectAsState()
     RegisteredPlayersScreen(list = list,
         onBackPressed = onBackPressed::invoke,
         addNewPlayer = { addNewPlayer.invoke() },
-        remove = { viewModel.removePlayer(it) }
+        remove = { viewModel.removePlayer(it) },
+        onItemClick = { 
+            println("RegisteredPlayer onClick: $it")
+            onEditPlayer.invoke(it.id)
+        }
     )
 }
 
@@ -73,6 +78,7 @@ internal fun RegisteredPlayersScreen(
     onBackPressed: () -> Unit,
     addNewPlayer: () -> Unit,
     remove: (CreatePlayerState) -> Unit,
+    onItemClick: (CreatePlayerState) -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -139,6 +145,9 @@ internal fun RegisteredPlayersScreen(
                     },
                     dismissContent = {
                         Card(
+                            onClick = {
+                                onItemClick.invoke(it)
+                                      },
                             shape = RoundedCornerShape(
                                 topStart = 20.dp,
                                 topEnd = 5.dp,
@@ -148,7 +157,7 @@ internal fun RegisteredPlayersScreen(
                             modifier = Modifier
                                 .padding(vertical = 5.dp, horizontal = 10.dp),
                         ) {
-                            PlayerItem(item = it, onClick = { })
+                            PlayerItem(item = it, onClick = { onItemClick.invoke(it) })
                         }
                     })
             }
@@ -258,5 +267,5 @@ private fun ListContent() {
     list.add(CreatePlayerState(4, "Anthony", "Ginting", "Left", "Woman"))
     list.add(CreatePlayerState(5, "Carolina", "Marin", "Left", "Woman"))
     list.add(CreatePlayerState(6, "Susi", "Susanti", "Left", "Woman"))
-    RegisteredPlayersScreen(list, onBackPressed = {}, addNewPlayer = {}, remove = {})
+    RegisteredPlayersScreen(list, onItemClick = {}, onBackPressed = {}, addNewPlayer = {}, remove = {})
 }

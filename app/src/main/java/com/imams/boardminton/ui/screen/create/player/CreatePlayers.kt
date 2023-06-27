@@ -61,6 +61,7 @@ fun CreatePlayerScreen(
     val savedPlayers by viewModel.savePlayers.collectAsState()
 
     CreatePlayerContent(
+        screenName = "Create Player",
         uiState = uiState,
         event = { viewModel.execute(it) },
         onSave = { viewModel.savePlayer(callback = onSave) },
@@ -86,11 +87,30 @@ fun CreatePlayerScreen(
 }
 
 @Composable
+fun EditPlayerCreatedScreen(
+    id: Int,
+    viewModel: CreatePlayerVM = hiltViewModel<CreatePlayerVM>().apply { setupWith(id = id) },
+    onSave: () -> Unit,
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    CreatePlayerContent(
+        screenName = "Edit Player (id = ${uiState.id})",
+        uiState = uiState,
+        event = { viewModel.execute(it) },
+        onSave = { viewModel.updatePlayer(callback = onSave) },
+        onCheckSavePlayers = {  }
+    )
+
+}
+
+@Composable
 internal fun CreatePlayerContent(
+    screenName: String,
     uiState: CreatePlayerState,
     event: (CreatePlayerEvent) -> Unit,
     onSave: () -> Unit,
-    onCheckSavePlayers: () -> Unit,
+    onCheckSavePlayers: (() -> Unit)? = null,
 ) {
     val enableSave by rememberSaveable(uiState) {
         mutableStateOf(uiState.firstName.isNotEmpty() && uiState.gender.isNotEmpty()
@@ -104,7 +124,7 @@ internal fun CreatePlayerContent(
         .fillMaxSize()
         .widthIn(max = 840.dp),
         topBar = {
-            TopView(onClick = { onCheckSavePlayers.invoke() })
+            TopView(title = screenName, onClick = { onCheckSavePlayers?.invoke() })
         },
         bottomBar = {
             BottomView(
@@ -209,10 +229,10 @@ internal fun FormContent(
             )
         }
         GenderField(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
-            onSelected = onGender::invoke, initSelect = data.gender
+            onSelected = onGender::invoke, initialSelection = data.gender
         )
         HandPlays(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
-            initSelect = data.handPlay, onSelected = onHandPlay::invoke
+            initialSelection = data.handPlay, onSelected = onHandPlay::invoke
         )
     }
 }
@@ -248,11 +268,10 @@ private fun InputField(
 @Composable
 private fun HandPlays(
     modifier: Modifier,
-    initSelect: String = "",
+    initialSelection: String = "",
     onSelected: (String) -> Unit,
 ) {
     val radioOptions = listOf("Left", "Right", "Both")
-    var selectedOption by remember { mutableStateOf(initSelect) }
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -271,11 +290,8 @@ private fun HandPlays(
             radioOptions.forEach { text ->
                 InputChip(
                     modifier = Modifier.padding(horizontal = 5.dp),
-                    selected = text == selectedOption,
-                    onClick = {
-                        selectedOption = if (selectedOption == text) "" else text
-                        onSelected.invoke(selectedOption)
-                    },
+                    selected = text == initialSelection,
+                    onClick = { onSelected.invoke(text) },
                     label = {
                         Text(
                             modifier = Modifier.padding(5.dp),
@@ -294,11 +310,10 @@ private fun HandPlays(
 @Composable
 private fun GenderField(
     modifier: Modifier,
-    initSelect: String = "",
+    initialSelection: String = "",
     onSelected: (String) -> Unit,
 ) {
     val radioOptions = listOf("Man", "Woman")
-    var selectedOption by remember { mutableStateOf(initSelect) }
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -313,11 +328,8 @@ private fun GenderField(
             radioOptions.forEach { text ->
                 InputChip(
                     modifier = Modifier.padding(horizontal = 5.dp),
-                    selected = text == selectedOption,
-                    onClick = {
-                        selectedOption = text
-                        onSelected.invoke(selectedOption)
-                    },
+                    selected = text == initialSelection,
+                    onClick = { onSelected.invoke(text) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Outlined.Person,
@@ -340,15 +352,12 @@ private fun GenderField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopView(
+    title: String,
     onClick: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
         title = {
-            Text(
-                "Create Player",
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
         actions = {
             IconButton(onClick = { onClick.invoke() }, enabled = true) {
@@ -391,5 +400,5 @@ private fun BottomView(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun CreatePlayerPreview() {
-    CreatePlayerContent(CreatePlayerState(), event = {}, onSave = {}, onCheckSavePlayers = {})
+    CreatePlayerContent("Create Player", CreatePlayerState(), event = {}, onSave = {}, onCheckSavePlayers = {})
 }

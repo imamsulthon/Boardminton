@@ -19,7 +19,7 @@ class PlayerRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getPlayer(id: Int): Flow<Player> {
-        TODO("Not yet implemented")
+        return dao.getById(id).map { it.toModel() }
     }
 
     override suspend fun addPlayer(player: Player) {
@@ -28,6 +28,10 @@ class PlayerRepositoryImpl @Inject constructor(
 
     override suspend fun addPlayer(player: List<Player>) {
         dao.addPlayers(player.map { it.toEntity() })
+    }
+
+    override suspend fun updatePlayer(player: Player) {
+        dao.addPlayer(player.toEntity(true))
     }
 
     override suspend fun removePlayer(player: Player) {

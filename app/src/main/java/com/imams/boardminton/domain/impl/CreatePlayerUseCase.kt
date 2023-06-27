@@ -17,6 +17,14 @@ class CreatePlayerUseCaseImpl constructor(
         repository.addPlayer(data.toModel())
     }
 
+    override suspend fun updatePlayer(data: CreatePlayerState) {
+        repository.updatePlayer(data.toModel(true))
+    }
+
+    override suspend fun getPlayer(id: Int): Flow<CreatePlayerState> {
+        return repository.getPlayer(id).map { it.toState() }
+    }
+
     override suspend fun getAllPlayers(): Flow<List<CreatePlayerState>> {
         return repository.getAllPlayers().map { it.map { p -> p.toState() } }.flowOn(Dispatchers.IO)
     }
@@ -29,6 +37,8 @@ class CreatePlayerUseCaseImpl constructor(
 
 interface CreatePlayerUseCase {
     suspend fun createPlayer(data: CreatePlayerState)
+    suspend fun updatePlayer(data: CreatePlayerState)
+    suspend fun getPlayer(id: Int): Flow<CreatePlayerState>
     suspend fun getAllPlayers(): Flow<List<CreatePlayerState>>
     suspend fun savePlayers(players: List<CreatePlayerState>)
 }

@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.dp
 import com.imams.boardminton.R
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ITeam
+import com.imams.boardminton.ui.theme.Orientation
 import com.imams.boardminton.ui.utils.keyBoardDone
 import com.imams.boardminton.ui.utils.keyboardNext
-import com.imams.boardminton.ui.theme.Orientation
 
 val mPortrait = Modifier
     .fillMaxWidth()
@@ -38,8 +38,8 @@ val mLandscape = Modifier
     .wrapContentHeight()
     .padding(10.dp)
 
-private val ipModifierP = Modifier.fillMaxWidth()
-private val ipModifierL = Modifier.widthIn(min = 250.dp, max = 480.dp)
+val ipModifierP = Modifier.fillMaxWidth()
+val ipModifierL = Modifier.widthIn(min = 250.dp, max = 480.dp)
 
 @Composable
 fun FieldInputSingleMatch(

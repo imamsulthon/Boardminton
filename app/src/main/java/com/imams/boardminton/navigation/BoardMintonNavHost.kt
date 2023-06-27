@@ -1,21 +1,29 @@
 package com.imams.boardminton.navigation
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.imams.boardminton.navigation.Destination.CreateMatch
+import com.imams.boardminton.navigation.Destination.CreatePlayer
+import com.imams.boardminton.navigation.Destination.EditCreatedPlayer
 import com.imams.boardminton.navigation.Destination.EditPlayers
 import com.imams.boardminton.navigation.Destination.Home
 import com.imams.boardminton.navigation.Destination.ScoreBoard
 import com.imams.boardminton.ui.screen.create.CreateMatchScreen
 import com.imams.boardminton.ui.screen.create.EditPlayersScreen
+import com.imams.boardminton.ui.screen.create.player.CreatePlayerScreen
+import com.imams.boardminton.ui.screen.create.player.EditPlayerCreatedScreen
 import com.imams.boardminton.ui.screen.home.HomeScreen
+import com.imams.boardminton.ui.screen.player.RegisteredPlayersScreen
 import com.imams.boardminton.ui.screen.score.ScoreBoardScreen
 
 sealed class Destination(protected val route: String, vararg params: String) {
@@ -56,6 +64,13 @@ sealed class Destination(protected val route: String, vararg params: String) {
 
     }
 
+    object CreatePlayer: DestinationNoArgs("create-player")
+    object EditCreatedPlayer: Destination("edit-create-player", "id") {
+        operator fun invoke(id: Int): String = route.appendParams("id" to id)
+    }
+
+    object AllPlayers: DestinationNoArgs("registered-players")
+
 }
 
 @Composable
@@ -64,9 +79,15 @@ fun BoardMintonNavHost(
 ) {
     NavHost(navController = navController, startDestination = Home.fullRoute) {
         composable(Home.fullRoute) {
-            HomeScreen {
-                navController.navigate(CreateMatch.invoke(it))
-            }
+            HomeScreen(
+                onCreateMatch = { navController.navigate(CreateMatch.invoke(it)) },
+                onCreatePlayer = {
+                    when (it) {
+                        "create" -> { navController.navigate(CreatePlayer.fullRoute) }
+                        "seeAll" -> { navController.navigate(Destination.AllPlayers.fullRoute) }
+                    }
+                }
+            )
         }
 
         composable(
@@ -123,6 +144,42 @@ fun BoardMintonNavHost(
                     navController.popBackStack()
                 },
                 onCancel = navController::navigateUp
+            )
+        }
+
+        composable(CreatePlayer.fullRoute) {
+            val context = LocalContext.current
+            CreatePlayerScreen(
+                onSave = {
+                    Toast.makeText(context, "Success save", Toast.LENGTH_LONG).show()
+                }
+            )
+        }
+
+        composable(
+            EditCreatedPlayer.fullRoute,
+            arguments = listOf(navArgument("id") {type = NavType.IntType})
+        ) {
+            val context = LocalContext.current
+            val id = it.arguments?.getInt("id") ?: 0
+            printLog("${EditCreatedPlayer.fullRoute} id $id")
+
+            EditPlayerCreatedScreen(
+                id = id,
+                onSave = {
+                    Toast.makeText(context, "Success edit", Toast.LENGTH_LONG).show()
+                }
+            )
+        }
+
+        composable(Destination.AllPlayers.fullRoute) {
+            RegisteredPlayersScreen(
+                onBackPressed = navController::navigateUp,
+                addNewPlayer = { navController.navigate(CreatePlayer.fullRoute) },
+                onEditPlayer = {
+                    printLog("onItemClick $it")
+                    navController.navigate(EditCreatedPlayer.invoke(it))
+                }
             )
         }
     }

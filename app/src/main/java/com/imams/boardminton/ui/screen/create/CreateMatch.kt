@@ -11,13 +11,20 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,6 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.data.toJson
+import com.imams.boardminton.domain.model.ITeam
+import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
+import com.imams.boardminton.ui.screen.create.player.PlayerBottomSheetContent
 import com.imams.boardminton.ui.theme.Orientation
 
 @Composable
@@ -53,6 +63,10 @@ fun CreateMatchScreen(
         mutableStateOf(playerA1.isNotEmpty() || playerA2.isNotEmpty() || playerB1.isNotEmpty() || playerB2.isNotEmpty())
     }
 
+    var openBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var selectedFieldForImport by remember { mutableStateOf(ITeam.A1) }
+    val savedPlayers by vm.savePlayers.collectAsState()
+
     val config = LocalConfiguration.current
 
     fun gotoScoreBoard() {
@@ -67,6 +81,10 @@ fun CreateMatchScreen(
         }
 
         override fun onClear() = vm.onClearPlayers()
+
+        override fun onRandom() {
+            vm.randomPlayers(singleMatch)
+        }
 
     }
 
@@ -87,8 +105,8 @@ fun CreateMatchScreen(
                 onChange = vm::updatePlayerName,
                 swapPlayer = vm::swapSingleMatch,
                 importPerson = {
-                    vm.defaultPlayers(singleMatch)
-                }
+                    selectedFieldForImport = it
+                    openBottomSheet = true                }
             )
         } else {
             FieldInputDoubleMatch(
@@ -100,7 +118,8 @@ fun CreateMatchScreen(
                 swapPlayer = vm::swapPlayerByTeam,
                 swapTeam = { vm.swapDoubleMatch() },
                 importPerson = {
-                    vm.defaultPlayers(singleMatch)
+                    selectedFieldForImport = it
+                    openBottomSheet = true
                 }
             )
         }
@@ -135,6 +154,18 @@ fun CreateMatchScreen(
             )
         }
     }
+
+    // show Dialog optional players from database to choose
+    ImportPlayers(
+        openBottomSheet = openBottomSheet,
+        onField = selectedFieldForImport,
+        dismiss = { openBottomSheet = false },
+        optionalPlayers = savedPlayers,
+        onChoose = { i, data ->
+            vm.updatePlayerName(i, data)
+            openBottomSheet = false
+        },
+    )
 
 }
 
@@ -188,21 +219,23 @@ private fun PortraitContent(
     formField: @Composable () -> Unit,
     bottomView: @Composable () -> Unit,
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween,
-    ) {
+    Surface {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
-            verticalArrangement = Arrangement.Top
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            topView()
-            formField()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                verticalArrangement = Arrangement.Top
+            ) {
+                topView()
+                formField()
+            }
+            bottomView()
         }
-        bottomView()
     }
 
 }
@@ -213,19 +246,21 @@ private fun LandscapeContent(
     formField: @Composable () -> Unit,
     bottomView: @Composable () -> Unit,
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceBetween,
-    ) {
-        topView()
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+    Surface {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            formField()
+            topView()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                formField()
+            }
+            bottomView()
         }
-        bottomView()
     }
 
 }
@@ -256,6 +291,10 @@ private fun BottomButton(
             Icon(Icons.Outlined.Delete, contentDescription = "clear_icon")
         }
 
+        OutlinedButton(onClick = { listener.onRandom() }) {
+            Icon(Icons.Outlined.Star, contentDescription = "star_icon")
+        }
+
         Button(
             onClick = { listener.onNext() },
             modifier = Modifier.padding(start = 5.dp),
@@ -266,10 +305,34 @@ private fun BottomButton(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ImportPlayers(
+    openBottomSheet: Boolean,
+    onField: ITeam,
+    optionalPlayers: List<CreatePlayerState>,
+    onChoose: (ITeam, CreatePlayerState) -> Unit,
+    dismiss: () -> Unit,
+) {
+    val skipPartiallyExpanded by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
+    if (openBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { dismiss.invoke() },
+            sheetState = bottomSheetState,
+        ) {
+            PlayerBottomSheetContent(list = optionalPlayers, onSelect = {
+                onChoose.invoke(onField, it)
+            })
+        }
+    }
+}
+
 private interface BottomListener {
     fun onNext()
     fun onBackPressed()
     fun onClear()
+    fun onRandom()
 }
 
 @Preview(showBackground = true)

@@ -2,16 +2,19 @@ package com.imams.boardminton.ui.screen.home
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,15 +29,14 @@ import androidx.compose.ui.unit.sp
 import com.imams.boardminton.R
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun HomeScreen(
-    onCreateMatch: (String) -> Unit
+    onCreateMatch: (String) -> Unit,
+    onCreatePlayer: (String) -> Unit,
 ) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .widthIn(max = 840.dp)
-            .padding(10.dp),
+            .widthIn(max = 840.dp),
         topBar = {
             HomeAppBar()
         },
@@ -47,7 +49,8 @@ fun HomeScreen(
             onCreateMatch = {
                 if (it) onCreateMatch.invoke("single")
                 else onCreateMatch.invoke("double")
-            }
+            },
+            onCreatePlayer = onCreatePlayer::invoke
         )
     }
 }
@@ -74,6 +77,7 @@ private fun HomeAppBar() {
 internal fun HomeContent(
     modifier: Modifier,
     onCreateMatch: (Boolean) -> Unit,
+    onCreatePlayer: (String) -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -94,11 +98,11 @@ internal fun HomeContent(
         MenuGroup(
             label = "Create New Player"
         ) {
-            ItemMenu(label = "Single Player") {
-                // todo
+            ItemMenu(label = "New Player") {
+                onCreatePlayer.invoke("create")
             }
-            ItemMenu(label = "Double Player", enabled = false) {
-                // todo
+            ItemMenu(label = "Registered Players", enabled = true) {
+                onCreatePlayer.invoke("seeAll")
             }
         }
     }
@@ -110,40 +114,56 @@ private fun MenuGroup(
     content: @Composable () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+        modifier = Modifier
+            .wrapContentWidth()
+            .padding(vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = label)
+        Text(
+            text = label,
+            modifier = Modifier.align(Alignment.Start),
+            fontWeight = FontWeight.SemiBold
+        )
         Row(
             modifier = Modifier
                 .wrapContentWidth()
-                .padding(vertical = 5.dp)
                 .widthIn(max = 400.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceAround
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             content()
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ItemMenu(
     label: String,
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    Button(
-        enabled = enabled,
+    Card(
         onClick = { onClick.invoke() },
-        modifier = Modifier.padding(horizontal = 10.dp),
+        enabled = enabled,
+        shape = RoundedCornerShape(
+            topStart = 20.dp,
+            topEnd = 5.dp,
+            bottomEnd = 20.dp,
+            bottomStart = 5.dp
+        ),
+        modifier = Modifier
+            .size(width = 160.dp, height = 80.dp)
+            .padding(5.dp),
     ) {
-        Text(text = label)
+        Box(Modifier.fillMaxSize()) {
+            Text(label, Modifier.align(Alignment.Center))
+        }
     }
 }
 
 @Preview(showSystemUi = true, uiMode = UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen(onCreateMatch = {})
+    HomeScreen(onCreateMatch = {}, onCreatePlayer = {})
 }

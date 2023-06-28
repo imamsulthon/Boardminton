@@ -54,10 +54,14 @@ sealed class Destination(protected val route: String, vararg params: String) {
     object ScoreBoard: Destination("scoreboard", "type") {
         const val TYPE = "type"
         const val PLAYERS = "players"
+        const val ID = "id"
         operator fun invoke(type: String, players: String): String = route.appendParams(
             TYPE to type
         ).plus("?$PLAYERS=$players")
 
+        operator fun invoke(type: String, id: Int): String = route.appendParams(
+            TYPE to type
+        ).plus("?$ID=$id")
     }
 
     object EditPlayers: Destination("edit-players", "type") {
@@ -95,6 +99,9 @@ fun BoardMintonNavHost(
                         "create" -> { navController.navigate(CreatePlayer.fullRoute) }
                         "seeAll" -> { navController.navigate(Destination.AllPlayers.fullRoute) }
                     }
+                },
+                gotoScoreboard = { matchType, id ->
+                    navController.navigate(ScoreBoard.invoke(matchType, id))
                 }
             )
         }
@@ -127,6 +134,25 @@ fun BoardMintonNavHost(
             printLog("${ScoreBoard.fullRoute} type $type pl $players")
             ScoreBoardScreen(
                 single = type == "single", players = players,
+                onEdit = { _, json ->
+                    navController.navigate(EditPlayers.invoke(type ?: "single", json))
+                },
+                savedStateHandle = it.savedStateHandle,
+                onBackPressed = navController::popBackStack
+            )
+        }
+
+        composable(
+            route = ScoreBoard.fullRoute.plus("?id={id}"),
+            arguments = listOf(
+                navArgument(ScoreBoard.TYPE) { defaultValue = "single" },
+                navArgument(ScoreBoard.ID) { type = NavType.IntType },
+            ),
+        ) {
+            val type = it.arguments?.getString(ScoreBoard.TYPE)
+            val id = it.arguments?.getInt(ScoreBoard.ID) ?: 0
+            ScoreBoardScreen(
+                id = id, single = type == "single", players = "",
                 onEdit = { _, json ->
                     navController.navigate(EditPlayers.invoke(type ?: "single", json))
                 },
@@ -195,7 +221,9 @@ fun BoardMintonNavHost(
     }
 }
 
-private fun printLog(msg: String) = println("MyNavigation $msg")
+private fun printLog(msg: String) {
+    println("MyNavigation $msg")
+}
 
 // todo example of nested navigation graphs
 fun NavGraphBuilder.scoreBoardGraph(navController: NavController) {

@@ -60,6 +60,7 @@ import com.imams.boardminton.ui.screen.timer.TimeCounterUiState
 
 @Composable
 fun ScoreBoardScreen(
+    id: Int? = null,
     single: Boolean,
     players: String,
     onEdit: (Boolean, String) -> Unit,
@@ -71,11 +72,12 @@ fun ScoreBoardScreen(
 
     BackHandler(true) {
         printLog("onBackHandler")
-        scoreVm.saveGame(onBackPressed)
+        scoreVm.updateGame(onBackPressed)
     }
 
-    // todo should use Side Effect?
-    scoreVm.setupPlayer(players, single)
+    LaunchedEffect(Unit) {
+        scoreVm.setupPlayer(id, players, single)
+    }
 
     val uiState by scoreVm.matchUIState.collectAsState()
     val timerUiState by counterVm.tcUiState.collectAsState()
@@ -406,5 +408,5 @@ private fun printLog(msg: String) {
 @Preview(device = Devices.NEXUS_6)
 @Composable
 private fun ScoreBoardScreenV() {
-    ScoreBoardScreen(false, "listOf()", onEdit = {_, _, ->}, savedStateHandle = null, onBackPressed = {})
+    ScoreBoardScreen(null, false, "listOf()", onEdit = {_, _, ->}, savedStateHandle = null, onBackPressed = {})
 }

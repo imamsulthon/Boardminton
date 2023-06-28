@@ -19,6 +19,7 @@ data class MatchUIState(
         currentGame = GameViewParam(),
         games = mutableListOf(),
     ),
+    val id: Int = 0,
 ) {
     var courtSide: CourtSide = CourtSide()
     var scoreByCourt: ScoreByCourt = getByCourt(courtSide)

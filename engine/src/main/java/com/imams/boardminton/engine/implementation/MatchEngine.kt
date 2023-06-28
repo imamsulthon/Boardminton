@@ -55,7 +55,7 @@ class MatchEngine(
     /**
      * Create Match with existing [match]
      */
-    constructor(match: MatchScore): this(match.type, match.teamA, match.teamA, match.games) {
+    constructor(match: MatchScore): this(match.type, match.teamA, match.teamB, match.games) {
         gameIndex = match.currentGame.index
     }
 

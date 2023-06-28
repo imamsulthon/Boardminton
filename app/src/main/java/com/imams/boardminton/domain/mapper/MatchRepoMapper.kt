@@ -49,7 +49,6 @@ object MatchRepoMapper {
     }
 
     fun MatchViewParam.toRepo() = Match(
-        id = 0,
         type = matchType.name,
         teamA = teamA.toJson(),
         teamB = teamB.toJson(),

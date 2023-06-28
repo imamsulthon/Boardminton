@@ -6,6 +6,7 @@ import com.imams.boardminton.data.toList
 import com.imams.boardminton.domain.impl.BoardEvent
 import com.imams.boardminton.domain.impl.MatchBoardUseCase
 import com.imams.boardminton.domain.mapper.MatchRepoMapper.toRepo
+import com.imams.boardminton.domain.mapper.MatchRepoMapper.toVp
 import com.imams.boardminton.domain.mapper.any
 import com.imams.boardminton.domain.mapper.gameWinnerBy
 import com.imams.boardminton.domain.mapper.matchWinnerBy
@@ -20,6 +21,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -78,8 +80,12 @@ class ScoreBoardVM @Inject constructor(
         }
     }
 
-    fun setupPlayer(json: String, single: Boolean) {
+    fun setupPlayer(id: Int?, json: String, single: Boolean) {
         if (alreadySetup) return
+        if (id == null) setupPlayer(json, single) else setupWithId(id)
+    }
+
+    private fun setupPlayer(json: String, single: Boolean) {
         val data = json.toList()
         _matchUiState.update {
             if (single) {
@@ -88,8 +94,17 @@ class ScoreBoardVM @Inject constructor(
                 useCase.create(data[0], data[1], data[2], data[3])
             }
             it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
+        }.also { alreadySetup = true }
+    }
+
+    private fun setupWithId(id: Int) {
+        viewModelScope.launch {
+            val data = repository.getMatch(id).first().toVp()
+            _matchUiState.update {
+                useCase.create(data)
+                it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
+            }.also { alreadySetup = true }
         }
-        alreadySetup = true
     }
 
     fun updatePlayers(json: String, single: Boolean) {
@@ -176,9 +191,10 @@ class ScoreBoardVM @Inject constructor(
         Court.Right -> config.right
     }
 
-    fun saveGame(callback: () -> Unit) {
+    fun updateGame(callback: () -> Unit) {
         viewModelScope.launch {
-            repository.updateMatch(matchUIState.value.match.toRepo())
+            repository.updateMatch(matchUIState.value.match.toRepo()
+                .apply { this.id = matchUIState.value.id })
             callback.invoke()
         }
     }

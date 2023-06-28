@@ -36,11 +36,11 @@ class MatchRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateMatch(match: Match) {
-        dao.updateMatch(match.toEntity(withId = match.id))
+        dao.updateMatch(match.toEntity(true))
     }
 
     override suspend fun deleteMatch(match: Match) {
-        dao.delete(match.toEntity())
+        dao.delete(match.toEntity(true))
     }
 
 }

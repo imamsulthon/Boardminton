@@ -1,7 +1,6 @@
 package com.imams.boardminton.ui.screen.create
 
 import android.content.res.Configuration
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -71,6 +70,7 @@ fun CreateMatchScreen(
     val config = LocalConfiguration.current
 
     fun gotoScoreBoard() {
+        vm.saveInputPlayer(singleMatch)
         toScoreBoard.invoke(if (singleMatch) "single" else "double", listOf(playerA1, playerA2, playerB1, playerB2).toJson())
     }
 
@@ -167,11 +167,6 @@ fun CreateMatchScreen(
             openBottomSheet = false
         },
     )
-
-    BackHandler(true) {
-        println("CreateMatch onBackHandler")
-        vm.saveInputPlayer(singleMatch)
-    }
 
 }
 

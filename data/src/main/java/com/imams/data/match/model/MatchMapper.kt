@@ -15,8 +15,7 @@ object MatchMapper {
         lastUpdate = lastUpdate,
     )
 
-    fun Match.toEntity(withId: Int? = null) = MatchEntity(
-        id = id,
+    fun Match.toEntity(withId: Boolean = false) = MatchEntity(
         type = type,
         teamA = teamA,
         teamB = teamB,
@@ -25,7 +24,7 @@ object MatchMapper {
         winner = winner,
         lastUpdate = lastUpdate,
     ).also {
-        if (withId != null) it.id = id
+        if (withId) it.id = id
     }
 
 }

@@ -25,12 +25,11 @@ class HomeScreenVM @Inject constructor(
     fun getLatestMatch() {
         viewModelScope.launch {
             repository.getLatestMatch().collectLatest {
-                log("latest $it")
                 if (it == null) {
                     _matchUiState.update { null }
                 } else {
                     _matchUiState.update { state ->
-                        state?.copy(match = it.toVp()) ?: MatchUIState(match = it.toVp())
+                        state?.copy(match = it.toVp()) ?: MatchUIState(match = it.toVp(), id = it.id)
                     }
                 }
             }

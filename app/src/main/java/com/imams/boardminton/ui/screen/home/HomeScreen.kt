@@ -29,18 +29,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.imams.boardminton.R
 import com.imams.boardminton.data.Athlete
+import com.imams.boardminton.domain.mapper.isSingle
 import com.imams.boardminton.domain.model.MatchUIState
 import com.imams.boardminton.domain.model.PlayerViewParam
 import com.imams.boardminton.domain.model.ScoreByCourt
 import com.imams.boardminton.domain.model.ScoreViewParam
 import com.imams.boardminton.domain.model.TeamViewParam
-import com.imams.boardminton.ui.component.MainNameBoardView
 
 @Composable
 fun HomeScreen(
     uiState: MatchUIState? = null,
     onCreateMatch: (String) -> Unit,
     onCreatePlayer: (String) -> Unit,
+    gotoScoreboard: ((String, Int) -> Unit)? = null
 ) {
     Scaffold(
         modifier = Modifier
@@ -55,12 +56,15 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .padding(padding)
                 .verticalScroll(rememberScrollState()),
-            onCreateMatch = {
-                if (it) onCreateMatch.invoke("single")
-                else onCreateMatch.invoke("double")
-            },
+            onCreateMatch = { onCreateMatch.invoke(if (it) "single" else "double") },
             onCreatePlayer = onCreatePlayer::invoke,
-            uiState = uiState
+            uiState = uiState,
+            gotoMatch = {
+                gotoScoreboard?.invoke(
+                    if (uiState == null || uiState.match.matchType.isSingle()) "single"
+                    else "double", it
+                )
+            }
         )
     }
 }
@@ -89,6 +93,7 @@ internal fun HomeContent(
     onCreateMatch: (Boolean) -> Unit,
     onCreatePlayer: (String) -> Unit,
     uiState: MatchUIState? = null,
+    gotoMatch: ((Int) -> Unit)? = null
 ) {
     Column(
         modifier = modifier,
@@ -128,13 +133,17 @@ internal fun HomeContent(
         }
         AnimatedVisibility(visible = uiState != null) {
             if (uiState != null) {
-                MainNameBoardView(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                LatestMatchItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp),
+                    matchId = uiState.id,
                     team1 = uiState.match.teamA,
                     team2 = uiState.match.teamB,
                     scoreA = uiState.match.currentGame.scoreA.point,
-                    scoreB =uiState.match.currentGame.scoreB.point,
-                    histories = uiState.match.games
+                    scoreB = uiState.match.currentGame.scoreB.point,
+                    histories = uiState.match.games,
+                    boardClick = { gotoMatch?.invoke(uiState.id) }
                 )
             }
         }
@@ -210,9 +219,11 @@ private fun HomeContentWithCurrentMatch() {
         right = ScoreViewParam(15, false, false, false),
         teamLeft = TeamViewParam(
             player1 = PlayerViewParam(Athlete.Imam_Sulthon, false),
-            PlayerViewParam(Athlete.Taufik_Hidayat), false),
+            PlayerViewParam(Athlete.Taufik_Hidayat), false
+        ),
         teamRight = TeamViewParam(
             player1 = PlayerViewParam(Athlete.Kim_Astrup, false),
-            PlayerViewParam(Athlete.Viktor), true),
+            PlayerViewParam(Athlete.Viktor), true
+        ),
     )
 }

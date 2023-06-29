@@ -45,6 +45,7 @@ data class Team(
 }
 
 data class MatchScore(
+    val id: Int,
     val type: MatchType = MatchType.Single,
     val currentGame: Game,
     val games: MutableList<Game> = mutableListOf(),

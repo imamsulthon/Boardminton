@@ -14,6 +14,7 @@ import com.imams.boardminton.engine.data.model.Winner
 import com.imams.boardminton.ui.utils.getLabel
 
 fun MatchViewParam.toModel() = MatchScore(
+    id = id,
     type = matchType.toModel(),
     currentGame = currentGame.toModel(),
     games = games.map { it.toModel() }.toMutableList(),
@@ -23,6 +24,7 @@ fun MatchViewParam.toModel() = MatchScore(
 )
 
 fun MatchScore.toVp() = MatchViewParam(
+    id = id,
     matchType = type.toVp(),
     currentGame = currentGame.toVp(),
     games = games.map { it.toVp() }.toMutableList(),

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,7 +30,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
@@ -151,7 +151,7 @@ private fun ScoreBoardScreen(
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(12.dp),
     ) {
         val (topRef, contentRef, bottomRef) = createRefs()
@@ -330,7 +330,7 @@ private fun LandscapeContent(
     ) {
         scoreBoard()
         Divider(
-            color = Color.Black, modifier = Modifier
+            color = MaterialTheme.colorScheme.onBackground, modifier = Modifier
                 .fillMaxHeight()
                 .padding(horizontal = 20.dp)
                 .width(2.dp)
@@ -397,7 +397,7 @@ private fun BottomView(
 @Composable
 private fun LineDivider(padding: Dp = 20.dp) = Divider(
     modifier = Modifier.padding(vertical = padding),
-    color = Color.Black,
+    color = MaterialTheme.colorScheme.onBackground,
     thickness = 2.dp
 )
 

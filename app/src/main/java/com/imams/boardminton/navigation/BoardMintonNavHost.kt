@@ -15,6 +15,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.imams.boardminton.navigation.Destination.AllMatches
+import com.imams.boardminton.navigation.Destination.AllPlayers
 import com.imams.boardminton.navigation.Destination.CreateMatch
 import com.imams.boardminton.navigation.Destination.CreatePlayer
 import com.imams.boardminton.navigation.Destination.EditCreatedPlayer
@@ -25,6 +27,7 @@ import com.imams.boardminton.ui.screen.create.CreateMatchScreen
 import com.imams.boardminton.ui.screen.create.EditPlayersScreen
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerScreen
 import com.imams.boardminton.ui.screen.create.player.EditPlayerCreatedScreen
+import com.imams.boardminton.ui.screen.matches.AllMatchesScreen
 import com.imams.boardminton.ui.screen.home.HomeScreen
 import com.imams.boardminton.ui.screen.home.HomeScreenVM
 import com.imams.boardminton.ui.screen.player.RegisteredPlayersScreen
@@ -79,6 +82,8 @@ sealed class Destination(protected val route: String, vararg params: String) {
 
     object AllPlayers: DestinationNoArgs("registered-players")
 
+    object AllMatches: DestinationNoArgs("all-matches")
+
 }
 
 @Composable
@@ -97,11 +102,14 @@ fun BoardMintonNavHost(
                 onCreatePlayer = {
                     when (it) {
                         "create" -> { navController.navigate(CreatePlayer.fullRoute) }
-                        "seeAll" -> { navController.navigate(Destination.AllPlayers.fullRoute) }
+                        "seeAll" -> { navController.navigate(AllPlayers.fullRoute) }
                     }
                 },
                 gotoScoreboard = { matchType, id ->
                     navController.navigate(ScoreBoard.invoke(matchType, id))
+                },
+                seeAllMatch = {
+                    navController.navigate(AllMatches.fullRoute)
                 }
             )
         }
@@ -133,7 +141,7 @@ fun BoardMintonNavHost(
             val players = it.arguments?.getString(ScoreBoard.PLAYERS).orEmpty()
             printLog("${ScoreBoard.fullRoute} type $type pl $players")
             ScoreBoardScreen(
-                single = type == "single", players = players,
+                single = type.equals("single", true), players = players,
                 onEdit = { _, json ->
                     navController.navigate(EditPlayers.invoke(type ?: "single", json))
                 },
@@ -152,7 +160,7 @@ fun BoardMintonNavHost(
             val type = it.arguments?.getString(ScoreBoard.TYPE)
             val id = it.arguments?.getInt(ScoreBoard.ID) ?: 0
             ScoreBoardScreen(
-                id = id, single = type == "single", players = "",
+                id = id, single = type.equals("single", true), players = "",
                 onEdit = { _, json ->
                     navController.navigate(EditPlayers.invoke(type ?: "single", json))
                 },
@@ -208,13 +216,22 @@ fun BoardMintonNavHost(
             )
         }
 
-        composable(Destination.AllPlayers.fullRoute) {
+        composable(AllPlayers.fullRoute) {
             RegisteredPlayersScreen(
                 onBackPressed = navController::navigateUp,
                 addNewPlayer = { navController.navigate(CreatePlayer.fullRoute) },
                 onEditPlayer = {
                     printLog("onItemClick $it")
                     navController.navigate(EditCreatedPlayer.invoke(it))
+                }
+            )
+        }
+
+        composable(AllMatches.fullRoute) {
+            AllMatchesScreen(
+                onSelect = { matchType, id ->
+                    printLog("AllMatchesScreen $it")
+                    navController.navigate(ScoreBoard.invoke(matchType, id))
                 }
             )
         }

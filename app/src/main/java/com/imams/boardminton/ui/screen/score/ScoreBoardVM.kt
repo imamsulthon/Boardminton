@@ -193,8 +193,7 @@ class ScoreBoardVM @Inject constructor(
 
     fun updateGame(callback: () -> Unit) {
         viewModelScope.launch {
-            repository.updateMatch(matchUIState.value.match.toRepo()
-                .apply { this.id = matchUIState.value.id })
+            repository.updateMatch(matchUIState.value.match.toRepo())
             callback.invoke()
         }
     }

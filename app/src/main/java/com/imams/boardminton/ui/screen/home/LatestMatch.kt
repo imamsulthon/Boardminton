@@ -4,9 +4,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -17,50 +15,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.imams.boardminton.data.Athlete
-import com.imams.boardminton.domain.model.GameViewParam
+import com.imams.boardminton.domain.mapper.isSingle
+import com.imams.boardminton.domain.model.MatchViewParam
 import com.imams.boardminton.domain.model.PlayerViewParam
 import com.imams.boardminton.domain.model.ScoreByCourt
 import com.imams.boardminton.domain.model.ScoreViewParam
 import com.imams.boardminton.domain.model.TeamViewParam
-import com.imams.boardminton.ui.screen.score.UmpireBoard
 import com.imams.boardminton.ui.utils.getLabel
-
-@Composable
-fun LatestMatch(
-    uiState: ScoreByCourt,
-) {
-    UmpireBoard(
-        modifier = Modifier
-            .widthIn(max = 350.dp)
-            .heightIn(max = 250.dp),
-        board = uiState,
-        plus = {
-            
-        }
-    )
-}
 
 @Composable
 fun LatestMatchItem(
     modifier: Modifier = Modifier,
-    matchId: Int,
-    team1: TeamViewParam,
-    team2: TeamViewParam,
-    scoreA: Int,
-    scoreB: Int,
-    histories: List<GameViewParam>,
-    single: Boolean = true,
+    data: MatchViewParam,
     boardClick: ((Int) -> Unit)? = null
 ) {
-    val teamLabel1 = team1.getLabel()
-    val teamLabel2 = team2.getLabel()
+    val teamLabel1 = data.teamA.getLabel()
+    val teamLabel2 = data.teamB.getLabel()
+    val histories = data.games
 
     Column(modifier = modifier.drawBorder()
-        .clickable { boardClick?.invoke(matchId) }
+        .clickable { boardClick?.invoke(data.id) }
     ) {
         Text(
             modifier = Modifier.padding(top = 5.dp),
-            text = "${if (single) "Single" else "Double"} Match (id: $matchId)",
+            text = "${if (data.matchType.isSingle()) "Single" else "Double"} Match (id: ${data.id})",
             fontWeight = FontWeight.ExtraBold
         )
         LazyRow {
@@ -71,7 +49,7 @@ fun LatestMatchItem(
                 }
                 Spacer(modifier = Modifier.padding(horizontal = 10.dp))
             }
-            items(histories.size) {
+            items(data.games.size) {
                 Column {
                     Text(
                         text = histories[it].scoreA.point.toString(),
@@ -87,11 +65,11 @@ fun LatestMatchItem(
             item {
                 Column {
                     Text(
-                        text = scoreA.toString(),
+                        text = data.currentGame.scoreA.point.toString(),
                         modifier = Modifier.padding(start = 10.dp, top = 5.dp)
                     )
                     Text(
-                        text = scoreB.toString(),
+                        text = data.currentGame.scoreB.point.toString(),
                         modifier = Modifier.padding(start = 10.dp, top = 5.dp)
                     )
                 }
@@ -122,5 +100,4 @@ fun LatestMatchPrev() {
             player1 = PlayerViewParam(Athlete.Kim_Astrup, false), 
             PlayerViewParam(Athlete.Viktor), true),
     )
-    LatestMatch(uiState = score)
 }

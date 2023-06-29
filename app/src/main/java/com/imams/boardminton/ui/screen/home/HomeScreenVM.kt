@@ -29,7 +29,7 @@ class HomeScreenVM @Inject constructor(
                     _matchUiState.update { null }
                 } else {
                     _matchUiState.update { state ->
-                        state?.copy(match = it.toVp()) ?: MatchUIState(match = it.toVp(), id = it.id)
+                        state?.copy(match = it.toVp()) ?: MatchUIState(match = it.toVp())
                     }
                 }
             }

@@ -2,6 +2,7 @@ package com.imams.boardminton.ui.screen.home
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,20 +29,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.imams.boardminton.R
-import com.imams.boardminton.data.Athlete
 import com.imams.boardminton.domain.mapper.isSingle
 import com.imams.boardminton.domain.model.MatchUIState
-import com.imams.boardminton.domain.model.PlayerViewParam
-import com.imams.boardminton.domain.model.ScoreByCourt
-import com.imams.boardminton.domain.model.ScoreViewParam
-import com.imams.boardminton.domain.model.TeamViewParam
 
 @Composable
 fun HomeScreen(
     uiState: MatchUIState? = null,
     onCreateMatch: (String) -> Unit,
     onCreatePlayer: (String) -> Unit,
-    gotoScoreboard: ((String, Int) -> Unit)? = null
+    gotoScoreboard: ((String, Int) -> Unit)? = null,
+    seeAllMatch: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier
@@ -64,7 +61,8 @@ fun HomeScreen(
                     if (uiState == null || uiState.match.matchType.isSingle()) "single"
                     else "double", it
                 )
-            }
+            },
+            seeAllMatch = { seeAllMatch.invoke() },
         )
     }
 }
@@ -93,7 +91,8 @@ internal fun HomeContent(
     onCreateMatch: (Boolean) -> Unit,
     onCreatePlayer: (String) -> Unit,
     uiState: MatchUIState? = null,
-    gotoMatch: ((Int) -> Unit)? = null
+    gotoMatch: ((Int) -> Unit)? = null,
+    seeAllMatch: () -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -123,27 +122,29 @@ internal fun HomeContent(
         }
         AnimatedVisibility(visible = uiState != null) {
             if (uiState != null) {
-                Text(
-                    text = "On Going Match",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = "On Going Match",
+                        modifier = Modifier.wrapContentWidth()
+                    )
+                    Text(
+                        text = "See All",
+                        modifier = Modifier.wrapContentWidth()
+                            .padding(start = 10.dp).padding(vertical = 10.dp)
+                            .clickable { seeAllMatch.invoke() }
+                    )
+                }
             }
         }
         AnimatedVisibility(visible = uiState != null) {
             if (uiState != null) {
                 LatestMatchItem(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 10.dp),
-                    matchId = uiState.id,
-                    team1 = uiState.match.teamA,
-                    team2 = uiState.match.teamB,
-                    scoreA = uiState.match.currentGame.scoreA.point,
-                    scoreB = uiState.match.currentGame.scoreB.point,
-                    histories = uiState.match.games,
-                    boardClick = { gotoMatch?.invoke(uiState.id) }
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                    data = uiState.match,
+                    boardClick = { gotoMatch?.invoke(uiState.match.id) }
                 )
             }
         }
@@ -207,23 +208,11 @@ private fun ItemMenu(
 @Preview(showSystemUi = true, uiMode = UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
-    HomeScreen(onCreateMatch = {}, onCreatePlayer = {})
+    HomeScreen(onCreateMatch = {}, onCreatePlayer = {}, seeAllMatch = {})
 }
 
 @Preview
 @Composable
 private fun HomeContentWithCurrentMatch() {
-    val latestMatch = ScoreByCourt(
-        index = 1,
-        left = ScoreViewParam(15, false, false, false),
-        right = ScoreViewParam(15, false, false, false),
-        teamLeft = TeamViewParam(
-            player1 = PlayerViewParam(Athlete.Imam_Sulthon, false),
-            PlayerViewParam(Athlete.Taufik_Hidayat), false
-        ),
-        teamRight = TeamViewParam(
-            player1 = PlayerViewParam(Athlete.Kim_Astrup, false),
-            PlayerViewParam(Athlete.Viktor), true
-        ),
-    )
+
 }

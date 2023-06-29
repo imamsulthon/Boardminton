@@ -11,6 +11,7 @@ import com.imams.boardminton.engine.data.model.Team
 import com.imams.boardminton.engine.data.model.Winner
 
 class MatchEngine(
+    private var id: Int? = 0,
     private val matchType: MatchType,
     private var teamA: Team,
     private var teamB: Team,
@@ -34,6 +35,7 @@ class MatchEngine(
      * Create Match [MatchType.Single] with player name [a1] vs [b1]
      */
     constructor(a1: String, b1: String) : this(
+        null,
         MatchType.Single,
         Team(Player(a1), Player("")),
         Team(Player(b1), Player(""))
@@ -45,6 +47,7 @@ class MatchEngine(
      * Create Match [MatchType.Double] with player name [a1]-[a2] vs [b1]-[b2]
      */
     constructor(a1: String, a2: String, b1: String, b2: String) : this(
+        null,
         MatchType.Double,
         Team(Player(a1), Player(a2)),
         Team(Player(b1), Player(b2)),
@@ -55,8 +58,9 @@ class MatchEngine(
     /**
      * Create Match with existing [match]
      */
-    constructor(match: MatchScore): this(match.type, match.teamA, match.teamB, match.games) {
+    constructor(match: MatchScore): this(match.id, match.type, match.teamA, match.teamB, match.games) {
         gameIndex = match.currentGame.index
+        gameEngine = GameEngine(gameIndex, match.currentGame.scoreA, match.currentGame.scoreB)
     }
 
     init {
@@ -137,6 +141,7 @@ class MatchEngine(
 
     // region getter
     fun getMatchScore() = MatchScore(
+        id = id ?: 0,
         type = matchType,
         currentGame = gameEngine.asGame(),
         games = previousGames,

@@ -12,12 +12,14 @@ import com.imams.data.match.model.Match
 object MatchRepoMapper {
 
     fun Match.toVp(): MatchViewParam = MatchViewParam(
+        id = id,
         matchType = type.toType(),
         teamA = teamA.asTeam(),
         teamB = teamB.asTeam(),
         winner = winner.asWinner(),
         currentGame = currentGame.toGame(),
-        games = games.toGames()
+        games = games.toGames(),
+        lastUpdate = lastUpdate,
     )
 
     private fun String.asTeam(): TeamViewParam {
@@ -49,6 +51,7 @@ object MatchRepoMapper {
     }
 
     fun MatchViewParam.toRepo() = Match(
+        id = id,
         type = matchType.name,
         teamA = teamA.toJson(),
         teamB = teamB.toJson(),

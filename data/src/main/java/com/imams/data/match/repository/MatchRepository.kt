@@ -9,6 +9,8 @@ interface MatchRepository {
 
     suspend fun getLatestMatch(): Flow<Match?>
 
+    suspend fun getOnGoingMatches(): Flow<List<Match>?>
+
     suspend fun getMatch(id: Int): Flow<Match>
 
     suspend fun saveMatch(match: Match)

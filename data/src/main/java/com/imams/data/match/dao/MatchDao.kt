@@ -16,6 +16,9 @@ interface MatchDao {
     @Query("SELECT * FROM match_entity ORDER BY id DESC LIMIT 1")
     fun getLatestMatch(): Flow<MatchEntity?>
 
+    @Query("SELECT * FROM match_entity WHERE winner=:status")
+    fun onGoingMatches(status: String): Flow<List<MatchEntity>>
+
     @Query("SELECT * FROM match_entity WHERE id=:id")
     fun getMatch(id: Int): Flow<MatchEntity>
 

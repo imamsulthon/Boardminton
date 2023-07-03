@@ -28,7 +28,7 @@ object MatchRepoMapper {
 
     private fun String.toType(): IMatchType = when {
         this.equals("double", true) -> IMatchType.Double
-        else -> IMatchType.Double
+        else -> IMatchType.Single
     }
 
     private fun String.asWinner(): Winner = when {

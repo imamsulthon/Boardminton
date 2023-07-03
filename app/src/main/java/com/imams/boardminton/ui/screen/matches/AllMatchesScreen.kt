@@ -171,7 +171,7 @@ internal fun AllMatchContent(
 }
 
 @Composable
-private fun MatchItem(
+fun MatchItem(
     item: MatchViewParam,
     onClick: (MatchViewParam) -> Unit,
 ) {

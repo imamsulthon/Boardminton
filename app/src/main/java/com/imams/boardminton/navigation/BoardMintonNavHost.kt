@@ -27,9 +27,9 @@ import com.imams.boardminton.ui.screen.create.CreateMatchScreen
 import com.imams.boardminton.ui.screen.create.EditPlayersScreen
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerScreen
 import com.imams.boardminton.ui.screen.create.player.EditPlayerCreatedScreen
-import com.imams.boardminton.ui.screen.matches.AllMatchesScreen
 import com.imams.boardminton.ui.screen.home.HomeScreen
 import com.imams.boardminton.ui.screen.home.HomeScreenVM
+import com.imams.boardminton.ui.screen.matches.AllMatchesScreen
 import com.imams.boardminton.ui.screen.player.RegisteredPlayersScreen
 import com.imams.boardminton.ui.screen.score.ScoreBoardScreen
 
@@ -65,6 +65,9 @@ sealed class Destination(protected val route: String, vararg params: String) {
         operator fun invoke(type: String, id: Int): String = route.appendParams(
             TYPE to type
         ).plus("?$ID=$id")
+
+        val routeInitMatch = fullRoute.plus("?players={players}")
+        val routeMatch = fullRoute.plus("?id={id}")
     }
 
     object EditPlayers: Destination("edit-players", "type") {
@@ -92,12 +95,12 @@ fun BoardMintonNavHost(
     navController: NavHostController = rememberNavController(),
 ) {
 
-    val latestMatch by viewModel.latestMatch.collectAsState()
+    val latestMatch by viewModel.onGoingMatches.collectAsState()
 
     NavHost(navController = navController, startDestination = Home.fullRoute) {
         composable(Home.fullRoute) {
             HomeScreen(
-                uiState = latestMatch,
+                onGoingMatches = latestMatch,
                 onCreateMatch = { navController.navigate(CreateMatch.invoke(it)) },
                 onCreatePlayer = {
                     when (it) {
@@ -131,7 +134,7 @@ fun BoardMintonNavHost(
         }
 
         composable(
-            route = ScoreBoard.fullRoute.plus("?players={players}"),
+            route = ScoreBoard.routeInitMatch,
             arguments = listOf(
                 navArgument(ScoreBoard.TYPE) { defaultValue = "single" },
                 navArgument(ScoreBoard.PLAYERS) { defaultValue = "[]" },
@@ -151,7 +154,7 @@ fun BoardMintonNavHost(
         }
 
         composable(
-            route = ScoreBoard.fullRoute.plus("?id={id}"),
+            route = ScoreBoard.routeMatch,
             arguments = listOf(
                 navArgument(ScoreBoard.TYPE) { defaultValue = "single" },
                 navArgument(ScoreBoard.ID) { type = NavType.IntType },

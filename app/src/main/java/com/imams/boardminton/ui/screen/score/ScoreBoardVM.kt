@@ -101,6 +101,7 @@ class ScoreBoardVM @Inject constructor(
         viewModelScope.launch {
             val data = repository.getMatch(id).first().toVp()
             _matchUiState.update {
+                printLog("data ${data.currentGame}")
                 useCase.create(data)
                 it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
             }.also { alreadySetup = true }

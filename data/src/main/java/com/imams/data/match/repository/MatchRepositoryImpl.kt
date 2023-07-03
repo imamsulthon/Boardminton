@@ -18,6 +18,12 @@ class MatchRepositoryImpl @Inject constructor(
         return dao.getLatestMatch().map { it?.toModel() }
     }
 
+    override suspend fun getOnGoingMatches(): Flow<List<Match>?> {
+        return dao.onGoingMatches("None").map { list ->
+            list.map { it.toModel() }
+        }
+    }
+
     override suspend fun getMatch(id: Int): Flow<Match> {
         return dao.getMatch(id).map { it.toModel() }
     }

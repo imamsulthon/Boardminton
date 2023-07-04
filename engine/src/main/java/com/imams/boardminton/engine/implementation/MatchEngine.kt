@@ -60,7 +60,11 @@ class MatchEngine(
      */
     constructor(match: MatchScore): this(match.id, match.type, match.teamA, match.teamB, match.games) {
         gameIndex = match.currentGame.index
-        gameEngine = GameEngine(gameIndex, match.currentGame.scoreA, match.currentGame.scoreB)
+        gameEngine = GameEngine(gameIndex,
+            match.currentGame.scoreA, match.currentGame.scoreB,
+            match.currentGame.onServe, match.currentGame.winner
+        )
+        winner = match.winner
     }
 
     init {
@@ -134,9 +138,17 @@ class MatchEngine(
      * try set Winner of match
      */
     private fun trySetWinnerByMatch() {
-        if (gameIndex < 1) return
+        if (gameIndex < 2) return
         if (previousGameWinner == Winner.None) return
-        if (previousGameWinner == gameEngine.asGame().winner) winner = gameEngine.asGame().winner
+        val current = gameEngine.asGame().winner
+        winner = when {
+            current == Winner.None -> Winner.None
+            gameIndex == 2 -> {
+                if (current == previousGameWinner) current else Winner.None
+            }
+            gameIndex == 3 -> current
+            else -> Winner.None
+        }
     }
 
     // region getter

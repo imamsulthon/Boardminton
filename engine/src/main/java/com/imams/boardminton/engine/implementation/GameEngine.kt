@@ -11,11 +11,11 @@ class GameEngine constructor(
     private val index: Int = 1,
     private val scoreA: Score = Score(),
     private val scoreB: Score = Score(),
+    private var onServe: OnServe = OnServe.NONE,
+    private var winner: Winner = Winner.None
 ) {
 
     private val rules: GameRule = GameRule()
-    private var onServe: OnServe = OnServe.NONE
-    private var winner: Winner = Winner.None
     var hasReachInterval = false
         private set
 

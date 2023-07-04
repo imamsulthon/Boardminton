@@ -77,6 +77,7 @@ fun ScoreBoardScreen(
 
     LaunchedEffect(Unit) {
         scoreVm.setupPlayer(id, players, single)
+        counterVm.start()
     }
 
     val uiState by scoreVm.matchUIState.collectAsState()

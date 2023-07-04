@@ -59,7 +59,11 @@ fun Score.toVp() = ScoreViewParam(
 
 fun ScoreViewParam.toModel() = Score(
     point = point,
-)
+).also {
+    it.onServe = onServe
+    it.lastPoint = isLastPoint
+    it.isWin = isWin
+}
 
 fun Player.toVp() = PlayerViewParam(
     name = name,

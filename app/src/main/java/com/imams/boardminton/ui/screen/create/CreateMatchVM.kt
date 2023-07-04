@@ -13,6 +13,7 @@ import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ITeam
 import com.imams.boardminton.domain.model.PlayerViewParam
 import com.imams.boardminton.domain.model.TeamViewParam
+import com.imams.boardminton.engine.data.model.Winner
 import com.imams.boardminton.ui.component.printLog
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.data.match.model.Match
@@ -124,7 +125,7 @@ class CreateMatchVM @Inject constructor(
                     teamB = TeamViewParam(PlayerViewParam(playerB1.value), PlayerViewParam(playerB2.value), false).toJson(),
                     currentGame = GameViewParam().toJson(),
                     games = listOf<GameViewParam>().toJson(),
-                    winner = "none",
+                    winner = Winner.None.name,
                     lastUpdate = System.currentTimeMillis().toString(),
             ))
         }

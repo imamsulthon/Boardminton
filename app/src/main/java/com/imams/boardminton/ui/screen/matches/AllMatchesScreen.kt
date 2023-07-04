@@ -43,13 +43,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.imams.boardminton.R
 import com.imams.boardminton.data.asDateTime
 import com.imams.boardminton.domain.model.GameViewParam
 import com.imams.boardminton.domain.model.MatchViewParam
@@ -199,10 +197,7 @@ fun MatchItem(
             Text(text = item.lastUpdate.asDateTime() ?: item.lastUpdate, fontSize = 10.sp)
         },
         trailingContent = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_cock),
-                contentDescription = "Localized description"
-            )
+            Text(text = item.winner.name)
         }
     )
 }

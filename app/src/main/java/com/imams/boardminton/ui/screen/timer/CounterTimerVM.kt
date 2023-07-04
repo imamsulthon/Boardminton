@@ -7,7 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import java.util.*
+import java.util.Timer
 import javax.inject.Inject
 import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration
@@ -24,11 +24,12 @@ class CounterTimerVM @Inject constructor(): ViewModel() {
     private val _tcUiState = MutableStateFlow(TimeCounterUiState())
     val tcUiState: StateFlow<TimeCounterUiState> get() = _tcUiState
 
-    init {
+    fun start(init: Duration? = null) {
+        init?.let { timeDuration.plus(it) }
         start()
     }
 
-    fun start() {
+    private fun start() {
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             timeDuration = timeDuration.plus(1.seconds)
             updateTimeStates()
@@ -64,7 +65,7 @@ class CounterTimerVM @Inject constructor(): ViewModel() {
     fun restart(onGame: Int) {
         val currentGameDuration = _gameDuration.find { it.index == onGame } ?: GameDuration(onGame)
         _gameDuration.add(currentGameDuration.apply {
-            inWholeMinutes = timeDuration.inWholeMinutes
+            inWholeSeconds = timeDuration.inWholeSeconds
             inLabel = _tcUiState.value.counter
         })
         _tcUiState.update { it.copy(gameDuration = _gameDuration) }
@@ -79,7 +80,7 @@ data class TimeCounterUiState(
 
 data class GameDuration(
     val index: Int = 1,
-    var inWholeMinutes: Long = 0,
+    var inWholeSeconds: Long = 0,
     var inLabel: String = "00:00:00"
 )
 

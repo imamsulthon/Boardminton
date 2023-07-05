@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -153,15 +152,9 @@ private fun ScoreBoardScreen(
 
     @Composable
     fun courtView() = MyCourtMatch(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(2.dp)
-            .background(MaterialTheme.colorScheme.primary)
-            .aspectRatio(ratio = 13.4f / 6.1f),
-        game = uiState.match.currentGame,
+        modifier = Modifier.fillMaxWidth().padding(2.dp),
+        court = uiState.scoreByCourt,
         type = uiState.match.matchType,
-        teamA = uiState.scoreByCourt.teamLeft,
-        teamB = uiState.scoreByCourt.teamRight,
     )
 
     ConstraintLayout(
@@ -357,9 +350,10 @@ private fun LandscapeContent(
                 .width(2.dp)
         )
         Column(
-            verticalArrangement = Arrangement.Top
+            verticalArrangement = Arrangement.Top,
         ) {
             mainBoard()
+            LineDivider(padding = 5.dp, thick = 1.dp)
             courtView()
         }
     }
@@ -380,6 +374,7 @@ private fun PortraitContent(
         mainBoard()
         LineDivider()
         scoreBoard()
+        LineDivider(thick = 1.dp)
         courtView()
     }
 }
@@ -423,10 +418,10 @@ private fun BottomView(
 }
 
 @Composable
-private fun LineDivider(padding: Dp = 20.dp) = Divider(
+private fun LineDivider(padding: Dp = 20.dp, thick: Dp = 2.dp) = Divider(
     modifier = Modifier.padding(vertical = padding),
     color = MaterialTheme.colorScheme.onBackground,
-    thickness = 2.dp
+    thickness = thick
 )
 
 private fun printLog(msg: String) {

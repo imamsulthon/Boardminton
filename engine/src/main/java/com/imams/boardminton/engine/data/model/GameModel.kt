@@ -34,6 +34,7 @@ data class Game(
 
 data class Player(
     var name: String,
+    var onServe: Boolean = false,
 )
 
 data class Team(

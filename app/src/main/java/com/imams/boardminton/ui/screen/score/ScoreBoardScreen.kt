@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,6 +55,7 @@ import com.imams.boardminton.ui.component.ButtonPointLeft
 import com.imams.boardminton.ui.component.ButtonPointRight
 import com.imams.boardminton.ui.component.GameFinishDialogContent
 import com.imams.boardminton.ui.component.MainNameBoardView
+import com.imams.boardminton.ui.component.MyCourtMatch
 import com.imams.boardminton.ui.component.TimeCounterView
 import com.imams.boardminton.ui.screen.timer.CounterTimerVM
 import com.imams.boardminton.ui.screen.timer.TimeCounterUiState
@@ -149,6 +151,19 @@ private fun ScoreBoardScreen(
         }
     )
 
+    @Composable
+    fun courtView() = MyCourtMatch(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp)
+            .background(MaterialTheme.colorScheme.primary)
+            .aspectRatio(ratio = 13.4f / 6.1f),
+        game = uiState.match.currentGame,
+        type = uiState.match.matchType,
+        teamA = uiState.scoreByCourt.teamLeft,
+        teamB = uiState.scoreByCourt.teamRight,
+    )
+
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
@@ -190,7 +205,8 @@ private fun ScoreBoardScreen(
                     height = Dimension.fillToConstraints
                 },
             board = { scoreBoard() },
-            main = { mainBoard() }
+            main = { mainBoard() },
+            courtView = { courtView() }
         )
 
         BottomView(
@@ -297,6 +313,7 @@ private fun ContentView(
     modifier: Modifier = Modifier,
     board: @Composable () -> Unit,
     main: @Composable () -> Unit,
+    courtView: @Composable () -> Unit
 ) {
     val config = LocalConfiguration.current
     when (config.orientation) {
@@ -304,14 +321,16 @@ private fun ContentView(
             PortraitContent(
                 modifier = modifier,
                 mainBoard = { main() },
-                scoreBoard = { board() }
+                scoreBoard = { board() },
+                courtView = { courtView() },
             )
         }
         else -> {
             LandscapeContent(
                 modifier = modifier,
                 mainBoard = { main() },
-                scoreBoard = { board() }
+                scoreBoard = { board() },
+                courtView = { courtView() },
             )
         }
     }
@@ -323,6 +342,7 @@ private fun LandscapeContent(
     modifier: Modifier,
     mainBoard: @Composable () -> Unit,
     scoreBoard: @Composable () -> Unit,
+    courtView: @Composable () -> Unit,
 ) {
     Row(
         modifier = modifier.fillMaxSize(),
@@ -336,7 +356,12 @@ private fun LandscapeContent(
                 .padding(horizontal = 20.dp)
                 .width(2.dp)
         )
-        mainBoard()
+        Column(
+            verticalArrangement = Arrangement.Top
+        ) {
+            mainBoard()
+            courtView()
+        }
     }
 }
 
@@ -345,6 +370,7 @@ private fun PortraitContent(
     modifier: Modifier,
     mainBoard: @Composable () -> Unit,
     scoreBoard: @Composable () -> Unit,
+    courtView: @Composable () -> Unit,
 ) {
     Column(
         modifier = modifier.fillMaxHeight(),
@@ -354,6 +380,7 @@ private fun PortraitContent(
         mainBoard()
         LineDivider()
         scoreBoard()
+        courtView()
     }
 }
 

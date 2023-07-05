@@ -1,59 +1,185 @@
 package com.imams.boardminton.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.imams.boardminton.R
 import com.imams.boardminton.data.Athlete
+import com.imams.boardminton.domain.mapper.isSingle
+import com.imams.boardminton.domain.model.GameViewParam
+import com.imams.boardminton.domain.model.IMatchType
+import com.imams.boardminton.domain.model.TeamViewParam
+import com.imams.boardminton.engine.data.model.OnServe
 import com.imams.boardminton.ui.utils.prettifyName
 import com.touchlane.gridpad.GridPad
 import com.touchlane.gridpad.GridPadCellSize
 import com.touchlane.gridpad.GridPadCells
 
 @Composable
-fun CourtViewMatchSingle(
-    pA1: String,
-    pB1: String,
+fun MyCourtMatch(
+    modifier: Modifier,
+    type: IMatchType,
+    game: GameViewParam,
+    teamA: TeamViewParam,
+    teamB: TeamViewParam,
 ) {
-    CourtView(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(2.dp)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .aspectRatio(ratio = 13.4f / 6.1f),
-        pAEven = pA1, pBEven = pB1
-    )
+    if (type.isSingle()) {
+        CourtViewMatchSingle(
+            modifier = modifier,
+            game = game,
+            pA1 = teamA.player1.name.prettifyName(), pB1 = teamB.player1.name.prettifyName()
+        )
+    } else {
+        CourtViewMatchDouble(
+            modifier = modifier,
+            game = game,
+            pA1 = teamA.player1.name.prettifyName(), pA2 = teamA.player2.name.prettifyName(),
+            pB1 = teamB.player1.name.prettifyName(), pB2 = teamB.player2.name.prettifyName(),
+        )
+    }
 }
 
 @Composable
+fun CourtViewMatchSingle(
+    modifier: Modifier,
+    game: GameViewParam,
+    pA1: String,
+    pB1: String,
+) {
+    log("onServe ${game.onServe.name}")
+    val paEven by remember(game.onServe, game.scoreA.point, game.scoreB.point) {
+        mutableStateOf(
+            when (game.onServe) {
+                OnServe.A -> {
+                    log("a 1a")
+                    if (game.scoreA.point.odd()) null else pA1
+                }
+                OnServe.B -> {
+                    log("a 1b")
+                    if (game.scoreB.point.odd()) null else pA1
+                }
+                else -> pA1
+            }
+        )
+    }
+    val paOdd by remember(game.onServe, game.scoreA.point, game.scoreB.point) {
+        mutableStateOf(
+            when (game.onServe) {
+                OnServe.A -> {
+                    log("a 2a")
+                    if (game.scoreA.point.odd()) null else pA1
+                }
+                OnServe.B -> {
+                    log("a 2b")
+                    if (game.scoreB.point.odd()) null else pA1
+                }
+                else -> null
+            }
+        )
+    }
+    val pBEven by remember(game.onServe, game.scoreA.point, game.scoreB.point) {
+        mutableStateOf(
+            when (game.onServe) {
+                OnServe.B -> {
+                    log("b 1b")
+                    if (game.scoreB.point.odd()) null else pB1
+                }
+                OnServe.A -> {
+                    log("b 1a")
+                    if (game.scoreA.point.odd()) null else pB1
+                }
+                else -> pB1
+            }
+        )
+    }
+    val pBOdd by remember(game.onServe, game.scoreA.point, game.scoreB.point) {
+        mutableStateOf(
+            when (game.onServe) {
+                OnServe.B -> {
+                    log("b 2b")
+                    if (game.scoreB.point.odd()) pB1 else null
+                }
+                OnServe.A -> {
+                    log("b 2a")
+                    if (game.scoreA.point.odd()) pB1 else null
+                }
+                else -> null
+            }
+        )
+    }
+    val onIndex: Int by remember(game.onServe, game.scoreA.point, game.scoreB.point) {
+        mutableStateOf(
+            when (game.onServe) {
+                OnServe.A -> {
+                    if (game.scoreA.point.odd()) 1 else 2
+                }
+                OnServe.B -> {
+                    if (game.scoreB.point.odd()) 3 else 4
+                }
+                else -> 0
+            }
+        )
+    }
+    log("result ${game.onServe.name} $paEven $paOdd $pBEven $pBOdd")
+
+    CourtView(
+        modifier = modifier,
+        onIndex = onIndex,
+        pAEven = paEven, pAOdd = paOdd, pBEven = pBEven, pBOdd = pBOdd
+    )
+}
+
+private fun log(m: String) = println("CourtView: $m")
+
+private fun Int.odd(): Boolean = this % 2 > 0
+
+@Composable
 fun CourtViewMatchDouble(
+    modifier: Modifier = Modifier,
+    game: GameViewParam,
     pA1: String,
     pA2: String,
     pB1: String,
     pB2: String
 ) {
+    val onIndex by remember(game.onServe, game.scoreA, game.scoreB) {
+        mutableStateOf(
+            when (game.onServe) {
+                OnServe.A -> {
+                    if (game.scoreA.point.odd()) 1 else 2
+                }
+                OnServe.B -> {
+                    if (game.scoreB.point.odd()) 3 else 4
+                }
+                else -> 0
+            }
+        )
+    }
     CourtView(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(2.dp)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .aspectRatio(ratio = 13.4f / 6.1f),
+        modifier = modifier,
+        onIndex = onIndex,
         pAEven = pA1, pAOdd = pA2,
         pBEven = pB1, pBOdd = pB2
     )
@@ -62,9 +188,10 @@ fun CourtViewMatchDouble(
 @Composable
 fun CourtView(
     modifier: Modifier = Modifier,
-    pAEven: String,
+    onIndex: Int = 0,
+    pAEven: String? = null,
     pAOdd: String? = null,
-    pBEven: String,
+    pBEven: String? = null,
     pBOdd: String? = null,
 ) {
     GridPad(
@@ -106,13 +233,13 @@ fun CourtView(
             FieldPlain()
         }
         item(row = 1, column = 1) {
-            FieldPlayer(text = pAOdd ?: "")
+            FieldPlayer(text = pAOdd.orEmpty(), onIndex == 1)
         }
         item(row = 1, column = 2, rowSpan = 2, columnSpan = 2) {
             FieldPlain()
         }
         item(row = 1, column = 4) {
-            FieldPlayer(text = pBEven)
+            FieldPlayer(text = pBEven.orEmpty(), onIndex == 4)
         }
         item(row = 1, column = 5) {
             FieldPlain()
@@ -122,13 +249,13 @@ fun CourtView(
             FieldPlain()
         }
         item(row = 2, column = 1) {
-            FieldPlayer(text = pAEven)
+            FieldPlayer(text = pAEven.orEmpty(), onIndex == 2)
         }
         item(row = 2, column = 2, rowSpan = 3, columnSpan = 2) {
             FieldPlain()
         }
         item(row = 2, column = 4) {
-            FieldPlayer(text = pBOdd ?: "")
+            FieldPlayer(text = pBOdd.orEmpty(), onIndex == 3)
         }
         item(row = 2, column = 5) {
             FieldPlain()
@@ -156,14 +283,26 @@ fun CourtView(
 }
 
 @Composable
-private fun FieldPlayer(text: String) {
+private fun FieldPlayer(text: String, onServe: Boolean = false) {
     ItemComponent {
-        Text(
-            text = text,
-            modifier = Modifier.padding(2.dp), fontSize = 11.sp,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1
-        )
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = text,
+                modifier = Modifier.padding(2.dp), fontSize = 11.sp,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+            AnimatedVisibility(visible = onServe) {
+                Icon(
+                    modifier = Modifier.size(height = 24.dp, width = 24.dp).padding(vertical = 2.dp),
+                    painter = painterResource(id = R.drawable.ic_cock),
+                    contentDescription = "cock"
+                )
+            }
+        }
     }
 }
 
@@ -198,11 +337,12 @@ private fun ItemComponent(
 )
 @Composable
 private fun CourtViewLandscape() {
-    CourtViewMatchDouble(
-        pA1 = Athlete.Anthony,
-        pA2 = Athlete.Imam_Sulthon,
-        pB1 = Athlete.Kim_Astrup,
-        pB2 = Athlete.Anders_Skaarup,
+    CourtView(
+        onIndex = 1,
+        pAEven = Athlete.Imam_Sulthon,
+        pAOdd = Athlete.Anthony.prettifyName(),
+        pBEven = Athlete.Kim_Astrup,
+        pBOdd = Athlete.Anders_Skaarup,
     )
 }
 
@@ -218,17 +358,24 @@ private fun CourtViewPreview() {
     ) {
 
         Text(text = "Single match Court View")
-        CourtViewMatchSingle(
-            pA1 = Athlete.Anthony.prettifyName(),
-            pB1 = Athlete.Kim_Astrup,
+//        CourtViewMatchSingle(
+//            pA1 = Athlete.Anthony.prettifyName(),
+//            pB1 = Athlete.Kim_Astrup,
+//        )
+        CourtView(
+            onIndex = 1,
+            pAEven = Athlete.Imam_Sulthon,
+            pAOdd = Athlete.Anthony.prettifyName(),
+            pBEven = Athlete.Kim_Astrup,
+            pBOdd = Athlete.Anders_Skaarup,
         )
 
         Text(text = "Double match Court View")
-        CourtViewMatchDouble(
-            pA1 = Athlete.Anthony.prettifyName(),
-            pA2 = Athlete.Imam_Sulthon,
-            pB1 = Athlete.Kim_Astrup,
-            pB2 = Athlete.Anders_Skaarup.prettifyName(),
-        )
+//        CourtViewMatchDouble(
+//            pA1 = Athlete.Anthony.prettifyName(),
+//            pA2 = Athlete.Imam_Sulthon,
+//            pB1 = Athlete.Kim_Astrup,
+//            pB2 = Athlete.Anders_Skaarup.prettifyName(),
+//        )
     }
 }

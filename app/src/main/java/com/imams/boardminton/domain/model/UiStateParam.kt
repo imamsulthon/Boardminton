@@ -19,8 +19,9 @@ data class MatchUIState(
         ),
         currentGame = GameViewParam(),
         games = mutableListOf(),
-        lastUpdate = ""
+        lastUpdate = "",
     ),
+    val matchDuration: Long
 ) {
     var courtSide: CourtSide = CourtSide()
     var scoreByCourt: ScoreByCourt = getByCourt(courtSide)
@@ -58,7 +59,8 @@ data class MatchViewParam(
     val teamB: TeamViewParam,
     val games: MutableList<GameViewParam> = mutableListOf(),
     val winner: Winner = Winner.None,
-    val lastUpdate: String = ""
+    val lastUpdate: String = "",
+    val matchDurations: Long = 0L,
 )
 
 // region UI State Model

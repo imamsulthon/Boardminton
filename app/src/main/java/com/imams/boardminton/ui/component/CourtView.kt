@@ -286,6 +286,7 @@ private fun FieldPlayer(text: String, onServe: Boolean = false) {
         ) {
             Text(
                 text = text,
+                color = MaterialTheme.colorScheme.background,
                 modifier = Modifier.padding(2.dp), fontSize = 11.sp,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
@@ -294,7 +295,8 @@ private fun FieldPlayer(text: String, onServe: Boolean = false) {
                 Icon(
                     modifier = Modifier.size(height = 24.dp, width = 24.dp).padding(vertical = 2.dp),
                     painter = painterResource(id = R.drawable.ic_cock),
-                    contentDescription = "cock"
+                    contentDescription = "cock",
+                    tint = MaterialTheme.colorScheme.background
                 )
             }
         }
@@ -316,7 +318,7 @@ private fun ItemComponent(
         modifier = Modifier
             .fillMaxSize()
             .padding(2.dp)
-            .background(MaterialTheme.colorScheme.primaryContainer),
+            .background(MaterialTheme.colorScheme.surfaceTint),
         contentAlignment = Alignment.Center
     ) {
         content()

@@ -16,6 +16,8 @@ import com.imams.boardminton.domain.model.IMatchType
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.MatchUIState
 import com.imams.boardminton.domain.model.WinnerState
+import com.imams.boardminton.ui.screen.timer.MatchTimerGenerator
+import com.imams.boardminton.ui.screen.timer.TimeCounterUiState
 import com.imams.data.match.repository.MatchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,11 +37,14 @@ class ScoreBoardVM @Inject constructor(
     private var alreadySetup = false
     private var courtConfig = CourtSide(left = ISide.A, right = ISide.B)
 
-    private val _matchUiState = MutableStateFlow(MatchUIState().apply { courtSide = courtConfig })
+    private val _matchUiState = MutableStateFlow(MatchUIState(matchDuration = 0L).apply { courtSide = courtConfig })
     val matchUIState: StateFlow<MatchUIState> = _matchUiState.asStateFlow()
 
     private val _winnerState = MutableStateFlow(WinnerState(WinnerState.Type.Game, 1, isWin = false, show = false, by = ""))
     val winnerState: StateFlow<WinnerState> = _winnerState.asStateFlow()
+
+    private val timeGenerator by lazy { MatchTimerGenerator() }
+    val tcUiState : StateFlow<TimeCounterUiState> get() = timeGenerator.getUiState()
 
     init {
         observeWinner()
@@ -94,18 +99,29 @@ class ScoreBoardVM @Inject constructor(
                 useCase.create(data[0], data[1], data[2], data[3])
             }
             it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
-        }.also { alreadySetup = true }
+        }.also {
+            alreadySetup = true
+            generateMatchTimer(0L)
+        }
     }
 
     private fun setupWithId(id: Int) {
         viewModelScope.launch {
             val data = repository.getMatch(id).first().toVp()
             _matchUiState.update {
-                printLog("data ${data.currentGame}")
                 useCase.create(data)
-                it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
-            }.also { alreadySetup = true }
+                it.copy(match = useCase.getMatch(), matchDuration = data.matchDurations).apply {
+                    setScoreByCourt(courtConfig)
+                }
+            }.also {
+                alreadySetup = true
+                generateMatchTimer(data.matchDurations)
+            }
         }
+    }
+
+    private fun generateMatchTimer(init: Long? = null) {
+        timeGenerator.start(init)
     }
 
     fun updatePlayers(json: String, single: Boolean) {
@@ -178,6 +194,7 @@ class ScoreBoardVM @Inject constructor(
 
     private fun onEndMatch() {
         // todo
+        timeGenerator.pause()
     }
 
     private fun onNewGame() {
@@ -193,8 +210,9 @@ class ScoreBoardVM @Inject constructor(
     }
 
     fun updateGame(callback: () -> Unit) {
+        val duration = timeGenerator.currentTimerInSeconds(pause = true)
         viewModelScope.launch {
-            repository.updateMatch(_matchUiState.value.match.toRepo())
+            repository.updateMatch(_matchUiState.value.match.toRepo().apply { matchDuration = duration })
             callback.invoke()
         }
     }

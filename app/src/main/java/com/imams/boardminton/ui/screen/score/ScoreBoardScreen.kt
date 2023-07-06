@@ -56,7 +56,6 @@ import com.imams.boardminton.ui.component.GameFinishDialogContent
 import com.imams.boardminton.ui.component.MainNameBoardView
 import com.imams.boardminton.ui.component.MyCourtMatch
 import com.imams.boardminton.ui.component.TimeCounterView
-import com.imams.boardminton.ui.screen.timer.CounterTimerVM
 import com.imams.boardminton.ui.screen.timer.TimeCounterUiState
 
 @Composable
@@ -65,7 +64,6 @@ fun ScoreBoardScreen(
     single: Boolean,
     players: String,
     onEdit: (Boolean, String) -> Unit,
-    counterVm: CounterTimerVM = hiltViewModel(),
     scoreVm: ScoreBoardVM = hiltViewModel(),
     savedStateHandle: SavedStateHandle?,
     onBackPressed: () -> Unit,
@@ -78,11 +76,10 @@ fun ScoreBoardScreen(
 
     LaunchedEffect(Unit) {
         scoreVm.setupPlayer(id, players, single)
-        counterVm.start()
     }
 
     val uiState by scoreVm.matchUIState.collectAsState()
-    val timerUiState by counterVm.tcUiState.collectAsState()
+    val timerUiState by scoreVm.tcUiState.collectAsState()
     val winnerState by scoreVm.winnerState.collectAsState()
 
     if (savedStateHandle != null) {
@@ -152,7 +149,9 @@ private fun ScoreBoardScreen(
 
     @Composable
     fun courtView() = MyCourtMatch(
-        modifier = Modifier.fillMaxWidth().padding(2.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp),
         court = uiState.scoreByCourt,
         type = uiState.match.matchType,
     )

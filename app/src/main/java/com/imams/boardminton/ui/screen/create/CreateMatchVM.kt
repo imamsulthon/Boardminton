@@ -127,6 +127,7 @@ class CreateMatchVM @Inject constructor(
                     games = listOf<GameViewParam>().toJson(),
                     winner = Winner.None.name,
                     lastUpdate = System.currentTimeMillis().toString(),
+                    matchDuration = 0L,
             ))
         }
     }

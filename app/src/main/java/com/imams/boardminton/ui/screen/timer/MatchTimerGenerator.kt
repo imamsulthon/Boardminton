@@ -1,35 +1,36 @@
 package com.imams.boardminton.ui.screen.timer
 
-import androidx.lifecycle.ViewModel
-import com.imams.boardminton.ui.screen.timer.Util.formatTime
 import com.imams.boardminton.ui.screen.timer.Util.pad
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.util.Timer
-import javax.inject.Inject
 import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-@HiltViewModel
-class CounterTimerVM @Inject constructor(): ViewModel() {
+class MatchTimerGenerator {
 
     private var timeDuration: Duration = Duration.ZERO
     private lateinit var timer: Timer
-
     private var _gameDuration = mutableListOf<GameDuration>()
-
     private val _tcUiState = MutableStateFlow(TimeCounterUiState())
-    val tcUiState: StateFlow<TimeCounterUiState> get() = _tcUiState
 
-    fun start(init: Duration? = null) {
-        init?.let { timeDuration.plus(it) }
-        start()
+    fun getUiState(): StateFlow<TimeCounterUiState> {
+        return _tcUiState.asStateFlow()
     }
 
-    private fun start() {
+    fun currentTimerInSeconds(pause: Boolean = true): Long {
+        return timeDuration.inWholeSeconds.also { if (pause) timer.cancel() }
+    }
+
+    fun start(init: Long?) {
+        init?.let { timeDuration = timeDuration.plus(it.seconds) }
+        runTimer()
+    }
+
+    private fun runTimer() {
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             timeDuration = timeDuration.plus(1.seconds)
             updateTimeStates()
@@ -40,7 +41,7 @@ class CounterTimerVM @Inject constructor(): ViewModel() {
         timeDuration.toComponents { hours, minutes, seconds, _ ->
             _tcUiState.update {
                 it.copy(
-                    counter = formatTime(seconds.pad(), minutes.pad(), hours.pad())
+                    counter = Util.formatTime(seconds.pad(), minutes.pad(), hours.pad())
                 )
             }
         }
@@ -50,26 +51,19 @@ class CounterTimerVM @Inject constructor(): ViewModel() {
         timer.cancel()
     }
 
+    fun restart() {
+        timer.cancel()
+        timeDuration = Duration.ZERO
+        runTimer()
+    }
+
     fun stop() {
-        pause()
+        timer.cancel()
         timeDuration = Duration.ZERO
         updateTimeStates()
     }
 
-    fun restart() {
-        timer.cancel()
-        timeDuration = Duration.ZERO
-        start()
-    }
-
-    fun restart(onGame: Int) {
-        val currentGameDuration = _gameDuration.find { it.index == onGame } ?: GameDuration(onGame)
-        _gameDuration.add(currentGameDuration.apply {
-            inWholeSeconds = timeDuration.inWholeSeconds
-            inLabel = _tcUiState.value.counter
-        })
-        _tcUiState.update { it.copy(gameDuration = _gameDuration) }
-    }
+    private fun log(m: String) = println("ScoreBoard MatchTimeGenerator: $m")
 
 }
 

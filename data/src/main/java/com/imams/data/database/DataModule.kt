@@ -21,7 +21,9 @@ object DataModule {
             application,
             AppDatabase::class.java,
             "boardminton_database"
-    ).build()
+        )
+        .fallbackToDestructiveMigration()
+        .build()
 
     @Provides
     @Singleton

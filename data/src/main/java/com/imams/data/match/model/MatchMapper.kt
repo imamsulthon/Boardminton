@@ -13,6 +13,7 @@ object MatchMapper {
         games = games,
         winner = winner,
         lastUpdate = lastUpdate,
+        matchDuration = matchDuration,
     )
 
     fun Match.toEntity(withId: Boolean = false) = MatchEntity(
@@ -23,6 +24,7 @@ object MatchMapper {
         games = games,
         winner = winner,
         lastUpdate = lastUpdate,
+        matchDuration = matchDuration,
     ).also {
         if (withId) it.id = id
     }

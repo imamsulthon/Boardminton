@@ -9,4 +9,5 @@ data class Match(
     val games: String,
     var winner: String,
     var lastUpdate: String,
+    var matchDuration: Long,
 )

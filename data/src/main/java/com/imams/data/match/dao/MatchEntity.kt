@@ -14,4 +14,5 @@ data class MatchEntity(
     @ColumnInfo("games") val games: String,
     @ColumnInfo("winner") val winner: String,
     @ColumnInfo("last_update") val lastUpdate: String,
+    @ColumnInfo("match_duration") val matchDuration: Long = 0L,
 )

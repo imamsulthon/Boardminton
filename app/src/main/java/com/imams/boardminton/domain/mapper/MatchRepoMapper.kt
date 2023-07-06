@@ -20,6 +20,7 @@ object MatchRepoMapper {
         currentGame = currentGame.toGame(),
         games = games.toGames(),
         lastUpdate = lastUpdate,
+        matchDurations = matchDuration,
     )
 
     private fun String.asTeam(): TeamViewParam {
@@ -59,6 +60,7 @@ object MatchRepoMapper {
         games = games.toJson(),
         winner = winner.name,
         lastUpdate = System.currentTimeMillis().toString(),
+        matchDuration = matchDurations,
     )
 
 }

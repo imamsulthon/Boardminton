@@ -38,12 +38,10 @@ class MatchRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveMatch(match: Match) {
-        log("save $match")
         dao.addMatch(match.toEntity())
     }
 
     override suspend fun updateMatch(match: Match) {
-        log("update $match")
         dao.updateMatch(match.toEntity(true))
     }
 

@@ -182,7 +182,6 @@ fun MatchItem(
         },
         tonalElevation = 2.dp,
         shadowElevation = 2.dp,
-
         headlineContent = {
             ItemContent(
                 type = item.matchType.name,
@@ -198,6 +197,7 @@ fun MatchItem(
         },
         trailingContent = {
             Text(text = item.winner.name)
+            Text(text = item.matchDurations.toString())
         }
     )
 }

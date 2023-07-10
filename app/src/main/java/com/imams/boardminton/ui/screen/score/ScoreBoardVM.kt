@@ -129,7 +129,11 @@ class ScoreBoardVM @Inject constructor(
             val data = json.toList()
             val t = if (single) IMatchType.Single else IMatchType.Double
             _matchUiState.update {
-                useCase.updatePlayers(t, data[0], data[1], data[2], data[3])
+                if (single) {
+                    useCase.updatePlayers(t, data[0], "", data[1], "")
+                } else {
+                    useCase.updatePlayers(t, data[0], data[1], data[2], data[3])
+                }
                 it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
             }
         }
@@ -178,6 +182,7 @@ class ScoreBoardVM @Inject constructor(
         _matchUiState.update {
             it.copy(match = useCase.getMatch()).apply { setScoreByCourt(courtConfig) }
         }
+        timeGenerator.restart()
     }
 
     fun onGameEndDialog(finishIt: Boolean, type: WinnerState.Type) {

@@ -13,9 +13,9 @@ interface MatchRepository {
 
     suspend fun getMatch(id: Int): Flow<Match>
 
-    suspend fun saveMatch(match: Match)
+    suspend fun saveMatch(match: Match): Long
 
-    suspend fun updateMatch(match: Match)
+    suspend fun updateMatch(match: Match): Int
 
-    suspend fun deleteMatch(match: Match)
+    suspend fun deleteMatch(match: Match): Int
 }

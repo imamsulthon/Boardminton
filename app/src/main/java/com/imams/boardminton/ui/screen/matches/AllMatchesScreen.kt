@@ -48,10 +48,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.imams.boardminton.data.asDateTime
+import com.imams.boardminton.data.prettifyDate
 import com.imams.boardminton.domain.model.GameViewParam
 import com.imams.boardminton.domain.model.MatchViewParam
 import com.imams.boardminton.domain.model.ScoreViewParam
+import com.imams.boardminton.ui.component.EmptyContent
 import com.imams.boardminton.ui.utils.getLabel
 
 @Composable
@@ -66,13 +67,17 @@ fun AllMatchesScreen(
         viewModel.fetchData()
     }
 
-    AllMatchContent(
-        list = list,
-        onRemove = viewModel::remove,
-        onItemClick = {
-            onSelect?.invoke(it.matchType.name.lowercase(), it.id)
-        }
-    )
+    if (list.isNotEmpty()) {
+        AllMatchContent(
+            list = list,
+            onRemove = viewModel::remove,
+            onItemClick = {
+                onSelect?.invoke(it.matchType.name.lowercase(), it.id)
+            }
+        )
+    } else {
+        EmptyContent(message = "No Match Found")
+    }
 
 }
 
@@ -193,11 +198,10 @@ fun MatchItem(
             )
         },
         supportingContent = {
-            Text(text = item.lastUpdate.asDateTime() ?: item.lastUpdate, fontSize = 10.sp)
+            Text(text = "${item.lastUpdate.prettifyDate()} in ${item.matchDurations}'s", fontSize = 10.sp)
         },
         trailingContent = {
-            Text(text = item.winner.name)
-            Text(text = item.matchDurations.toString())
+            Text(text = "Winner\n${item.winner.name}")
         }
     )
 }
@@ -212,7 +216,6 @@ private fun ItemContent(
     games: MutableList<GameViewParam>,
 ) {
     Column {
-        Text(text = "$type match", fontSize = 10.sp)
         LazyRow(
             horizontalArrangement = Arrangement.Start,
         ) {
@@ -223,7 +226,7 @@ private fun ItemContent(
                         .padding(end = 20.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "")
+                    Text(text = "$type match", fontWeight = FontWeight.Bold)
                     Text(text = teamA)
                     Text(text = teamB)
                 }

@@ -129,6 +129,11 @@ fun BoardMintonNavHost(
                     navController.popBackStack()
                     navController.navigate(ScoreBoard.invoke(matchType, players))
                 },
+                toScoreBoardWithId = { matchType, id ->
+                    printLog("${CreateMatch.fullRoute} type $matchType id $id")
+                    navController.popBackStack()
+                    navController.navigate(ScoreBoard.invoke(matchType, id))
+                },
                 onBackPressed = navController::navigateUp
             )
         }
@@ -142,7 +147,6 @@ fun BoardMintonNavHost(
         ) {
             val type = it.arguments?.getString(ScoreBoard.TYPE)
             val players = it.arguments?.getString(ScoreBoard.PLAYERS).orEmpty()
-            printLog("${ScoreBoard.fullRoute} type $type pl $players")
             ScoreBoardScreen(
                 single = type.equals("single", true), players = players,
                 onEdit = { _, json ->
@@ -182,7 +186,6 @@ fun BoardMintonNavHost(
             val type = it.arguments?.getString(EditPlayers.TYPE)
             val players = it.arguments?.getString(EditPlayers.PLAYERS).orEmpty()
             val isSingle = type == "single"
-            printLog("${EditPlayers.fullRoute} type $type players $players")
             EditPlayersScreen(
                 single = isSingle,
                 players = players,
@@ -209,8 +212,6 @@ fun BoardMintonNavHost(
         ) {
             val context = LocalContext.current
             val id = it.arguments?.getInt("id") ?: 0
-            printLog("${EditCreatedPlayer.fullRoute} id $id")
-
             EditPlayerCreatedScreen(
                 id = id,
                 onSave = {
@@ -224,7 +225,6 @@ fun BoardMintonNavHost(
                 onBackPressed = navController::navigateUp,
                 addNewPlayer = { navController.navigate(CreatePlayer.fullRoute) },
                 onEditPlayer = {
-                    printLog("onItemClick $it")
                     navController.navigate(EditCreatedPlayer.invoke(it))
                 }
             )
@@ -233,7 +233,6 @@ fun BoardMintonNavHost(
         composable(AllMatches.fullRoute) {
             AllMatchesScreen(
                 onSelect = { matchType, id ->
-                    printLog("AllMatchesScreen $it")
                     navController.navigate(ScoreBoard.invoke(matchType, id))
                 }
             )

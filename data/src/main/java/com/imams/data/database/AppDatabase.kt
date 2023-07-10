@@ -9,7 +9,7 @@ import com.imams.data.player.dao.PlayerEntity
 
 @Database(
     entities = [PlayerEntity::class, MatchEntity::class],
-    version = 2
+    version = 1
 )
 abstract class AppDatabase: RoomDatabase() {
     abstract fun playerDao(): PlayerDao

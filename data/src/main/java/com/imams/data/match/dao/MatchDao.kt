@@ -5,6 +5,8 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -23,12 +25,23 @@ interface MatchDao {
     fun getMatch(id: Int): Flow<MatchEntity>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addMatch(match: MatchEntity)
+    suspend fun addMatch(match: MatchEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun updateMatch(matchEntity: MatchEntity)
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updateMatch(matchEntity: MatchEntity): Int
+
+    @Transaction
+    suspend fun addOrUpdate(match: MatchEntity): Long {
+        val id = addMatch(match)
+        return if (id == -1L) {
+            updateMatch(match)
+            match.id.toLong()
+        } else {
+            id
+        }
+    }
 
     @Delete
-    suspend fun delete(match: MatchEntity)
+    suspend fun delete(match: MatchEntity): Int
 
 }

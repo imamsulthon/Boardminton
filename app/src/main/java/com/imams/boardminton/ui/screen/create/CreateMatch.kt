@@ -45,6 +45,7 @@ import com.imams.boardminton.ui.theme.Orientation
 fun CreateMatchScreen(
     single: Boolean,
     toScoreBoard: (String, String) -> Unit,
+    toScoreBoardWithId: ((String, Int) -> Unit) ? = null,
     onBackPressed: () -> Unit,
     vm: CreateMatchVM = hiltViewModel(),
 ) {
@@ -70,8 +71,11 @@ fun CreateMatchScreen(
     val config = LocalConfiguration.current
 
     fun gotoScoreBoard() {
-        vm.saveInputPlayer(singleMatch)
-        toScoreBoard.invoke(if (singleMatch) "single" else "double", listOf(playerA1, playerA2, playerB1, playerB2).toJson())
+        vm.saveInputPlayer(singleMatch, callback = {t, id ->
+            if (id > 0) toScoreBoardWithId?.invoke(t, id)
+            else toScoreBoard.invoke(if (singleMatch) "single" else "double",
+                listOf(playerA1, playerA2, playerB1, playerB2).toJson())
+        })
     }
 
     val bottomListener = object : BottomListener {
@@ -107,7 +111,8 @@ fun CreateMatchScreen(
                 swapPlayer = vm::swapSingleMatch,
                 importPerson = {
                     selectedFieldForImport = it
-                    openBottomSheet = true                }
+                    openBottomSheet = true
+                }
             )
         } else {
             FieldInputDoubleMatch(

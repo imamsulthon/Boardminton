@@ -83,7 +83,11 @@ class GameEngine constructor(
      * Revert/swap the side whose on serve.
      */
     fun revertServer() {
-        scoreA.onServe = scoreB.onServe.also { scoreB.onServe = scoreA.onServe }
+        if (!scoreA.onServe && !scoreB.onServe) {
+            scoreA.onServe = true
+        } else {
+            scoreA.onServe = scoreB.onServe.also { scoreB.onServe = scoreA.onServe }
+        }
         onServe = when (onServe) {
             OnServe.A -> OnServe.B
             else -> OnServe.A

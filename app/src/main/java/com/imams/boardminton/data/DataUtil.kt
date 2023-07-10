@@ -25,9 +25,13 @@ fun <T, M> StateFlow<T>.map(
     SharingStarted.Eagerly,
     mapper(value)
 )
-fun String.asDateTime(): String? {
+
+fun String.prettifyDate(): String {
+    return "${this.asDateTime("EEEE, dd MMM yyyy")}, at ${this.asDateTime("hh:mm:ss")}"
+}
+fun String.asDateTime(pattern: String = "EEEE, dd MMM yyyy hh:mm:ss"): String? {
     return try {
-        val sdf = SimpleDateFormat("MM/dd/yyyy hh:mm:ss")
+        val sdf = SimpleDateFormat(pattern)
         val netDate = this.toLong()
         sdf.format(netDate)
     } catch (e: Exception) {

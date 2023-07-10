@@ -50,7 +50,7 @@ class CreateMatchVM @Inject constructor(
 
     fun setupPlayers(isSingle: Boolean, json: String) {
         val data = json.toList()
-        if (isSingle) setupPlayers(a1 = data[0], b1 = data[0])
+        if (isSingle) setupPlayers(a1 = data[0], b1 = data[2])
         else setupPlayers(data[0], data[1], data[2], data[3])
     }
 
@@ -116,10 +116,9 @@ class CreateMatchVM @Inject constructor(
         }
     }
 
-    fun saveInputPlayer(single: Boolean) {
+    fun saveInputPlayer(single: Boolean, callback: (String, Int) -> Unit) {
         viewModelScope.launch {
-            repository.saveMatch(
-                Match(
+            when (val save = repository.saveMatch(Match(
                     type = if (single) "single" else "double",
                     teamA = TeamViewParam(PlayerViewParam(playerA1.value), PlayerViewParam(playerA2.value), false).toJson(),
                     teamB = TeamViewParam(PlayerViewParam(playerB1.value), PlayerViewParam(playerB2.value), false).toJson(),
@@ -128,7 +127,15 @@ class CreateMatchVM @Inject constructor(
                     winner = Winner.None.name,
                     lastUpdate = System.currentTimeMillis().toString(),
                     matchDuration = 0L,
-            ))
+                )).toInt()
+            ) {
+                0 -> callback.invoke(
+                    if (single) "single" else "double", save
+                )
+                else -> callback.invoke(
+                    if (single) "single" else "double", save
+                )
+            }
         }
     }
 

@@ -37,16 +37,22 @@ class MatchRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun saveMatch(match: Match) {
-        dao.addMatch(match.toEntity())
+    override suspend fun saveMatch(match: Match): Long {
+        return dao.addOrUpdate(match.toEntity()).also {
+            log("save $it")
+        }
     }
 
-    override suspend fun updateMatch(match: Match) {
-        dao.updateMatch(match.toEntity(true))
+    override suspend fun updateMatch(match: Match): Int {
+        return dao.addOrUpdate(match.toEntity(true)).toInt().also {
+            log("update $it")
+        }
     }
 
-    override suspend fun deleteMatch(match: Match) {
-        dao.delete(match.toEntity(true))
+    override suspend fun deleteMatch(match: Match): Int {
+        return dao.delete(match.toEntity(true)).also {
+            log("delete $it")
+        }
     }
 
 }

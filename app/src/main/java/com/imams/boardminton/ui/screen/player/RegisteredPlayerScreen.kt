@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.data.Athlete
+import com.imams.boardminton.ui.component.EmptyContent
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 
 @Composable
@@ -60,15 +61,19 @@ fun RegisteredPlayersScreen(
     onEditPlayer: (id: Int) -> Unit,
 ) {
     val list by viewModel.savePlayers.collectAsState()
-    RegisteredPlayersScreen(list = list,
-        onBackPressed = onBackPressed::invoke,
-        addNewPlayer = { addNewPlayer.invoke() },
-        remove = { viewModel.removePlayer(it) },
-        onItemClick = { 
-            println("RegisteredPlayer onClick: $it")
-            onEditPlayer.invoke(it.id)
-        }
-    )
+    if (list.isNotEmpty()) {
+        RegisteredPlayersScreen(list = list,
+            onBackPressed = onBackPressed::invoke,
+            addNewPlayer = { addNewPlayer.invoke() },
+            remove = { viewModel.removePlayer(it) },
+            onItemClick = {
+                onEditPlayer.invoke(it.id)
+            }
+        )
+    } else {
+        EmptyContent(message = "No Registered Player found")
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

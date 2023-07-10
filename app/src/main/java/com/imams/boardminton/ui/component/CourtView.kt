@@ -67,44 +67,44 @@ fun CourtViewMatchSingle(
     pA1: String,
     pB1: String,
 ) {
+    val onIndex: Int by remember(court.right, court.left,) {
+        getIndexServer(court)
+    }
     val paEven by remember(court.left.onServe, court.left.point, court.right.point) {
         mutableStateOf(
             if (court.left.onServe) {
                 if (court.left.point.odd()) null else pA1
-            } else {
+            } else if (court.right.onServe) {
                 if (court.right.point.odd()) null else pA1
-            }
+            } else pA1
         )
     }
     val paOdd by remember(court.left.onServe, court.left.point, court.right.point) {
         mutableStateOf(
             if (court.left.onServe) {
                 if (court.left.point.odd()) pA1 else null
-            } else {
+            } else if (court.right.onServe) {
                 if (court.right.point.odd()) pA1 else null
-            }
+            } else null
         )
     }
     val pBEven by remember(court.right.onServe, court.left.point, court.right.point) {
         mutableStateOf(
             if (court.right.onServe) {
                 if (court.right.point.odd()) null else pB1
-            } else {
+            } else if (court.left.onServe) {
                 if (court.left.point.odd()) null else pB1
-            }
+            } else pB1
         )
     }
     val pBOdd by remember(court.right.onServe, court.left.point, court.right.point) {
         mutableStateOf(
             if (court.right.onServe) {
                 if (court.right.point.odd()) pB1 else null
-            } else {
+            } else if (court.left.onServe) {
                 if (court.left.point.odd()) pB1 else null
-            }
+            } else null
         )
-    }
-    val onIndex: Int by remember(court.right, court.left,) {
-        getIndexServer(court)
     }
     CourtView(
         modifier = modifier,
@@ -127,36 +127,36 @@ fun CourtViewMatchDouble(
         mutableStateOf(
             if (court.left.onServe) {
                 if (court.left.point.odd()) pA1 else pA2
-            } else {
+            } else if (court.right.onServe) {
                 if (court.right.point.odd()) pA2 else pA1
-            }
+            } else pA1
         )
     }
     val paOdd by remember(court.left.onServe, court.left.point, court.right.point) {
         mutableStateOf(
             if (court.left.onServe) {
                 if (court.left.point.odd()) pA2 else pA1
-            } else {
+            } else if (court.right.onServe) {
                 if (court.right.point.odd()) pA1 else pA2
-            }
+            } else pA2
         )
     }
     val pBEven by remember(court.right.onServe, court.left.point, court.right.point) {
         mutableStateOf(
             if (court.right.onServe) {
                 if (court.right.point.odd()) pB1 else pB2
-            } else {
+            } else if (court.left.onServe) {
                 if (court.left.point.odd()) pB2 else pB1
-            }
+            } else pB1
         )
     }
     val pBOdd by remember(court.right.onServe, court.left.point, court.right.point) {
         mutableStateOf(
             if (court.right.onServe) {
                 if (court.right.point.odd()) pB2 else pB1
-            } else {
+            } else if (court.left.onServe) {
                 if (court.left.point.odd()) pB1 else pB2
-            }
+            } else pB2
         )
     }
 
@@ -168,7 +168,7 @@ fun CourtViewMatchDouble(
     )
 }
 
-private fun Int.odd(): Boolean = this % 2 > 0
+private fun Int.odd(): Boolean = if (this == 0) false else this % 2 > 0
 private fun getIndexServer(court: ScoreByCourt): MutableIntState {
     return mutableStateOf(
         when {

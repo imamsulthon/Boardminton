@@ -14,6 +14,7 @@ object MatchMapper {
         winner = winner,
         lastUpdate = lastUpdate,
         matchDuration = matchDuration,
+        shuttleCockUsed = shuttleCockUsed,
     )
 
     fun Match.toEntity(withId: Boolean = false) = MatchEntity(
@@ -25,6 +26,7 @@ object MatchMapper {
         winner = winner,
         lastUpdate = lastUpdate,
         matchDuration = matchDuration,
+        shuttleCockUsed = shuttleCockUsed,
     ).also {
         if (withId) it.id = id
     }

@@ -21,8 +21,10 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -216,6 +218,8 @@ private fun ScoreBoardScreen(
             bPlus = { scoreVm.pointTo(Court.Right) },
             bMin = { scoreVm.minusPoint(Court.Right) },
             swap = { scoreVm.swapServe() },
+            addCock = { scoreVm.addShuttleCock() },
+            cockCount = uiState.match.shuttleCockCount,
             enabled = uiState.match.currentGame.winner.none()
         )
     }
@@ -380,17 +384,48 @@ private fun PortraitContent(
 
 @Composable
 private fun BottomView(
+    modifier: Modifier = Modifier,
     aPlus: () -> Unit,
     aMin: () -> Unit,
     bPlus: () -> Unit,
     bMin: () -> Unit,
     swap: () -> Unit,
+    addCock: () -> Unit,
+    cockCount: Int = 0,
     enabled: Boolean,
-    modifier: Modifier = Modifier
 ) {
+    @Composable
+    fun swapButton() {
+        OutlinedButton(
+            onClick = { swap.invoke() },
+            modifier = Modifier.widthIn(min = 40.dp, max = 60.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_on_serve),
+                contentDescription = "swap_server"
+            )
+        }
+    }
+
+    @Composable
+    fun addCockButton() {
+        IconButton(
+            onClick = { addCock.invoke() },
+            modifier = Modifier.widthIn(min = 40.dp, max = 60.dp)
+        ) {
+            Row {
+                Text(text = cockCount.toString())
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_cock),
+                    contentDescription = "increase_count"
+                )
+            }
+        }
+    }
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom
     ) {
         ButtonPointLeft(
             onClickPlus = { aPlus.invoke() },
@@ -398,14 +433,16 @@ private fun BottomView(
             enabled = enabled
         )
 
-        OutlinedButton(
-            onClick = { swap.invoke() },
-            modifier = Modifier.widthIn(min = 40.dp, max = 60.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_cock),
-                contentDescription = "swap_server"
-            )
+        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                addCockButton()
+                swapButton()
+            }
+        } else {
+            Row {
+                swapButton()
+                addCockButton()
+            }
         }
 
         ButtonPointRight(

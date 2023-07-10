@@ -79,8 +79,8 @@ class CombinedMatchBoardUseCaseImpl : MatchBoardUseCase {
             is BoardEvent.SwapServer -> {
                 engine.swapServer()
             }
-            is BoardEvent.SwapBoardSide -> {
-                // todo
+            is BoardEvent.AddShuttleCock -> {
+                engine.addShuttleCock()
             }
             is BoardEvent.OnNewGame -> {
                 engine.createNewGame(event.index)
@@ -132,8 +132,8 @@ sealed class BoardEvent {
     data class PointTo(val side: ISide) : BoardEvent()
     data class MinTo(val side: ISide) : BoardEvent()
     data class ServeTo(val side: ISide) : BoardEvent()
+    object AddShuttleCock: BoardEvent()
     object SwapServer : BoardEvent()
-    object SwapBoardSide : BoardEvent()
     data class OnNewGame(val index: Int): BoardEvent()
     object ResetGame: BoardEvent()
 }

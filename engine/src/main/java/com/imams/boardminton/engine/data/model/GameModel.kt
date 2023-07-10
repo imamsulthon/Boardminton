@@ -52,6 +52,7 @@ data class MatchScore(
     val games: MutableList<Game> = mutableListOf(),
     val teamA: Team,
     val teamB: Team,
-    var winner: Winner = Winner.None
+    var winner: Winner = Winner.None,
+    val shuttleCockCount: Int
 )
 

@@ -10,4 +10,5 @@ data class Match(
     var winner: String,
     var lastUpdate: String,
     var matchDuration: Long,
+    var shuttleCockUsed: Int,
 )

@@ -61,9 +61,9 @@ data class MatchViewParam(
     val winner: Winner = Winner.None,
     val lastUpdate: String = "",
     val matchDurations: Long = 0L,
+    val shuttleCockCount: Int = 0,
 )
 
-// region UI State Model
 data class TeamViewParam(
     val player1: PlayerViewParam,
     val player2: PlayerViewParam,
@@ -107,7 +107,6 @@ data class CourtSide(
     fun swap() {
         left = right.also { right = left }
     }
-// endregion
 }
 
 data class WinnerState(

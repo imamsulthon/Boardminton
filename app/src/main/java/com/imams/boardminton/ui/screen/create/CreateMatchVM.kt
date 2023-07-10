@@ -118,20 +118,32 @@ class CreateMatchVM @Inject constructor(
 
     fun saveInputPlayer(single: Boolean, callback: (String, Int) -> Unit) {
         viewModelScope.launch {
-            when (val save = repository.saveMatch(Match(
+            when (val save = repository.saveMatch(
+                Match(
                     type = if (single) "single" else "double",
-                    teamA = TeamViewParam(PlayerViewParam(playerA1.value), PlayerViewParam(playerA2.value), false).toJson(),
-                    teamB = TeamViewParam(PlayerViewParam(playerB1.value), PlayerViewParam(playerB2.value), false).toJson(),
+                    teamA = TeamViewParam(
+                        PlayerViewParam(playerA1.value),
+                        PlayerViewParam(playerA2.value),
+                        false
+                    ).toJson(),
+                    teamB = TeamViewParam(
+                        PlayerViewParam(playerB1.value),
+                        PlayerViewParam(playerB2.value),
+                        false
+                    ).toJson(),
                     currentGame = GameViewParam().toJson(),
                     games = listOf<GameViewParam>().toJson(),
                     winner = Winner.None.name,
                     lastUpdate = System.currentTimeMillis().toString(),
                     matchDuration = 0L,
-                )).toInt()
+                    shuttleCockUsed = 0,
+                )
+            ).toInt()
             ) {
                 0 -> callback.invoke(
                     if (single) "single" else "double", save
                 )
+
                 else -> callback.invoke(
                     if (single) "single" else "double", save
                 )

@@ -168,6 +168,15 @@ class ScoreBoardVM @Inject constructor(
         }
     }
 
+    fun addShuttleCock() {
+        viewModelScope.launch {
+            _matchUiState.update {
+                useCase.execute(BoardEvent.AddShuttleCock)
+                it.copy(match = useCase.getMatch())
+            }
+        }
+    }
+
     fun swapCourt() {
         viewModelScope.launch {
             _matchUiState.update {
@@ -198,7 +207,6 @@ class ScoreBoardVM @Inject constructor(
     }
 
     private fun onEndMatch() {
-        // todo
         timeGenerator.pause()
     }
 

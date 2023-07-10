@@ -21,6 +21,7 @@ class MatchEngine(
     private val rule: MatchRule = MatchRule()
     private var gameIndex: Int = 1
     private var gameEngine: GameEngine
+    private var shuttleCockCount = 0
 
     private val previousGameWinner by lazy {
         if (previousGames.isNotEmpty()) previousGames.last().winner else Winner.None
@@ -65,6 +66,7 @@ class MatchEngine(
             match.currentGame.onServe, match.currentGame.winner
         )
         winner = match.winner
+        shuttleCockCount = match.shuttleCockCount
     }
 
     init {
@@ -114,6 +116,10 @@ class MatchEngine(
         executeMatchRules()
     }
 
+    fun addShuttleCock() {
+        shuttleCockCount++
+    }
+
     /**
      * Create new game engine
      */
@@ -160,6 +166,7 @@ class MatchEngine(
         teamA = teamA,
         teamB = teamB,
         winner = winner,
+        shuttleCockCount = shuttleCockCount,
     )
 
     // endregion

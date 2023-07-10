@@ -20,7 +20,8 @@ fun MatchViewParam.toModel() = MatchScore(
     games = games.map { it.toModel() }.toMutableList(),
     teamA = teamA.toModel(),
     teamB = teamB.toModel(),
-    winner = this.winner,
+    winner = winner,
+    shuttleCockCount = shuttleCockCount,
 )
 
 fun MatchScore.toVp() = MatchViewParam(
@@ -30,7 +31,8 @@ fun MatchScore.toVp() = MatchViewParam(
     games = games.map { it.toVp() }.toMutableList(),
     teamA = teamA.toVp(),
     teamB = teamB.toVp(),
-    winner = winner
+    winner = winner,
+    shuttleCockCount = shuttleCockCount,
 )
 
 fun Game.toVp() = GameViewParam(

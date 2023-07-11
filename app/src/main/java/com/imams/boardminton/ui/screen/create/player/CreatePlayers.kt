@@ -266,7 +266,7 @@ private fun InputField(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HandPlays(
+fun HandPlays(
     modifier: Modifier,
     initialSelection: String = "",
     onSelected: (String) -> Unit,
@@ -308,7 +308,7 @@ private fun HandPlays(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun GenderField(
+fun GenderField(
     modifier: Modifier,
     initialSelection: String = "",
     onSelected: (String) -> Unit,

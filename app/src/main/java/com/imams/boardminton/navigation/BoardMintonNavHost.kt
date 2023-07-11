@@ -30,7 +30,7 @@ import com.imams.boardminton.ui.screen.create.player.EditPlayerCreatedScreen
 import com.imams.boardminton.ui.screen.home.HomeScreen
 import com.imams.boardminton.ui.screen.home.HomeScreenVM
 import com.imams.boardminton.ui.screen.matches.AllMatchesScreen
-import com.imams.boardminton.ui.screen.player.RegisteredPlayersScreen
+import com.imams.boardminton.ui.screen.player.PlayerAndTeamsList
 import com.imams.boardminton.ui.screen.score.ScoreBoardScreen
 
 sealed class Destination(protected val route: String, vararg params: String) {
@@ -125,12 +125,10 @@ fun BoardMintonNavHost(
             CreateMatchScreen(
                 single = isSingle == "single",
                 toScoreBoard = { matchType, players ->
-                    printLog("${CreateMatch.fullRoute} type $matchType pl $players")
                     navController.popBackStack()
                     navController.navigate(ScoreBoard.invoke(matchType, players))
                 },
                 toScoreBoardWithId = { matchType, id ->
-                    printLog("${CreateMatch.fullRoute} type $matchType id $id")
                     navController.popBackStack()
                     navController.navigate(ScoreBoard.invoke(matchType, id))
                 },
@@ -221,8 +219,7 @@ fun BoardMintonNavHost(
         }
 
         composable(AllPlayers.fullRoute) {
-            RegisteredPlayersScreen(
-                onBackPressed = navController::navigateUp,
+            PlayerAndTeamsList(
                 addNewPlayer = { navController.navigate(CreatePlayer.fullRoute) },
                 onEditPlayer = {
                     navController.navigate(EditCreatedPlayer.invoke(it))

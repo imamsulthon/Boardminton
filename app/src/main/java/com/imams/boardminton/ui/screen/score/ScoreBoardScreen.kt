@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,9 +20,11 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -72,7 +75,6 @@ fun ScoreBoardScreen(
 ) {
 
     BackHandler(true) {
-        printLog("onBackHandler")
         scoreVm.updateGame(onBackPressed)
     }
 
@@ -382,6 +384,7 @@ private fun PortraitContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomView(
     modifier: Modifier = Modifier,
@@ -409,18 +412,20 @@ private fun BottomView(
 
     @Composable
     fun addCockButton() {
-        IconButton(
-            onClick = { addCock.invoke() },
-            modifier = Modifier.widthIn(min = 40.dp, max = 60.dp)
+        BadgedBox(
+            badge = { Badge { Text(text = cockCount.toString()) } }
         ) {
-            Row {
-                Text(text = cockCount.toString())
+            OutlinedButton(
+                onClick = { addCock.invoke() },
+                modifier = Modifier.widthIn(min = 40.dp, max = 60.dp)
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_cock),
                     contentDescription = "increase_count"
                 )
             }
         }
+
     }
     Row(
         modifier = modifier,
@@ -432,7 +437,6 @@ private fun BottomView(
             onClickMin = { aMin.invoke() },
             enabled = enabled
         )
-
         if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 addCockButton()
@@ -440,8 +444,9 @@ private fun BottomView(
             }
         } else {
             Row {
-                swapButton()
                 addCockButton()
+                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                swapButton()
             }
         }
 

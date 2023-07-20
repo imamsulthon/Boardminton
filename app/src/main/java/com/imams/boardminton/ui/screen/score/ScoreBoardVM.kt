@@ -53,11 +53,6 @@ class ScoreBoardVM @Inject constructor(
     private fun observeWinner() {
         viewModelScope.launch {
             _matchUiState.collect {
-                it.match.currentGame.let { g ->
-                    if (g.scoreA.point > 19 || g.scoreB.point > 19) {
-                        printLog("check: Winner ${g.winner}, game $g")
-                    }
-                }
                 when {
                     it.match.winner.any() -> {
                         _winnerState.update { state ->
@@ -229,7 +224,5 @@ class ScoreBoardVM @Inject constructor(
             callback.invoke()
         }
     }
-
-    private fun printLog(msg: String) = println("ScoreBoardVM $msg")
 
 }

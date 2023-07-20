@@ -49,8 +49,3 @@ private fun TimeCounterPreview() {
         pause = { /*TODO*/ }) {
     }
 }
-
-fun printLog(any: Any? = null, msg: String = "") {
-    if (any == null) println("AppLog: msg -> $msg")
-    else println("${any.javaClass.simpleName}: msg -> $msg")
-}

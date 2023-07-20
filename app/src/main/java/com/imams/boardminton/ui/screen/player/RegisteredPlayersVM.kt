@@ -55,7 +55,6 @@ class RegisteredPlayersVM @Inject constructor(
                 data = data.filter { it.gender == "Woman" }
             }
             else -> {
-                printLog("gender ${params.gender}")
             }
         }
         when (params.handPlay) {
@@ -95,10 +94,6 @@ class RegisteredPlayersVM @Inject constructor(
         viewModelScope.launch {
             repository.removePlayer(item.toModel(true))
         }
-    }
-
-    private fun printLog(msg: String) {
-        println("RegisteredPlayer VM $msg")
     }
 
 }

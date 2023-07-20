@@ -14,7 +14,6 @@ import com.imams.boardminton.domain.model.ITeam
 import com.imams.boardminton.domain.model.PlayerViewParam
 import com.imams.boardminton.domain.model.TeamViewParam
 import com.imams.boardminton.engine.data.model.Winner
-import com.imams.boardminton.ui.component.printLog
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.data.match.model.Match
 import com.imams.data.match.repository.MatchRepository
@@ -153,7 +152,6 @@ class CreateMatchVM @Inject constructor(
 
     fun randomPlayers(single: Boolean) {
         val optionals = _savePlayersFlow.value.toList().shuffled().take(4)
-        printLog("defaultPlayers size ${optionals.size}")
         if (single) {
             optionals.forEachIndexed { index, player ->
                 when (index) {

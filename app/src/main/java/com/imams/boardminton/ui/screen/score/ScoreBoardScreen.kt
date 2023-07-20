@@ -465,10 +465,6 @@ private fun LineDivider(padding: Dp = 20.dp, thick: Dp = 2.dp) = Divider(
     thickness = thick
 )
 
-private fun printLog(msg: String) {
-    println("ScoreBoardScreen $msg")
-}
-
 @Preview(device = Devices.NEXUS_6)
 @Composable
 private fun ScoreBoardScreenV() {

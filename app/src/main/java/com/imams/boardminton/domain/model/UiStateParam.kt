@@ -5,6 +5,7 @@ import com.imams.boardminton.engine.data.model.Winner
 
 data class MatchUIState(
     val match: MatchViewParam = MatchViewParam(
+        id = 0,
         matchType = IMatchType.Single,
         teamA = TeamViewParam(
             player1 = PlayerViewParam(""),
@@ -18,7 +19,9 @@ data class MatchUIState(
         ),
         currentGame = GameViewParam(),
         games = mutableListOf(),
+        lastUpdate = "",
     ),
+    val matchDuration: Long
 ) {
     var courtSide: CourtSide = CourtSide()
     var scoreByCourt: ScoreByCourt = getByCourt(courtSide)
@@ -49,15 +52,18 @@ data class MatchUIState(
 }
 
 data class MatchViewParam(
+    val id: Int,
     val matchType: IMatchType = IMatchType.Single,
     val currentGame: GameViewParam = GameViewParam(),
     val teamA: TeamViewParam,
     val teamB: TeamViewParam,
     val games: MutableList<GameViewParam> = mutableListOf(),
-    val winner: Winner = Winner.None
+    val winner: Winner = Winner.None,
+    val lastUpdate: String = "",
+    val matchDurations: Long = 0L,
+    val shuttleCockCount: Int = 0,
 )
 
-// region UI State Model
 data class TeamViewParam(
     val player1: PlayerViewParam,
     val player2: PlayerViewParam,
@@ -101,7 +107,6 @@ data class CourtSide(
     fun swap() {
         left = right.also { right = left }
     }
-// endregion
 }
 
 data class WinnerState(

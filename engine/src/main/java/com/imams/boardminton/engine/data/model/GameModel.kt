@@ -34,6 +34,7 @@ data class Game(
 
 data class Player(
     var name: String,
+    var onServe: Boolean = false,
 )
 
 data class Team(
@@ -45,11 +46,13 @@ data class Team(
 }
 
 data class MatchScore(
+    val id: Int,
     val type: MatchType = MatchType.Single,
     val currentGame: Game,
     val games: MutableList<Game> = mutableListOf(),
     val teamA: Team,
     val teamB: Team,
-    var winner: Winner = Winner.None
+    var winner: Winner = Winner.None,
+    val shuttleCockCount: Int
 )
 

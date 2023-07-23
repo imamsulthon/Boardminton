@@ -1,10 +1,12 @@
 package com.imams.boardminton.ui.screen.score
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,9 +20,14 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,7 +35,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
@@ -53,25 +59,31 @@ import com.imams.boardminton.ui.component.ButtonPointLeft
 import com.imams.boardminton.ui.component.ButtonPointRight
 import com.imams.boardminton.ui.component.GameFinishDialogContent
 import com.imams.boardminton.ui.component.MainNameBoardView
+import com.imams.boardminton.ui.component.MyCourtMatch
 import com.imams.boardminton.ui.component.TimeCounterView
-import com.imams.boardminton.ui.screen.timer.CounterTimerVM
 import com.imams.boardminton.ui.screen.timer.TimeCounterUiState
 
 @Composable
 fun ScoreBoardScreen(
+    id: Int? = null,
     single: Boolean,
     players: String,
     onEdit: (Boolean, String) -> Unit,
-    counterVm: CounterTimerVM = hiltViewModel(),
     scoreVm: ScoreBoardVM = hiltViewModel(),
     savedStateHandle: SavedStateHandle?,
+    onBackPressed: () -> Unit,
 ) {
 
-    // todo should use Side Effect?
-    scoreVm.setupPlayer(players, single)
+    BackHandler(true) {
+        scoreVm.updateGame(onBackPressed)
+    }
+
+    LaunchedEffect(Unit) {
+        scoreVm.setupPlayer(id, players, single)
+    }
 
     val uiState by scoreVm.matchUIState.collectAsState()
-    val timerUiState by counterVm.tcUiState.collectAsState()
+    val timerUiState by scoreVm.tcUiState.collectAsState()
     val winnerState by scoreVm.winnerState.collectAsState()
 
     if (savedStateHandle != null) {
@@ -139,10 +151,19 @@ private fun ScoreBoardScreen(
         }
     )
 
+    @Composable
+    fun courtView() = MyCourtMatch(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+        court = uiState.scoreByCourt,
+        type = uiState.match.matchType,
+    )
+
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(12.dp),
     ) {
         val (topRef, contentRef, bottomRef) = createRefs()
@@ -180,7 +201,8 @@ private fun ScoreBoardScreen(
                     height = Dimension.fillToConstraints
                 },
             board = { scoreBoard() },
-            main = { mainBoard() }
+            main = { mainBoard() },
+            courtView = { courtView() }
         )
 
         BottomView(
@@ -198,6 +220,8 @@ private fun ScoreBoardScreen(
             bPlus = { scoreVm.pointTo(Court.Right) },
             bMin = { scoreVm.minusPoint(Court.Right) },
             swap = { scoreVm.swapServe() },
+            addCock = { scoreVm.addShuttleCock() },
+            cockCount = uiState.match.shuttleCockCount,
             enabled = uiState.match.currentGame.winner.none()
         )
     }
@@ -287,6 +311,7 @@ private fun ContentView(
     modifier: Modifier = Modifier,
     board: @Composable () -> Unit,
     main: @Composable () -> Unit,
+    courtView: @Composable () -> Unit
 ) {
     val config = LocalConfiguration.current
     when (config.orientation) {
@@ -294,14 +319,16 @@ private fun ContentView(
             PortraitContent(
                 modifier = modifier,
                 mainBoard = { main() },
-                scoreBoard = { board() }
+                scoreBoard = { board() },
+                courtView = { courtView() },
             )
         }
         else -> {
             LandscapeContent(
                 modifier = modifier,
                 mainBoard = { main() },
-                scoreBoard = { board() }
+                scoreBoard = { board() },
+                courtView = { courtView() },
             )
         }
     }
@@ -313,6 +340,7 @@ private fun LandscapeContent(
     modifier: Modifier,
     mainBoard: @Composable () -> Unit,
     scoreBoard: @Composable () -> Unit,
+    courtView: @Composable () -> Unit,
 ) {
     Row(
         modifier = modifier.fillMaxSize(),
@@ -321,12 +349,18 @@ private fun LandscapeContent(
     ) {
         scoreBoard()
         Divider(
-            color = Color.Black, modifier = Modifier
+            color = MaterialTheme.colorScheme.onBackground, modifier = Modifier
                 .fillMaxHeight()
                 .padding(horizontal = 20.dp)
                 .width(2.dp)
         )
-        mainBoard()
+        Column(
+            verticalArrangement = Arrangement.Top,
+        ) {
+            mainBoard()
+            LineDivider(padding = 5.dp, thick = 1.dp)
+            courtView()
+        }
     }
 }
 
@@ -335,6 +369,7 @@ private fun PortraitContent(
     modifier: Modifier,
     mainBoard: @Composable () -> Unit,
     scoreBoard: @Composable () -> Unit,
+    courtView: @Composable () -> Unit,
 ) {
     Column(
         modifier = modifier.fillMaxHeight(),
@@ -344,37 +379,75 @@ private fun PortraitContent(
         mainBoard()
         LineDivider()
         scoreBoard()
+        LineDivider(thick = 1.dp)
+        courtView()
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomView(
+    modifier: Modifier = Modifier,
     aPlus: () -> Unit,
     aMin: () -> Unit,
     bPlus: () -> Unit,
     bMin: () -> Unit,
     swap: () -> Unit,
+    addCock: () -> Unit,
+    cockCount: Int = 0,
     enabled: Boolean,
-    modifier: Modifier = Modifier
 ) {
+    @Composable
+    fun swapButton() {
+        OutlinedButton(
+            onClick = { swap.invoke() },
+            modifier = Modifier.widthIn(min = 40.dp, max = 60.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_on_serve),
+                contentDescription = "swap_server"
+            )
+        }
+    }
+
+    @Composable
+    fun addCockButton() {
+        BadgedBox(
+            badge = { Badge { Text(text = cockCount.toString()) } }
+        ) {
+            OutlinedButton(
+                onClick = { addCock.invoke() },
+                modifier = Modifier.widthIn(min = 40.dp, max = 60.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_cock),
+                    contentDescription = "increase_count"
+                )
+            }
+        }
+
+    }
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom
     ) {
         ButtonPointLeft(
             onClickPlus = { aPlus.invoke() },
             onClickMin = { aMin.invoke() },
             enabled = enabled
         )
-
-        OutlinedButton(
-            onClick = { swap.invoke() },
-            modifier = Modifier.widthIn(min = 40.dp, max = 60.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_cock),
-                contentDescription = "swap_server"
-            )
+        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                addCockButton()
+                swapButton()
+            }
+        } else {
+            Row {
+                addCockButton()
+                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                swapButton()
+            }
         }
 
         ButtonPointRight(
@@ -386,18 +459,14 @@ private fun BottomView(
 }
 
 @Composable
-private fun LineDivider(padding: Dp = 20.dp) = Divider(
+private fun LineDivider(padding: Dp = 20.dp, thick: Dp = 2.dp) = Divider(
     modifier = Modifier.padding(vertical = padding),
-    color = Color.Black,
-    thickness = 2.dp
+    color = MaterialTheme.colorScheme.onBackground,
+    thickness = thick
 )
-
-private fun printLog(msg: String) {
-    println("ScoreBoardScreen $msg")
-}
 
 @Preview(device = Devices.NEXUS_6)
 @Composable
 private fun ScoreBoardScreenV() {
-    ScoreBoardScreen(false, "listOf()", onEdit = {_, _, ->}, savedStateHandle = null)
+    ScoreBoardScreen(null, false, "listOf()", onEdit = {_, _, ->}, savedStateHandle = null, onBackPressed = {})
 }

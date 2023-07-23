@@ -35,7 +35,9 @@ fun BaseScore(
     callback: ((Int, Boolean) -> Unit)? = null,
 ) {
     var before by remember { mutableStateOf(score) }
-    val boardColor by animateColorAsState(if (onTurn) Purple80 else White, tween(500))
+    val boardColor by animateColorAsState(
+        if (onTurn) MaterialTheme.colorScheme.primaryContainer else White, tween(500)
+    )
     Box(
         modifier = modifier
             .scoreMod(score, callback)
@@ -77,8 +79,12 @@ fun BaseScore(
                 Text(
                     text = targetCount.toString(), fontSize = 64.sp,
                     color = if (lastPoint) {
-                        if (winner) Green else Yellow
-                    } else if (onTurn) AppPrimaryColor else AppPrimaryColor,
+                        if (winner) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                    } else if (onTurn) {
+                        MaterialTheme.colorScheme.tertiary
+                    } else {
+                        MaterialTheme.colorScheme.tertiary
+                    },
                     textAlign = TextAlign.Center
                 )
                 before = targetCount

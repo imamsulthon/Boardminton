@@ -25,7 +25,7 @@ class CombinedMatchBoardUseCaseImpl : MatchBoardUseCase {
         teamB: TeamViewParam,
         prevGames: MutableList<GameViewParam>
     ) {
-        engine = MatchEngine(
+        engine = MatchEngine(0,
             matchType.toModel(), teamA.toModel(), teamB.toModel(),
             prevGames.map { it.toModel() }.toMutableList()
         )
@@ -79,8 +79,8 @@ class CombinedMatchBoardUseCaseImpl : MatchBoardUseCase {
             is BoardEvent.SwapServer -> {
                 engine.swapServer()
             }
-            is BoardEvent.SwapBoardSide -> {
-                // todo
+            is BoardEvent.AddShuttleCock -> {
+                engine.addShuttleCock()
             }
             is BoardEvent.OnNewGame -> {
                 engine.createNewGame(event.index)
@@ -100,15 +100,10 @@ class CombinedMatchBoardUseCaseImpl : MatchBoardUseCase {
 
     override fun getScore(courtSide: CourtSide): ScoreByCourt {
         val match = getMatch()
-        val left = if (courtSide.left == ISide.A) match.currentGame.scoreA
-        else match.currentGame.scoreB
-        val right = if (courtSide.right == ISide.A) match.currentGame.scoreA
-        else match.currentGame.scoreB
-        val teamOnLeft = if (courtSide.left == ISide.A) match.teamA
-        else match.teamB
-        val teamOnRight = if (courtSide.right == ISide.A) match.teamA
-        else match.teamB
-        println("ScoreBoardModel getScore on courtSide $courtSide")
+        val left = if (courtSide.left == ISide.A) match.currentGame.scoreA else match.currentGame.scoreB
+        val right = if (courtSide.right == ISide.A) match.currentGame.scoreA else match.currentGame.scoreB
+        val teamOnLeft = if (courtSide.left == ISide.A) match.teamA else match.teamB
+        val teamOnRight = if (courtSide.right == ISide.A) match.teamA else match.teamB
         return ScoreByCourt(
             index = match.currentGame.index,
             left = left,
@@ -137,8 +132,8 @@ sealed class BoardEvent {
     data class PointTo(val side: ISide) : BoardEvent()
     data class MinTo(val side: ISide) : BoardEvent()
     data class ServeTo(val side: ISide) : BoardEvent()
+    object AddShuttleCock: BoardEvent()
     object SwapServer : BoardEvent()
-    object SwapBoardSide : BoardEvent()
     data class OnNewGame(val index: Int): BoardEvent()
     object ResetGame: BoardEvent()
 }

@@ -7,10 +7,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.data.toList
 import com.imams.boardminton.domain.impl.CreatePlayerUseCase
+import com.imams.boardminton.domain.mapper.MatchRepoMapper.toJson
+import com.imams.boardminton.domain.model.GameViewParam
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ITeam
-import com.imams.boardminton.ui.component.printLog
+import com.imams.boardminton.domain.model.PlayerViewParam
+import com.imams.boardminton.domain.model.TeamViewParam
+import com.imams.boardminton.engine.data.model.Winner
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
+import com.imams.data.match.model.Match
+import com.imams.data.match.repository.MatchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +27,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateMatchVM @Inject constructor(
     private val useCase: CreatePlayerUseCase,
+    private val repository: MatchRepository,
 ) : ViewModel() {
 
     private val _playerA1 = mutableStateOf("")
@@ -42,7 +49,7 @@ class CreateMatchVM @Inject constructor(
 
     fun setupPlayers(isSingle: Boolean, json: String) {
         val data = json.toList()
-        if (isSingle) setupPlayers(a1 = data[0], b1 = data[0])
+        if (isSingle) setupPlayers(a1 = data[0], b1 = data[2])
         else setupPlayers(data[0], data[1], data[2], data[3])
     }
 
@@ -107,13 +114,44 @@ class CreateMatchVM @Inject constructor(
             }
         }
     }
-    fun saveInputPlayer(single: Boolean) {
 
+    fun saveInputPlayer(single: Boolean, callback: (String, Int) -> Unit) {
+        viewModelScope.launch {
+            when (val save = repository.saveMatch(
+                Match(
+                    type = if (single) "single" else "double",
+                    teamA = TeamViewParam(
+                        PlayerViewParam(playerA1.value),
+                        PlayerViewParam(playerA2.value),
+                        false
+                    ).toJson(),
+                    teamB = TeamViewParam(
+                        PlayerViewParam(playerB1.value),
+                        PlayerViewParam(playerB2.value),
+                        false
+                    ).toJson(),
+                    currentGame = GameViewParam().toJson(),
+                    games = listOf<GameViewParam>().toJson(),
+                    winner = Winner.None.name,
+                    lastUpdate = System.currentTimeMillis().toString(),
+                    matchDuration = 0L,
+                    shuttleCockUsed = 0,
+                )
+            ).toInt()
+            ) {
+                0 -> callback.invoke(
+                    if (single) "single" else "double", save
+                )
+
+                else -> callback.invoke(
+                    if (single) "single" else "double", save
+                )
+            }
+        }
     }
 
     fun randomPlayers(single: Boolean) {
         val optionals = _savePlayersFlow.value.toList().shuffled().take(4)
-        printLog("defaultPlayers size ${optionals.size}")
         if (single) {
             optionals.forEachIndexed { index, player ->
                 when (index) {

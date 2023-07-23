@@ -14,21 +14,25 @@ import com.imams.boardminton.engine.data.model.Winner
 import com.imams.boardminton.ui.utils.getLabel
 
 fun MatchViewParam.toModel() = MatchScore(
+    id = id,
     type = matchType.toModel(),
     currentGame = currentGame.toModel(),
     games = games.map { it.toModel() }.toMutableList(),
     teamA = teamA.toModel(),
     teamB = teamB.toModel(),
-    winner = this.winner,
+    winner = winner,
+    shuttleCockCount = shuttleCockCount,
 )
 
 fun MatchScore.toVp() = MatchViewParam(
+    id = id,
     matchType = type.toVp(),
     currentGame = currentGame.toVp(),
     games = games.map { it.toVp() }.toMutableList(),
     teamA = teamA.toVp(),
     teamB = teamB.toVp(),
-    winner = winner
+    winner = winner,
+    shuttleCockCount = shuttleCockCount,
 )
 
 fun Game.toVp() = GameViewParam(
@@ -57,21 +61,26 @@ fun Score.toVp() = ScoreViewParam(
 
 fun ScoreViewParam.toModel() = Score(
     point = point,
-)
+).also {
+    it.onServe = onServe
+    it.lastPoint = isLastPoint
+    it.isWin = isWin
+}
 
 fun Player.toVp() = PlayerViewParam(
     name = name,
-    onServe = false, // todo
+    onServe = onServe,
 )
 
 fun PlayerViewParam.toModel() = Player(
     name = name,
+    onServe = onServe,
 )
 
 fun Team.toVp() = TeamViewParam(
     player1 = player1.toVp(),
     player2 = player2.toVp(),
-    onServe = false, // todo
+    onServe = player1.onServe || player2.onServe
 )
 
 fun TeamViewParam.toModel() = Team(

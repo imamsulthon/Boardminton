@@ -12,7 +12,7 @@ class MatchEngineTest {
 
     @Test
     fun init_test() {
-        val matchEngine = MatchEngine(
+        val matchEngine = MatchEngine(null,
             MatchType.Single,
             Team(Player("Imam Sulthon"), Player("Iqbal Kamal")),
             Team(Player("Achif Kaizan"), Player("Al Ghazi")),

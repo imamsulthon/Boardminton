@@ -1,9 +1,10 @@
-package com.imams.boardminton.ui.screen.player
+package com.imams.boardminton.ui.screen.matches
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -20,10 +23,8 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.DismissDirection
@@ -36,7 +37,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -44,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,53 +56,86 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.imams.boardminton.R
-import com.imams.boardminton.data.Athlete
+import com.imams.boardminton.data.prettifyDate
+import com.imams.boardminton.domain.model.GameViewParam
+import com.imams.boardminton.domain.model.MatchViewParam
+import com.imams.boardminton.domain.model.ScoreViewParam
 import com.imams.boardminton.ui.component.EmptyContent
-import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
-import com.imams.boardminton.ui.screen.create.player.GenderField
-import com.imams.boardminton.ui.screen.create.player.HandPlays
+import com.imams.boardminton.ui.screen.player.Sort
+import com.imams.boardminton.ui.utils.getLabel
 import kotlinx.coroutines.launch
 
 @Composable
-fun PlayerAndTeamsList(
-    viewModel: RegisteredPlayersVM = hiltViewModel(),
-    addNewPlayer: () -> Unit,
-    onEditPlayer: (id: Int) -> Unit,
+fun AllMatchesScreen(
+    viewModel: AllMatchesVM = hiltViewModel(),
+    onSelect: ((String, Int) -> Unit)? = null,
 ) {
+
+    val allMatches by viewModel.allMatches.collectAsState()
+    val onGoingMatches by viewModel.onGoingMatches.collectAsState()
+    val finishMatches by viewModel.finishMatches.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchData()
+    }
+
     ContentWrapper(
-        playerList = {
-            PlayerList(
-                viewModel = viewModel,
-                addNewPlayer = addNewPlayer::invoke,
-                onItemClick = { onEditPlayer.invoke(it.id) },
-            )},
-        content2 = { EmptyContent(message = "Feature is under developed") },
+        onGoingMatches = {
+            MatchListContent(
+                list = onGoingMatches,
+                onRemove = viewModel::remove,
+                onItemClick = {
+                    onSelect?.invoke(it.matchType.name.lowercase(), it.id)
+                },
+                onFilter = { viewModel.filter(FilterOn.OnGoing(it)) },
+                onSort = { viewModel.sortOn(SortOn.OnGoing(it)) },
+            )
+        },
+        finishedMatches = {
+            MatchListContent(
+                list = finishMatches,
+                onRemove = viewModel::remove,
+                onItemClick = {
+                    onSelect?.invoke(it.matchType.name.lowercase(), it.id)
+                },
+                onFilter = { viewModel.filter(FilterOn.Finished(it)) },
+                onSort = { viewModel.sortOn(SortOn.Finished(it)) },
+            )
+        },
+        allMatches = {
+            MatchListContent(
+                list = allMatches,
+                onRemove = viewModel::remove,
+                onItemClick = {
+                    onSelect?.invoke(it.matchType.name.lowercase(), it.id)
+                },
+                onFilter = { viewModel.filter(FilterOn.AllMatch(it)) },
+                onSort = { viewModel.sortOn(SortOn.AllMatch(it)) },
+            )
+        },
     )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ContentWrapper(
-    playerList: @Composable () -> Unit,
-    content2: @Composable () -> Unit,
+internal fun ContentWrapper(
+    onGoingMatches: @Composable () -> Unit,
+    finishedMatches: @Composable () -> Unit,
+    allMatches: @Composable () -> Unit,
 ) {
     val tabData = listOf(
-        "Players" to Icons.Filled.Home,
-        "Teams" to Icons.Filled.AccountBox,
+        "On Going" to Icons.Filled.Home,
+        "Finished" to Icons.Filled.AccountBox,
+        "All" to Icons.Filled.AccountBox,
     )
     val pagerState = rememberPagerState(pageCount = { tabData.size })
     val tabIndex = pagerState.currentPage
     val coroutineScope = rememberCoroutineScope()
-
     Column {
         TabRow(selectedTabIndex = tabIndex) {
             tabData.forEachIndexed { index, pair ->
@@ -119,7 +153,6 @@ private fun ContentWrapper(
         }
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.weight(1f)
         ) { index ->
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -127,8 +160,9 @@ private fun ContentWrapper(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 when (index) {
-                    0 -> playerList()
-                    1 -> content2()
+                    0 -> onGoingMatches()
+                    1 -> finishedMatches()
+                    2 -> allMatches()
                 }
             }
         }
@@ -137,49 +171,46 @@ private fun ContentWrapper(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun PlayerList(
-    viewModel: RegisteredPlayersVM,
-    addNewPlayer: () -> Unit,
-    onItemClick: (CreatePlayerState) -> Unit,
+internal fun MatchListContent(
+    list: List<MatchViewParam>,
+    onRemove: (MatchViewParam) -> Unit,
+    onItemClick: ((MatchViewParam) -> Unit)? = null,
+    onFilter: (FilterMatch) -> Unit,
+    onSort: (SortMatch) -> Unit,
 ) {
-
-    val list by viewModel.savePlayers.collectAsState()
-
     var openFilterDialog by rememberSaveable { mutableStateOf(false) }
     val skipPartiallyExpanded by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded)
     var openSortDialog by rememberSaveable { mutableStateOf(false) }
-    val skipPartiallyExpanded2 by remember { mutableStateOf(false) }
-    val bottomSheetState2 = rememberModalBottomSheetState(skipPartiallyExpanded2)
+    val skipPartially2 by remember { mutableStateOf(false) }
+    val btmSheetState2 = rememberModalBottomSheetState(skipPartially2)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             BottomBar(
-                onFilter = { openFilterDialog = true },
-                onSort = { openSortDialog = true },
+                onFilter = { openFilterDialog = true }, onSort = { openSortDialog = true },
+                enableFilter = list.isNotEmpty(), enableSort = list.isNotEmpty()
             )
-        },
-        floatingActionButton = {
-            SmallFloatingActionButton(onClick = { addNewPlayer.invoke() }) {
-                Icon(Icons.Filled.Add, contentDescription = "Localized description")
-            }
-        },
-    ) { padding ->
+        }
+    ) { p ->
         if (list.isEmpty()) {
-            EmptyContent(message = "No Player registered")
+            EmptyContent(message = "No Matches")
         } else {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(padding)
+                    .padding(p)
             ) {
-                items(items = list, key = { listItem: CreatePlayerState -> listItem.id }) {
+                items(
+                    items = list,
+                    key = { listItem: MatchViewParam -> listItem.id }
+                ) {
                     val dismissState = rememberDismissState(
                         confirmValueChange = { dismissState ->
                             if (dismissState == DismissValue.DismissedToStart || dismissState == DismissValue.DismissedToEnd) {
-                                viewModel.removePlayer(it)
+                                onRemove(it)
                             }
                             true
                         }
@@ -196,7 +227,7 @@ internal fun PlayerList(
                                 }
                             )
                             val scale by animateFloatAsState(
-                                if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+                                if (dismissState.targetValue == DismissValue.Default) 0.60f else 1f
                             )
                             Box(
                                 Modifier
@@ -215,7 +246,7 @@ internal fun PlayerList(
                         dismissContent = {
                             Card(
                                 onClick = {
-                                    onItemClick.invoke(it)
+                                    onItemClick?.invoke(it)
                                 },
                                 shape = RoundedCornerShape(
                                     topStart = 20.dp,
@@ -226,38 +257,37 @@ internal fun PlayerList(
                                 modifier = Modifier
                                     .padding(vertical = 5.dp, horizontal = 10.dp),
                             ) {
-                                PlayerItem(it)
+                                MatchItem(item = it, onClick = { onItemClick?.invoke(it) })
                             }
                         })
-                }
-            }
-            if (openFilterDialog) {
-                ModalBottomSheet(
-                    onDismissRequest = { openFilterDialog = false },
-                    sheetState = bottomSheetState,
-                ) {
-                    FilterSheet(
-                        filter = FilterPlayer(),
-                        onApply = {
-                            openFilterDialog = false
-                            viewModel.setFilter(it)
-                        },
-                        onCancel = { openFilterDialog = false }
-                    )
                 }
             }
             if (openSortDialog) {
                 ModalBottomSheet(
                     onDismissRequest = { openSortDialog = false },
-                    sheetState = bottomSheetState2,
+                    sheetState = btmSheetState2,
                 ) {
                     SortSheet(
-                        filter = SortPlayer.Id(Sort.Ascending),
+                        filter = SortMatch.Id( Sort.Ascending ),
                         onApply = {
                             openSortDialog = false
-                            viewModel.setSorting(it)
+                            onSort.invoke(it)
                         },
                         onCancel = { openSortDialog = false })
+                }
+            }
+            if (openFilterDialog) {
+                ModalBottomSheet(
+                    onDismissRequest = { openFilterDialog = false },
+                    sheetState = bottomSheetState) {
+                    FilterSheet(
+                        filter = FilterMatch(null),
+                        onApply = {
+                            openFilterDialog = false
+                            onFilter.invoke(it)
+                        },
+                        onCancel = { openFilterDialog = false }
+                    )
                 }
             }
         }
@@ -265,49 +295,106 @@ internal fun PlayerList(
 }
 
 @Composable
-private fun PlayerItem(
-    item: CreatePlayerState,
+fun MatchItem(
+    item: MatchViewParam,
+    onClick: (MatchViewParam) -> Unit,
 ) {
     ListItem(
-        leadingContent = {
-            when (item.gender.toLowerCase(Locale.current)) {
-                "man" -> Icon(
-                    painter = painterResource(id = R.drawable.ic_player_man),
-                    contentDescription = "player_man"
-                )
-
-                "woman" -> Icon(
-                    painter = painterResource(id = R.drawable.ic_player_woman),
-                    contentDescription = "player_man"
-                )
-
-                else -> Icon(Icons.Outlined.Person, contentDescription = "player_man")
-            }
+        modifier = Modifier.clickable {
+            onClick.invoke(item)
         },
-        trailingContent = {
-            Text(text = item.handPlay)
+        leadingContent = {
+            Text(text = item.id.toString())
         },
         tonalElevation = 2.dp,
         shadowElevation = 2.dp,
         headlineContent = {
-            val label = "${item.firstName} ${item.lastName}"
-            Text(label, fontWeight = FontWeight.Bold)
+            ItemContent(
+                type = item.matchType.name,
+                teamA = item.teamA.getLabel(),
+                teamB = item.teamB.getLabel(),
+                scoreA = item.currentGame.scoreA.point,
+                scoreB = item.currentGame.scoreB.point,
+                games = item.games,
+            )
         },
         supportingContent = {
             Text(
-                text = "ID: ${item.id}, Height: ${item.height} cm / Weight: ${item.weight} kg",
+                text = "${item.lastUpdate.prettifyDate()} in ${item.matchDurations}'s",
                 fontSize = 10.sp
             )
+        },
+        trailingContent = {
+            Text(text = "Winner\n${item.winner.name}")
         }
     )
+}
+
+@Composable
+private fun ItemContent(
+    type: String,
+    teamA: String,
+    teamB: String,
+    scoreA: Int,
+    scoreB: Int,
+    games: MutableList<GameViewParam>,
+) {
+    Column {
+        LazyRow(
+            horizontalArrangement = Arrangement.Start,
+        ) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(end = 20.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "$type match", fontWeight = FontWeight.Bold)
+                    Text(text = teamA)
+                    Text(text = teamB)
+                }
+            }
+            items(items = games) {
+                GameComponent(index = it.index, scoreA = it.scoreA.point, scoreB = it.scoreB.point)
+            }
+            if (games.size >= 3) return@LazyRow
+            item {
+                GameComponent(
+                    index = if (games.isEmpty()) 1 else games.size + 1,
+                    scoreA = scoreA,
+                    scoreB = scoreB
+                )
+            }
+        }
+    }
+}
+
+@Composable
+internal fun GameComponent(
+    index: Int,
+    scoreA: Int,
+    scoreB: Int,
+) {
+    Column(
+        modifier = Modifier
+            .wrapContentWidth()
+            .padding(end = 10.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(text = "G$index", fontWeight = FontWeight.Bold)
+        Text(text = scoreA.toString())
+        Text(text = scoreB.toString())
+    }
 }
 
 @Composable
 private fun BottomBar(
     onFilter: () -> Unit,
     onSort: () -> Unit,
-    enableFilter: Boolean = true,
-    enableSort: Boolean = true,
+    enableFilter: Boolean = false,
+    enableSort: Boolean = false,
 ) {
     BottomAppBar(tonalElevation = 1.dp) {
         Row(
@@ -338,49 +425,59 @@ private fun BottomBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FilterSheet(
-    filter: FilterPlayer,
-    onApply: (FilterPlayer) -> Unit,
+    filter: FilterMatch,
+    onApply: (FilterMatch) -> Unit,
     onCancel: () -> Unit,
 ) {
-    var sGender by remember { mutableStateOf(filter.gender) }
-    var sHandPlay by remember { mutableStateOf(filter.handPlay) }
+    val optionals = mutableListOf("All", "Single", "Double")
+    var selected : String? by remember { mutableStateOf(filter.type) }
     Column(
         modifier = Modifier
+            .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .padding(bottom = 10.dp)
+            .padding(bottom = 10.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start
     ) {
         Text(text = "Filter by:")
-        GenderField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 5.dp),
-            onSelected = { sGender = it }, initialSelection = sGender
-        )
-        HandPlays(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 5.dp),
-            initialSelection = sHandPlay, onSelected = { sHandPlay = it }
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "Match Type:")
+            Row(Modifier.selectableGroup()) {
+                optionals.forEach { text ->
+                    InputChip(
+                        modifier = Modifier.padding(horizontal = 5.dp),
+                        selected = text.equals(selected, true),
+                        onClick = { selected = text },
+                        label = {
+                            Text(
+                                text = text,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(5.dp)
+                            )
+                        }
+                    )
+                }
+            }
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             OutlinedButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
                     .padding(end = 4.dp),
-                onClick = { onCancel.invoke() }) {
-                Text(text = "Cancel")
-            }
+                onClick = { onCancel.invoke() }
+            ) { Text(text = "Cancel") }
             OutlinedButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                onClick = { onApply.invoke(filter.copy(gender = sGender, handPlay = sHandPlay)) }
+                onClick = { onApply.invoke(FilterMatch(selected)) }
             ) { Text(text = "Apply") }
         }
     }
@@ -388,16 +485,16 @@ private fun FilterSheet(
 
 @Composable
 private fun SortSheet(
-    filter: SortPlayer,
-    onApply: (SortPlayer) -> Unit,
+    filter: SortMatch,
+    onApply: (SortMatch) -> Unit,
     onCancel: () -> Unit,
 ) {
     val sortData = listOf(Sort.Ascending, Sort.Descending)
     var init by remember { mutableStateOf(filter) }
     var sortId: Sort? by remember { mutableStateOf(null) }
-    var sortName: Sort? by remember { mutableStateOf(null) }
-    var sortHeight: Sort? by remember { mutableStateOf(null) }
-    var sortWeight: Sort? by remember { mutableStateOf(null) }
+    var sortLastUpdate: Sort? by remember { mutableStateOf(null) }
+    var sortDuration: Sort? by remember { mutableStateOf(null) }
+    var sortGameCount: Sort? by remember { mutableStateOf(null) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -407,40 +504,48 @@ private fun SortSheet(
         horizontalAlignment = Alignment.Start
     ) {
         Text(text = "Sort by:")
-        SortField(label = "ID", options = sortData, initialSelection = sortId?.name.orEmpty(),
+        SortField(label = "ID",
+            options = sortData,
+            initialSelection = sortId?.name.orEmpty(),
             onSelected = {
-                init = SortPlayer.Id(it)
+                init = SortMatch.Id(it)
                 sortId = init.asc
-                sortName = null
-                sortWeight = null
-                sortHeight = null
+                sortLastUpdate = null
+                sortGameCount = null
+                sortDuration = null
             }
         )
-        SortField(label = "Name", options = sortData, initialSelection = sortName?.name.orEmpty(),
+        SortField(label = "Last Update",
+            options = sortData,
+            initialSelection = sortLastUpdate?.name.orEmpty(),
             onSelected = {
-                init = SortPlayer.Name(it)
-                sortName = init.asc
+                init = SortMatch.LastUpdate(it)
+                sortLastUpdate = init.asc
                 sortId = null
-                sortWeight = null
-                sortHeight = null
+                sortGameCount = null
+                sortDuration = null
             }
         )
-        SortField(label = "Height", options = sortData, initialSelection = sortHeight?.name.orEmpty(),
+        SortField(label = "Duration",
+            options = sortData,
+            initialSelection = sortDuration?.name.orEmpty(),
             onSelected = {
-                init = SortPlayer.Height(it)
-                sortHeight = init.asc
+                init = SortMatch.Duration(it)
+                sortDuration = init.asc
                 sortId = null
-                sortName = null
-                sortWeight = null
+                sortLastUpdate = null
+                sortGameCount = null
             }
         )
-        SortField(label = "Weight", options = sortData, initialSelection = sortWeight?.name.orEmpty(),
+        SortField(label = "Game Count",
+            options = sortData,
+            initialSelection = sortGameCount?.name.orEmpty(),
             onSelected = {
-                init = SortPlayer.Weight(it)
-                sortWeight = init.asc
+                init = SortMatch.GameCount(it)
+                sortGameCount = init.asc
                 sortId = null
-                sortName = null
-                sortHeight = null
+                sortLastUpdate = null
+                sortDuration = null
             }
         )
         Row(
@@ -493,14 +598,15 @@ private fun SortField(
     }
 }
 
-@Preview
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
-private fun ListContent() {
-    val list = mutableListOf<CreatePlayerState>()
-    list.add(CreatePlayerState(1, Athlete.Viktor, "", "Left", "Man"))
-    list.add(CreatePlayerState(2, Athlete.Imam_Sulthon, "", "Right", "Man"))
-    list.add(CreatePlayerState(3, Athlete.Taufik_Hidayat, "", "Right", "Man"))
-    list.add(CreatePlayerState(4, "Anthony", "Ginting", "Left", "Woman"))
-    list.add(CreatePlayerState(5, "Carolina", "Marin", "Left", "Woman"))
-    list.add(CreatePlayerState(6, "Susi", "Susanti", "Left", "Woman"))
+fun AllMatchesScreenPrev() {
+    ItemContent(
+        type = "Single", teamA = "Imam Sulthon", teamB = "Iqbal Kamal",
+        games = mutableListOf(
+            GameViewParam(1, ScoreViewParam(12), ScoreViewParam(21)),
+            GameViewParam(2, ScoreViewParam(21), ScoreViewParam(19)),
+        ),
+        scoreB = 10, scoreA = 21
+    )
 }

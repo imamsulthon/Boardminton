@@ -1,21 +1,25 @@
 package com.imams.boardminton.ui.screen.home
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,11 +31,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.imams.boardminton.R
+import com.imams.boardminton.domain.model.MatchViewParam
+import com.imams.boardminton.ui.component.ChildLayout
+import com.imams.boardminton.ui.component.LoadItemAfterSafeCast
+import com.imams.boardminton.ui.component.VerticalScroll
+import com.imams.boardminton.ui.screen.matches.MatchItem
 
 @Composable
 fun HomeScreen(
+    onGoingMatches: List<MatchViewParam>? = null,
     onCreateMatch: (String) -> Unit,
     onCreatePlayer: (String) -> Unit,
+    gotoScoreboard: ((String, Int) -> Unit)? = null,
+    seeAllMatch: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier
@@ -44,13 +56,17 @@ fun HomeScreen(
         HomeContent(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(padding)
-                .verticalScroll(rememberScrollState()),
-            onCreateMatch = {
-                if (it) onCreateMatch.invoke("single")
-                else onCreateMatch.invoke("double")
+                .padding(padding),
+            onCreateMatch = { onCreateMatch.invoke(if (it) "single" else "double") },
+            onCreatePlayer = onCreatePlayer::invoke,
+            onGoingMatches = onGoingMatches ?: emptyList(),
+            gotoMatch = { type, id ->
+                gotoScoreboard?.invoke(
+                    if (onGoingMatches == null || type.equals("single", true)) "single"
+                    else "double", id
+                )
             },
-            onCreatePlayer = onCreatePlayer::invoke
+            seeAllMatch = { seeAllMatch.invoke() },
         )
     }
 }
@@ -78,35 +94,115 @@ internal fun HomeContent(
     modifier: Modifier,
     onCreateMatch: (Boolean) -> Unit,
     onCreatePlayer: (String) -> Unit,
+    onGoingMatches: List<MatchViewParam>,
+    gotoMatch: ((String, Int) -> Unit)? = null,
+    seeAllMatch: () -> Unit,
 ) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        MenuGroup(
-            label = "Create New Match"
-        ) {
-            ItemMenu(label = "Single Match") {
-                onCreateMatch.invoke(true)
+    VerticalScroll(
+        modifier = modifier.fillMaxSize(),
+        ChildLayout(contentType = "menu_section",
+            content = {
+                Column(
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    MenuGroup(label = "Create New Match") {
+                        ItemMenu(label = "Single Match") {
+                            onCreateMatch.invoke(true)
+                        }
+                        ItemMenu(label = "Double Match") {
+                            onCreateMatch.invoke(false)
+                        }
+                    }
+                    Divider(modifier = Modifier.fillMaxWidth().height(1.dp)
+                        .background(MaterialTheme.colorScheme.onBackground))
+                    MenuGroup(label = "Create New Player") {
+                        ItemMenu(label = "New Player") {
+                            onCreatePlayer.invoke("create")
+                        }
+                        ItemMenu(label = "Registered Players", enabled = true) {
+                            onCreatePlayer.invoke("seeAll")
+                        }
+                    }
+                    Divider(modifier = Modifier.fillMaxWidth().height(1.dp)
+                        .background(MaterialTheme.colorScheme.onBackground))
+                }
             }
-            ItemMenu(label = "Double Match") {
-                onCreateMatch.invoke(false)
-            }
-        }
-
-        MenuGroup(
-            label = "Create New Player"
-        ) {
-            ItemMenu(label = "New Player") {
-                onCreatePlayer.invoke("create")
-            }
-            ItemMenu(label = "Registered Players", enabled = true) {
-                onCreatePlayer.invoke("seeAll")
-            }
-        }
-    }
+        ),
+        *latestMatchGroup(
+            list = onGoingMatches,
+            gotoMatch = { type, id -> gotoMatch?.invoke(type, id) },
+            seeAllMatch = seeAllMatch::invoke
+        )
+    )
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun latestMatchGroup(
+    list: List<MatchViewParam>,
+    gotoMatch: ((String, Int) -> Unit)? = null,
+    seeAllMatch: () -> Unit,
+) = arrayOf(
+    ChildLayout(
+        contentType = "latest_match_label",
+        content = {
+            AnimatedVisibility(visible = list.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = "On Going Match",
+                        modifier = Modifier.wrapContentWidth()
+                    )
+                    Text(
+                        text = "See All",
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .padding(start = 10.dp)
+                            .padding(vertical = 10.dp)
+                            .clickable { seeAllMatch.invoke() }
+                    )
+                }
+            }
+        }
+    ),
+    ChildLayout(
+        contentType = "latest_match_items",
+        items = list,
+        content = { item ->
+            AnimatedVisibility(visible = list.isNotEmpty()) {
+                LoadItemAfterSafeCast<MatchViewParam>(item) { data ->
+                    Card(
+                        onClick = {
+                            gotoMatch?.invoke(data.matchType.name, data.id)
+                        },
+                        shape = RoundedCornerShape(
+                            topStart = 20.dp,
+                            topEnd = 5.dp,
+                            bottomEnd = 5.dp,
+                            bottomStart = 5.dp
+                        ),
+                        modifier = Modifier
+                            .padding(vertical = 5.dp, horizontal = 10.dp),
+                    ) {
+                        MatchItem(
+                            item = data,
+                            onClick = { gotoMatch?.invoke(data.matchType.name, data.id)}
+                        )
+                    }
+                }
+            }
+        }
+    ),
+)
 
 @Composable
 private fun MenuGroup(
@@ -153,7 +249,7 @@ private fun ItemMenu(
             bottomStart = 5.dp
         ),
         modifier = Modifier
-            .size(width = 160.dp, height = 80.dp)
+            .size(width = 160.dp, height = 70.dp)
             .padding(5.dp),
     ) {
         Box(Modifier.fillMaxSize()) {
@@ -164,6 +260,6 @@ private fun ItemMenu(
 
 @Preview(showSystemUi = true, uiMode = UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
-fun HomeScreenPreview() {
-    HomeScreen(onCreateMatch = {}, onCreatePlayer = {})
+private fun HomeScreenPreview() {
+    HomeScreen(onCreateMatch = {}, onCreatePlayer = {}, seeAllMatch = {})
 }

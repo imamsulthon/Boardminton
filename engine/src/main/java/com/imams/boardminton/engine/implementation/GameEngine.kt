@@ -11,11 +11,11 @@ class GameEngine constructor(
     private val index: Int = 1,
     private val scoreA: Score = Score(),
     private val scoreB: Score = Score(),
+    private var onServe: OnServe = OnServe.NONE,
+    private var winner: Winner = Winner.None
 ) {
 
     private val rules: GameRule = GameRule()
-    private var onServe: OnServe = OnServe.NONE
-    private var winner: Winner = Winner.None
     var hasReachInterval = false
         private set
 
@@ -83,7 +83,11 @@ class GameEngine constructor(
      * Revert/swap the side whose on serve.
      */
     fun revertServer() {
-        scoreA.onServe = scoreB.onServe.also { scoreB.onServe = scoreA.onServe }
+        if (!scoreA.onServe && !scoreB.onServe) {
+            scoreA.onServe = true
+        } else {
+            scoreA.onServe = scoreB.onServe.also { scoreB.onServe = scoreA.onServe }
+        }
         onServe = when (onServe) {
             OnServe.A -> OnServe.B
             else -> OnServe.A

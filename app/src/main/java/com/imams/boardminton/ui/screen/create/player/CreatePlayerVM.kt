@@ -43,14 +43,11 @@ class CreatePlayerVM @Inject constructor(
     }
 
     private var isInit = false
-    private fun printLog(msg: String) = println("CreatePlayer $msg")
     fun setupWith(id: Int) {
-        printLog("SetupWith init $id")
         // todo should use savedInstance state
         if (isInit) return
         viewModelScope.launch {
             useCase.getPlayer(id).collectLatest { player ->
-                printLog("SetupWith player $player")
                 isInit = true
                 _uiState.update { player }
             }

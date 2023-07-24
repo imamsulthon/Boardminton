@@ -6,12 +6,15 @@ import com.imams.data.match.dao.MatchDao
 import com.imams.data.match.dao.MatchEntity
 import com.imams.data.player.dao.PlayerDao
 import com.imams.data.player.dao.PlayerEntity
+import com.imams.data.team.dao.TeamDao
+import com.imams.data.team.dao.TeamEntity
 
 @Database(
-    entities = [PlayerEntity::class, MatchEntity::class],
+    entities = [PlayerEntity::class, TeamEntity::class, MatchEntity::class],
     version = 1
 )
 abstract class AppDatabase: RoomDatabase() {
     abstract fun playerDao(): PlayerDao
+    abstract fun teamDao(): TeamDao
     abstract fun matchDao(): MatchDao
 }

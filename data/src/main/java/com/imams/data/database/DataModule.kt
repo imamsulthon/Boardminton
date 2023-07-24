@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.room.Room
 import com.imams.data.match.dao.MatchDao
 import com.imams.data.player.dao.PlayerDao
+import com.imams.data.team.dao.TeamDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,6 +36,12 @@ object DataModule {
     @Singleton
     fun providesMatchDao(database: AppDatabase): MatchDao {
         return database.matchDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTeamDao(database: AppDatabase): TeamDao {
+        return database.teamDao()
     }
 
 }

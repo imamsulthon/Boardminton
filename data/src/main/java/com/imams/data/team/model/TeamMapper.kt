@@ -7,7 +7,7 @@ object TeamMapper {
     fun TeamEntity.toModel() = Team(
         id = id,
         playerId1 = playerId1,
-        playerId2 = playerId1,
+        playerId2 = playerId2,
         playerName1 = playerName1,
         playerName2 = playerName2,
         type = type,
@@ -18,9 +18,8 @@ object TeamMapper {
     )
 
     fun Team.toEntity(withId: Boolean = false) = TeamEntity(
-        id = id,
         playerId1 = playerId1,
-        playerId2 = playerId1,
+        playerId2 = playerId2,
         playerName1 = playerName1,
         playerName2 = playerName2,
         type = type,

@@ -6,9 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.domain.mapper.UseCaseMapper.toModel
 import com.imams.boardminton.domain.mapper.UseCaseMapper.toState
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
+import com.imams.boardminton.ui.screen.create.player.CreateTeamState
 import com.imams.data.player.model.Player
 import com.imams.data.player.repository.PlayerRepository
+import com.imams.data.team.model.Team
+import com.imams.data.team.repository.TeamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -18,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisteredPlayersVM @Inject constructor(
     private val repository: PlayerRepository,
+    private val teamRepository: TeamRepository,
 ): ViewModel() {
 
     private val _tempData = mutableStateListOf<Player>()
@@ -25,8 +30,14 @@ class RegisteredPlayersVM @Inject constructor(
     private val _savePlayersFlow = MutableStateFlow(_savePlayers)
     val savePlayers: StateFlow<List<CreatePlayerState>> = _savePlayersFlow
 
+    private val _tempData2 = mutableStateListOf<Team>()
+    private val _saveTeams = mutableStateListOf<CreateTeamState>()
+    private val _saveTeamsFlow = MutableStateFlow(_saveTeams)
+    val saveTeams: StateFlow<List<CreateTeamState>> = _saveTeamsFlow
+
     init {
         checkSavedPlayers()
+        checkTeams()
     }
 
     private fun checkSavedPlayers() {
@@ -93,6 +104,28 @@ class RegisteredPlayersVM @Inject constructor(
     fun removePlayer(item: CreatePlayerState) {
         viewModelScope.launch {
             repository.removePlayer(item.toModel(true))
+        }
+    }
+
+    private fun checkTeams() {
+        viewModelScope.launch {
+            teamRepository.getAllTeams().collectLatest {
+                println("Registered Players size: ${it.size} list: $it")
+                _tempData2.clear()
+                _tempData2.addAll(it)
+                _tempData2.proceed2()
+            }
+        }
+    }
+    private fun List<Team>.proceed2() {
+        val data = this.toMutableList()
+        _saveTeams.clear()
+        _saveTeams.addAll(data.map { t -> t.toState() })
+    }
+
+    fun removeTeams(item: CreateTeamState) {
+        viewModelScope.launch {
+            teamRepository.removeTeam(item.toModel(true))
         }
     }
 

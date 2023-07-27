@@ -1,11 +1,13 @@
 package com.imams.data.team.dao
 
+import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface TeamDao {
 
     @Query("SELECT * FROM team_entity")
@@ -17,11 +19,11 @@ interface TeamDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addTeams(entities: List<TeamEntity>)
 
-    @Query("SELECT * FROM player_entity WHERE id=:id")
+    @Query("SELECT * FROM team_entity WHERE id=:id")
     fun getById(id: Int): Flow<TeamEntity>
 
-    @Query("SELECT * FROM player_entity WHERE first_name LIKE :first AND " +
-            "last_name LIKE :last LIMIT 1")
+    @Query("SELECT * FROM team_entity WHERE  player_1 LIKE :first AND " +
+            "player_2 LIKE :last LIMIT 1")
     suspend fun findByName(first: String, last: String): TeamEntity
 
     @Delete

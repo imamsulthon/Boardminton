@@ -84,7 +84,12 @@ fun PlayerAndTeamsList(
                 addNewPlayer = addNewPlayer::invoke,
                 onItemClick = { onEditPlayer.invoke(it.id) },
             )},
-        content2 = { EmptyContent(message = "Feature is under developed") },
+        teamList = {
+            TeamList(
+                viewModel = viewModel,
+                addNewTeam = { },
+                onItemClick = { },
+            ) },
     )
 }
 
@@ -92,7 +97,7 @@ fun PlayerAndTeamsList(
 @Composable
 private fun ContentWrapper(
     playerList: @Composable () -> Unit,
-    content2: @Composable () -> Unit,
+    teamList: @Composable () -> Unit,
 ) {
     val tabData = listOf(
         "Players" to Icons.Filled.Home,
@@ -128,7 +133,7 @@ private fun ContentWrapper(
             ) {
                 when (index) {
                     0 -> playerList()
-                    1 -> content2()
+                    1 -> teamList()
                 }
             }
         }
@@ -155,7 +160,7 @@ internal fun PlayerList(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomBar(
+            ListBottomBar(
                 onFilter = { openFilterDialog = true },
                 onSort = { openSortDialog = true },
             )
@@ -303,7 +308,7 @@ private fun PlayerItem(
 }
 
 @Composable
-private fun BottomBar(
+fun ListBottomBar(
     onFilter: () -> Unit,
     onSort: () -> Unit,
     enableFilter: Boolean = true,
@@ -387,7 +392,7 @@ private fun FilterSheet(
 }
 
 @Composable
-private fun SortSheet(
+fun SortSheet(
     filter: SortPlayer,
     onApply: (SortPlayer) -> Unit,
     onCancel: () -> Unit,

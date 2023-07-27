@@ -1,6 +1,9 @@
-package com.imams.data.team.model
+package com.imams.boardminton.ui.screen.create.player
 
-data class Team(
+import com.imams.boardminton.ui.utils.lastNameWith
+
+
+data class CreateTeamState(
     var id: Int = 0,
     val playerId1: Int = 0,
     val playerId2: Int = 0,
@@ -11,4 +14,6 @@ data class Team(
     val play: Int = 0,
     val win: Int = 0,
     val lose: Int = 0,
-)
+) {
+    val alias = playerName1.lastNameWith(playerName2)
+}

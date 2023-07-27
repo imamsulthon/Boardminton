@@ -7,8 +7,8 @@ import androidx.room.PrimaryKey
 @Entity("team_entity")
 data class TeamEntity(
     @PrimaryKey(autoGenerate = true) var id: Int = 0,
-    @ColumnInfo("player_id_1") val playerId1: String,
-    @ColumnInfo("player_id_2") val playerId2: String,
+    @ColumnInfo("player_id_1") val playerId1: Int,
+    @ColumnInfo("player_id_2") val playerId2: Int,
     @ColumnInfo("player_1") val playerName1: String,
     @ColumnInfo("player_2") val playerName2: String,
     @ColumnInfo("type") val type: String,

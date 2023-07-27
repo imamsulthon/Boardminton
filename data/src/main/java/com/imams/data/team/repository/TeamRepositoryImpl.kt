@@ -20,6 +20,7 @@ class TeamRepositoryImpl(
     }
 
     override suspend fun addTeam(team: Team) {
+        log("addTeam $team")
         dao.addTeam(team.toEntity())
     }
 
@@ -34,5 +35,7 @@ class TeamRepositoryImpl(
     override suspend fun removeTeam(team: Team) {
         dao.delete(team.toEntity(true))
     }
+
+    private fun log(m: String) = println("TeamRepository: $m")
 
 }

@@ -19,6 +19,7 @@ import com.imams.boardminton.navigation.Destination.AllMatches
 import com.imams.boardminton.navigation.Destination.AllPlayers
 import com.imams.boardminton.navigation.Destination.CreateMatch
 import com.imams.boardminton.navigation.Destination.CreatePlayer
+import com.imams.boardminton.navigation.Destination.CreateTeam
 import com.imams.boardminton.navigation.Destination.EditCreatedPlayer
 import com.imams.boardminton.navigation.Destination.EditPlayers
 import com.imams.boardminton.navigation.Destination.Home
@@ -27,6 +28,7 @@ import com.imams.boardminton.ui.screen.create.CreateMatchScreen
 import com.imams.boardminton.ui.screen.create.EditPlayersScreen
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerScreen
 import com.imams.boardminton.ui.screen.create.player.EditPlayerCreatedScreen
+import com.imams.boardminton.ui.screen.create.team.CreateTeamScreen
 import com.imams.boardminton.ui.screen.home.HomeScreen
 import com.imams.boardminton.ui.screen.home.HomeScreenVM
 import com.imams.boardminton.ui.screen.matches.AllMatchesScreen
@@ -79,6 +81,7 @@ sealed class Destination(protected val route: String, vararg params: String) {
     }
 
     object CreatePlayer: DestinationNoArgs("create-player")
+    object CreateTeam: Destination("create-team")
     object EditCreatedPlayer: Destination("edit-create-player", "id") {
         operator fun invoke(id: Int): String = route.appendParams("id" to id)
     }
@@ -204,6 +207,15 @@ fun BoardMintonNavHost(
             )
         }
 
+        composable(CreateTeam.fullRoute) {
+            val context = LocalContext.current
+            CreateTeamScreen (
+                onSave = {
+                    Toast.makeText(context, "Success save", Toast.LENGTH_LONG).show()
+                }
+            )
+        }
+
         composable(
             EditCreatedPlayer.fullRoute,
             arguments = listOf(navArgument("id") {type = NavType.IntType})
@@ -221,9 +233,8 @@ fun BoardMintonNavHost(
         composable(AllPlayers.fullRoute) {
             PlayerAndTeamsList(
                 addNewPlayer = { navController.navigate(CreatePlayer.fullRoute) },
-                onEditPlayer = {
-                    navController.navigate(EditCreatedPlayer.invoke(it))
-                }
+                onEditPlayer = { navController.navigate(EditCreatedPlayer.invoke(it)) },
+                addNewTeam = { navController.navigate(CreateTeam.fullRoute) }
             )
         }
 

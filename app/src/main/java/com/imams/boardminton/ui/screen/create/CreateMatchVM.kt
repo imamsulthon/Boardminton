@@ -18,7 +18,7 @@ import com.imams.boardminton.engine.data.model.Winner
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.data.match.model.Match
 import com.imams.data.match.repository.MatchRepository
-import com.imams.data.team.model.Team
+import com.imams.data.player.repository.PlayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +30,7 @@ import javax.inject.Inject
 class CreateMatchVM @Inject constructor(
     private val useCase: CreatePlayerUseCase,
     private val repository: MatchRepository,
+    private val playerRepository: PlayerRepository,
     private val createTeamUseCase: CreateTeamUseCase,
 ) : ViewModel() {
 
@@ -164,8 +165,8 @@ class CreateMatchVM @Inject constructor(
     private inline fun saveTeam(teamA: TeamViewParam, teamB: TeamViewParam, crossinline callback: () -> Unit) {
         viewModelScope.launch {
             log("saveTeam A: $teamA B: $teamB")
-            createTeamUseCase.createTeam(Team(playerName1 = teamA.player1.name, playerName2 = teamA.player2.name))
-            createTeamUseCase.createTeam(Team(playerName1 = teamB.player1.name, playerName2 = teamB.player2.name))
+            createTeamUseCase.createTeam(teamA)
+            createTeamUseCase.createTeam(teamB)
             callback.invoke()
         }
     }

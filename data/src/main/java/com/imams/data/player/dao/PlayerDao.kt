@@ -23,7 +23,7 @@ interface PlayerDao {
     fun getById(id: Int): Flow<PlayerEntity>
 
     @Query("SELECT * FROM player_entity WHERE full_name=:query or first_name=:query or last_name=:query")
-    fun getByName(query: String): Flow<PlayerEntity>
+    fun getByName(query: String): Flow<PlayerEntity>?
 
     @Query("SELECT * FROM player_entity WHERE first_name LIKE :first AND " +
             "last_name LIKE :last LIMIT 1")

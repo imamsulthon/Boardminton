@@ -12,7 +12,6 @@ import com.imams.data.player.repository.PlayerRepository
 import com.imams.data.team.model.Team
 import com.imams.data.team.repository.TeamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -141,6 +140,19 @@ sealed class SortPlayer(val asc: Sort) {
     data class Name(val sort: Sort): SortPlayer(sort)
     data class Height(val sort: Sort): SortPlayer(sort)
     data class Weight(val sort: Sort): SortPlayer(sort)
+}
+
+data class FilterTeam(
+    val type: String,
+)
+
+sealed class SortTeam(val asc: Sort) {
+    data class Id(val sort: Sort): SortTeam(sort)
+    data class Name(val sort: Sort): SortTeam(sort)
+    data class Rank(val sort: Sort): SortTeam(sort)
+    data class Play(val sort: Sort): SortTeam(sort)
+    data class Win(val sort: Sort): SortTeam(sort)
+    data class Los(val sort: Sort): SortTeam(sort)
 }
 
 enum class Sort {

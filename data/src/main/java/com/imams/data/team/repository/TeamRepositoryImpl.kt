@@ -19,6 +19,10 @@ class TeamRepositoryImpl(
         return dao.getById(id).map { it.toModel() }
     }
 
+    override suspend fun getTeam(first: Int, second: Int): Flow<Team?> {
+        return dao.findByPlayerId(first, second).map { it.toModel() }
+    }
+
     override suspend fun addTeam(team: Team) {
         log("addTeam $team")
         dao.addTeam(team.toEntity())

@@ -9,6 +9,8 @@ interface PlayerRepository {
 
     suspend fun getPlayer(id: Int): Flow<Player>
 
+    suspend fun getPlayer(query: String): Flow<Player?>
+
     suspend fun addPlayer(player: Player)
 
     suspend fun addPlayer(player: List<Player>)

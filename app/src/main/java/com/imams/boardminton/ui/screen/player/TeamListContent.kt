@@ -173,13 +173,16 @@ fun TeamItem(
 ) {
     ListItem(
         leadingContent = {
-
+            Text(text = item.rank.toString())
         },
         trailingContent = {
             Text(text = item.id.toString())
         },
         tonalElevation = 2.dp,
         shadowElevation = 2.dp,
+        overlineContent = {
+            Text(text = item.type)
+        },
         headlineContent = {
             val label = item.alias
             Text(label, fontWeight = FontWeight.Bold)
@@ -187,6 +190,10 @@ fun TeamItem(
         supportingContent = {
             Text(
                 text = "${item.playerName1} (${item.playerId1}) & ${item.playerName2} (${item.playerId2})",
+                fontSize = 10.sp
+            )
+            Text(
+                text = "Play; ${item.play}. Win; ${item.win}. Lose; ${item.lose}.",
                 fontSize = 10.sp
             )
         }

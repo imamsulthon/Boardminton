@@ -4,7 +4,6 @@ import com.imams.boardminton.domain.impl.CreatePlayerUseCase
 import com.imams.boardminton.domain.impl.CreatePlayerUseCaseImpl
 import com.imams.boardminton.domain.impl.CreateTeamUseCase
 import com.imams.boardminton.domain.impl.CreateTeamUseCaseImpl
-import com.imams.data.player.dao.PlayerDao
 import com.imams.data.player.repository.PlayerRepository
 import com.imams.data.team.repository.TeamRepository
 import dagger.Module
@@ -25,8 +24,8 @@ object CreatePlayerModule {
 
     @Provides
     @ViewModelScoped
-    fun provideCreateTeamUseCase(playerDao: PlayerDao, teamRepo: TeamRepository): CreateTeamUseCase {
-        return CreateTeamUseCaseImpl(playerDao, teamRepo)
+    fun provideCreateTeamUseCase(playerRepo: PlayerRepository, teamRepo: TeamRepository): CreateTeamUseCase {
+        return CreateTeamUseCaseImpl(playerRepo, teamRepo)
     }
 
 }

@@ -351,7 +351,7 @@ fun GenderField(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopView(
+fun TopView(
     title: String,
     onClick: () -> Unit,
 ) {
@@ -371,7 +371,7 @@ private fun TopView(
 }
 
 @Composable
-private fun BottomView(
+fun BottomView(
     enableClear: Boolean = false,
     enableSave: Boolean = false,
     onClear: () -> Unit,

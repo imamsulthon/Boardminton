@@ -1,5 +1,6 @@
 package com.imams.boardminton.ui.screen.create
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,9 +17,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -165,6 +166,7 @@ fun FieldInputDoubleMatch(
     swapPlayer: (ISide) -> Unit,
     swapTeam: () -> Unit,
     importPerson: (ITeam) -> Unit,
+    importTeam: ((ISide) -> Unit)? = null,
 ) {
     // Landscape
     if (orientation == Orientation.Landscape) {
@@ -177,7 +179,8 @@ fun FieldInputDoubleMatch(
             onChange = onChange::invoke,
             swapPlayer = swapPlayer::invoke,
             swapTeam = { swapTeam.invoke() },
-            importPerson = { importPerson.invoke(it) }
+            importPerson = { importPerson.invoke(it) },
+            importTeam = { importTeam?.invoke(it) },
         )
         return
     }
@@ -206,7 +209,12 @@ fun FieldInputDoubleMatch(
             label = "Player 2 Name",
             endIconClick = { importPerson.invoke(ITeam.A2) },
         )
-
+        AnimatedVisibility(visible = importTeam != null) {
+            OutlinedButton(
+                modifier = Modifier.padding(top = 6.dp),
+                onClick = { importTeam?.invoke(ISide.A) }
+            ) { Text(text = "Import Team") }
+        }
         Row(
             modifier = ipModifierP,
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -232,6 +240,12 @@ fun FieldInputDoubleMatch(
             keyboardOptions = keyBoardDone(),
             endIconClick = { importPerson.invoke(ITeam.B2) },
         )
+        AnimatedVisibility(visible = importTeam != null) {
+            OutlinedButton(
+                modifier = Modifier.padding(top = 6.dp),
+                onClick = { importTeam?.invoke(ISide.B) }
+            ) { Text(text = "Import Team") }
+        }
     }
 
 }
@@ -248,6 +262,7 @@ private fun FieldInputDoubleLandscape(
     swapPlayer: (ISide) -> Unit,
     swapTeam: () -> Unit,
     importPerson: (ITeam) -> Unit,
+    importTeam: ((ISide) -> Unit)? = null,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -278,6 +293,12 @@ private fun FieldInputDoubleLandscape(
                 label = "Player 2 Name",
                 endIconClick = { importPerson.invoke(ITeam.A2) },
             )
+            AnimatedVisibility(visible = importTeam != null) {
+                OutlinedButton(
+                    modifier = Modifier.padding(top = 6.dp),
+                    onClick = { importTeam?.invoke(ISide.A) }
+                ) { Text(text = "Import Team") }
+            }
         }
 
         Column(
@@ -312,6 +333,12 @@ private fun FieldInputDoubleLandscape(
                 keyboardOptions = keyBoardDone(),
                 endIconClick = { importPerson.invoke(ITeam.B2) },
             )
+            AnimatedVisibility(visible = importTeam != null) {
+                OutlinedButton(
+                    modifier = Modifier.padding(top = 6.dp),
+                    onClick = { importTeam?.invoke(ISide.B) }
+                ) { Text(text = "Import Team") }
+            }
         }
     }
 
@@ -391,6 +418,7 @@ fun DoubleLandscapeP() {
         onChange = { v, i -> },
         swapPlayer = {},
         swapTeam = { },
-        importPerson = {}
+        importPerson = {},
+        importTeam = {},
     )
 }

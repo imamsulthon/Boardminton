@@ -76,6 +76,7 @@ fun PlayerAndTeamsList(
     viewModel: RegisteredPlayersVM = hiltViewModel(),
     addNewPlayer: () -> Unit,
     onEditPlayer: (id: Int) -> Unit,
+    onEditTeam: (id: Int) -> Unit,
     addNewTeam: () -> Unit,
 ) {
     ContentWrapper(

@@ -9,6 +9,7 @@ import com.imams.boardminton.data.toList
 import com.imams.boardminton.domain.impl.CreatePlayerUseCase
 import com.imams.boardminton.domain.impl.CreateTeamUseCase
 import com.imams.boardminton.domain.mapper.MatchRepoMapper.toJson
+import com.imams.boardminton.domain.mapper.UseCaseMapper.toState
 import com.imams.boardminton.domain.model.GameViewParam
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ITeam
@@ -16,9 +17,10 @@ import com.imams.boardminton.domain.model.PlayerViewParam
 import com.imams.boardminton.domain.model.TeamViewParam
 import com.imams.boardminton.engine.data.model.Winner
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
+import com.imams.boardminton.ui.screen.create.player.CreateTeamState
 import com.imams.data.match.model.Match
 import com.imams.data.match.repository.MatchRepository
-import com.imams.data.player.repository.PlayerRepository
+import com.imams.data.team.repository.TeamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,10 +30,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreateMatchVM @Inject constructor(
-    private val useCase: CreatePlayerUseCase,
+    private val createPlayerUseCase: CreatePlayerUseCase,
     private val repository: MatchRepository,
-    private val playerRepository: PlayerRepository,
     private val createTeamUseCase: CreateTeamUseCase,
+    private val teamRepository: TeamRepository,
 ) : ViewModel() {
 
     private val _playerA1 = mutableStateOf("")
@@ -47,8 +49,13 @@ class CreateMatchVM @Inject constructor(
     private val _savePlayersFlow = MutableStateFlow(_savePlayers)
     val savePlayers: StateFlow<List<CreatePlayerState>> = _savePlayersFlow
 
+    private val _saveTeams = mutableStateListOf<CreateTeamState>()
+    private val _saveTeamsFlow = MutableStateFlow(_saveTeams)
+    val saveTeams: StateFlow<List<CreateTeamState>> = _saveTeamsFlow
+
     init {
         initOptionalPlayers()
+        initOptionalTeams()
     }
 
     fun setupPlayers(isSingle: Boolean, json: String) {
@@ -75,6 +82,19 @@ class CreateMatchVM @Inject constructor(
 
     fun updatePlayerName(iTeam: ITeam, data: CreatePlayerState) {
         updatePlayerName(iTeam, "${data.firstName} ${data.lastName}")
+    }
+
+    fun updatePlayerName(iSide: ISide, data: CreateTeamState) {
+        when (iSide) {
+            ISide.A -> {
+                updatePlayerName(ITeam.A1, data.playerName1)
+                updatePlayerName(ITeam.A2, data.playerName2)
+            }
+            ISide.B -> {
+                updatePlayerName(ITeam.B1, data.playerName1)
+                updatePlayerName(ITeam.B2, data.playerName2)
+            }
+        }
     }
 
     fun swapSingleMatch() {
@@ -110,11 +130,18 @@ class CreateMatchVM @Inject constructor(
 
     private fun initOptionalPlayers() {
         viewModelScope.launch {
-            viewModelScope.launch {
-                useCase.getAllPlayers().collectLatest {
-                    _savePlayers.clear()
-                    _savePlayers.addAll(it)
-                }
+            createPlayerUseCase.getAllPlayers().collectLatest {
+                _savePlayers.clear()
+                _savePlayers.addAll(it)
+            }
+        }
+    }
+
+    private fun initOptionalTeams() {
+        viewModelScope.launch {
+            teamRepository.getAllTeams().collectLatest {
+                _saveTeams.clear()
+                _saveTeams.addAll(it.map { t -> t.toState() })
             }
         }
     }

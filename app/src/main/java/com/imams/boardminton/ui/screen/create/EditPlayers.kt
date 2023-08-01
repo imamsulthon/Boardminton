@@ -63,7 +63,8 @@ fun EditPlayersScreen(
             onChange = vm::updatePlayerName,
             swapPlayer = vm::swapPlayerByTeam,
             swapTeam = vm::swapDoubleMatch,
-            importPerson = {}
+            importPerson = {},
+            importTeam = {},
         )
 
     @Composable

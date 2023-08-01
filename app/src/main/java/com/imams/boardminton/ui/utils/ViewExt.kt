@@ -70,6 +70,17 @@ private fun String.justLastName(): String {
     return first.trim() + " " + new.lastOrNull()
 }
 
+fun isNotEmptyAndSameName(vararg names: String): Boolean {
+    return !isAnyEmpty(*names) && isNotSamePlayer(*names)
+}
+fun isAnyEmpty(vararg names: String): Boolean {
+    return names.any { it.isEmpty() }
+}
+
+fun isNotSamePlayer(vararg names: String):  Boolean {
+    val new = names.toSet()
+    return new.size == names.size
+}
 
 fun keyboardNext() = KeyboardOptions(
     capitalization = KeyboardCapitalization.Words,

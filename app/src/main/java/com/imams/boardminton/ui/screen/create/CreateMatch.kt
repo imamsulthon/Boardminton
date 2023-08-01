@@ -36,10 +36,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.data.toJson
+import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ITeam
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
+import com.imams.boardminton.ui.screen.create.player.CreateTeamState
 import com.imams.boardminton.ui.screen.create.player.PlayerBottomSheetContent
+import com.imams.boardminton.ui.screen.create.team.TeamBottomSheetContent
 import com.imams.boardminton.ui.theme.Orientation
+import com.imams.boardminton.ui.utils.isNotEmptyAndSameName
 
 @Composable
 fun CreateMatchScreen(
@@ -56,17 +60,21 @@ fun CreateMatchScreen(
     val playerB2 by rememberSaveable { vm.playerB2 }
     val enableNext by rememberSaveable(singleMatch, playerA1, playerA2, playerB1, playerB2) {
         mutableStateOf(
-            if (singleMatch) playerA1.isNotEmpty() && playerB1.isNotEmpty()
-            else playerA1.isNotEmpty() && playerA2.isNotEmpty() && playerB1.isNotEmpty() && playerB2.isNotEmpty()
+            if (singleMatch) isNotEmptyAndSameName(playerA1, playerA2)
+            else isNotEmptyAndSameName(playerA1, playerA2, playerB1, playerB2)
         )
     }
     val enableClear by rememberSaveable(singleMatch, playerA1, playerA2, playerB1, playerB2) {
         mutableStateOf(playerA1.isNotEmpty() || playerA2.isNotEmpty() || playerB1.isNotEmpty() || playerB2.isNotEmpty())
     }
 
-    var openBottomSheet by rememberSaveable { mutableStateOf(false) }
-    var selectedFieldForImport by remember { mutableStateOf(ITeam.A1) }
+    var openOptionalPlayer by rememberSaveable { mutableStateOf(false) }
+    var selectedPlayerForImport by remember { mutableStateOf(ITeam.A1) }
     val savedPlayers by vm.savePlayers.collectAsState()
+
+    var openOptionalTeam by rememberSaveable { mutableStateOf(false) }
+    var selectedFieldForTeam by remember { mutableStateOf(ISide.A) }
+    val savedTeams by vm.saveTeams.collectAsState()
 
     val config = LocalConfiguration.current
 
@@ -110,8 +118,8 @@ fun CreateMatchScreen(
                 onChange = vm::updatePlayerName,
                 swapPlayer = vm::swapSingleMatch,
                 importPerson = {
-                    selectedFieldForImport = it
-                    openBottomSheet = true
+                    selectedPlayerForImport = it
+                    openOptionalPlayer = true
                 }
             )
         } else {
@@ -124,8 +132,12 @@ fun CreateMatchScreen(
                 swapPlayer = vm::swapPlayerByTeam,
                 swapTeam = { vm.swapDoubleMatch() },
                 importPerson = {
-                    selectedFieldForImport = it
-                    openBottomSheet = true
+                    selectedPlayerForImport = it
+                    openOptionalPlayer = true
+                },
+                importTeam = {
+                    selectedFieldForTeam = it
+                    openOptionalTeam = true
                 }
             )
         }
@@ -163,14 +175,23 @@ fun CreateMatchScreen(
 
     // show Dialog optional players from database to choose
     ImportPlayers(
-        openBottomSheet = openBottomSheet,
-        onField = selectedFieldForImport,
-        dismiss = { openBottomSheet = false },
+        openBottomSheet = openOptionalPlayer,
+        onField = selectedPlayerForImport,
+        dismiss = { openOptionalPlayer = false },
         optionalPlayers = savedPlayers,
         onChoose = { i, data ->
             vm.updatePlayerName(i, data)
-            openBottomSheet = false
+            openOptionalPlayer = false
         },
+    )
+    ImportTeams(
+        openBottomSheet = openOptionalTeam,
+        onField = selectedFieldForTeam,
+        dismiss = { openOptionalTeam = false },
+        optionalTeams = savedTeams, onChoose = { i, data ->
+            vm.updatePlayerName(i, data)
+            openOptionalTeam = false
+        }
     )
 
 }
@@ -293,13 +314,14 @@ private fun BottomButton(
             Text(text = "Back")
         }
 
-        OutlinedButton(onClick = { listener.onClear() }, enabled = enableClear) {
-            Icon(Icons.Outlined.Delete, contentDescription = "clear_icon")
-        }
+        OutlinedButton(
+            modifier = Modifier.padding(end = 5.dp),
+            onClick = { listener.onClear() }, enabled = enableClear
+        ) { Icon(Icons.Outlined.Delete, contentDescription = "clear_icon") }
 
-        OutlinedButton(onClick = { listener.onRandom() }) {
-            Icon(Icons.Outlined.Star, contentDescription = "star_icon")
-        }
+        OutlinedButton(
+            onClick = { listener.onRandom() },
+        ) { Icon(Icons.Outlined.Star, contentDescription = "star_icon") }
 
         Button(
             onClick = { listener.onNext() },
@@ -328,6 +350,29 @@ private fun ImportPlayers(
             sheetState = bottomSheetState,
         ) {
             PlayerBottomSheetContent(list = optionalPlayers, onSelect = {
+                onChoose.invoke(onField, it)
+            })
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ImportTeams(
+    openBottomSheet: Boolean,
+    onField: ISide,
+    optionalTeams: List<CreateTeamState>,
+    onChoose: (ISide, CreateTeamState) -> Unit,
+    dismiss: () -> Unit,
+) {
+    val skipPartiallyExpanded by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
+    if (openBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { dismiss.invoke() },
+            sheetState = bottomSheetState,
+        ) {
+            TeamBottomSheetContent(list = optionalTeams, onSelect = {
                 onChoose.invoke(onField, it)
             })
         }

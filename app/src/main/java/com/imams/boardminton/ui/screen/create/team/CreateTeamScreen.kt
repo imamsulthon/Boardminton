@@ -33,6 +33,7 @@ import com.imams.boardminton.ui.screen.create.player.CreateTeamEvent
 import com.imams.boardminton.ui.screen.create.player.CreateTeamState
 import com.imams.boardminton.ui.screen.create.player.PlayerBottomSheetContent
 import com.imams.boardminton.ui.screen.create.player.TopView
+import com.imams.boardminton.ui.utils.isNotEmptyAndSameName
 import com.imams.boardminton.ui.utils.keyBoardDone
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,7 +112,7 @@ internal fun CreateTeamContent(
     onCheckSaveTeams: (() -> Unit)? = null,
 ) {
     val enableSave by rememberSaveable(uiState) {
-        mutableStateOf(uiState.playerName1.isNotEmpty() && uiState.playerName2.isNotEmpty())
+        mutableStateOf(isNotEmptyAndSameName(uiState.playerName1, uiState.playerName2))
     }
     val enableClear by rememberSaveable(uiState) {
         mutableStateOf(uiState.playerName1.isNotEmpty() || uiState.playerName2.isNotEmpty())

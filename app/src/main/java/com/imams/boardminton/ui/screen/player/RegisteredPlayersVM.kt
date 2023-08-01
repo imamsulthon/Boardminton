@@ -100,6 +100,35 @@ class RegisteredPlayersVM @Inject constructor(
         }
     }
 
+    fun setSorting(params: SortTeam) {
+        when (params) {
+            is SortTeam.Id -> {
+                if (params.asc == Sort.Ascending)_saveTeams.sortBy { it.id }
+                else _savePlayers.sortByDescending { it.id }
+            }
+            is SortTeam.Name -> {
+                if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.playerName1 }
+                 else _saveTeams.sortByDescending { it.playerName1 }
+            }
+            is SortTeam.Rank -> {
+                if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.rank }
+                else _savePlayers.sortByDescending { it.weight }
+            }
+            is SortTeam.Play -> {
+                if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.play }
+                else _savePlayers.sortByDescending { it.height }
+            }
+            is SortTeam.Win -> {
+                if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.win }
+                else _savePlayers.sortByDescending { it.weight }
+            }
+            is SortTeam.Lose -> {
+                if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.lose }
+                else _savePlayers.sortByDescending { it.height }
+            }
+        }
+    }
+
     fun removePlayer(item: CreatePlayerState) {
         viewModelScope.launch {
             repository.removePlayer(item.toModel(true))
@@ -152,7 +181,7 @@ sealed class SortTeam(val asc: Sort) {
     data class Rank(val sort: Sort): SortTeam(sort)
     data class Play(val sort: Sort): SortTeam(sort)
     data class Win(val sort: Sort): SortTeam(sort)
-    data class Los(val sort: Sort): SortTeam(sort)
+    data class Lose(val sort: Sort): SortTeam(sort)
 }
 
 enum class Sort {

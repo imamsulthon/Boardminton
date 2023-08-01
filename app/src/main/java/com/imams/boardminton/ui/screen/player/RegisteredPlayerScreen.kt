@@ -394,7 +394,7 @@ private fun FilterSheet(
 }
 
 @Composable
-fun SortSheet(
+private fun SortSheet(
     filter: SortPlayer,
     onApply: (SortPlayer) -> Unit,
     onCancel: () -> Unit,
@@ -473,7 +473,7 @@ fun SortSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SortField(
+fun SortField(
     label: String,
     options: List<Sort>,
     initialSelection: String = "",

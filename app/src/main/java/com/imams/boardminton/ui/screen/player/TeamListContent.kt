@@ -3,7 +3,10 @@ package com.imams.boardminton.ui.screen.player
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SwipeToDismiss
@@ -68,6 +72,7 @@ internal fun TeamList(
             ListBottomBar(
                 onFilter = { openFilterDialog = true },
                 onSort = { openSortDialog = true },
+                enableFilter = false
             )
         },
         floatingActionButton = {
@@ -154,8 +159,8 @@ internal fun TeamList(
                     onDismissRequest = { openSortDialog = false },
                     sheetState = bottomSheetState2,
                 ) {
-                    SortSheet(
-                        filter = SortPlayer.Id(Sort.Ascending),
+                    SortTeamSheet(
+                        filter = SortTeam.Id(Sort.Ascending),
                         onApply = {
                             openSortDialog = false
                             viewModel.setSorting(it)
@@ -198,4 +203,115 @@ fun TeamItem(
             )
         }
     )
+}
+
+@Composable
+fun SortTeamSheet(
+    filter: SortTeam,
+    onApply: (SortTeam) -> Unit,
+    onCancel: () -> Unit,
+) {
+    val sortData = listOf(Sort.Ascending, Sort.Descending)
+    var init by remember { mutableStateOf(filter) }
+    var sortId: Sort? by remember { mutableStateOf(null) }
+    var sortName: Sort? by remember { mutableStateOf(null) }
+    var sortRank: Sort? by remember { mutableStateOf(null) }
+    var sortPlay: Sort? by remember { mutableStateOf(null) }
+    var sortWin: Sort? by remember { mutableStateOf(null) }
+    var sortLose: Sort? by remember { mutableStateOf(null) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 10.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(text = "Sort by:")
+        SortField(label = "ID", options = sortData, initialSelection = sortId?.name.orEmpty(),
+            onSelected = {
+                init = SortTeam.Id(it)
+                sortId = init.asc
+                sortName = null
+                sortPlay = null
+                sortRank = null
+                sortWin = null
+                sortLose = null
+            }
+        )
+        SortField(label = "Name", options = sortData, initialSelection = sortName?.name.orEmpty(),
+            onSelected = {
+                init = SortTeam.Name(it)
+                sortName = init.asc
+                sortId = null
+                sortPlay = null
+                sortRank = null
+                sortWin = null
+                sortLose = null
+            }
+        )
+        SortField(label = "Rank", options = sortData, initialSelection = sortRank?.name.orEmpty(),
+            onSelected = {
+                init = SortTeam.Rank(it)
+                sortId = null
+                sortName = null
+                sortRank = init.asc
+                sortPlay = null
+                sortWin = null
+                sortLose = null
+            }
+        )
+        SortField(label = "Play", options = sortData, initialSelection = sortPlay?.name.orEmpty(),
+            onSelected = {
+                init = SortTeam.Play(it)
+                sortId = null
+                sortName = null
+                sortRank = null
+                sortPlay = init.asc
+                sortWin = null
+                sortLose = null
+            }
+        )
+        SortField(label = "Win", options = sortData, initialSelection = sortWin?.name.orEmpty(),
+            onSelected = {
+                init = SortTeam.Win(it)
+                sortId = null
+                sortName = null
+                sortRank = null
+                sortPlay = null
+                sortWin = init.asc
+                sortLose = null
+            }
+        )
+        SortField(label = "Lose", options = sortData, initialSelection = sortLose?.name.orEmpty(),
+            onSelected = {
+                init = SortTeam.Lose(it)
+                sortId = null
+                sortName = null
+                sortRank = null
+                sortLose = init.asc
+                sortPlay = null
+                sortWin = null
+            }
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            OutlinedButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(end = 4.dp),
+                onClick = { onCancel.invoke() }
+            ) { Text(text = "Cancel") }
+            OutlinedButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                onClick = { onApply.invoke(init) }
+            ) { Text(text = "Apply") }
+        }
+    }
 }

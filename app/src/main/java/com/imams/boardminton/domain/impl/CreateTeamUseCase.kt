@@ -16,7 +16,6 @@ class CreateTeamUseCaseImpl(
         val t2 = playerRepository.getPlayer(team.playerName2).first()
         val checkTeam: Team? = if (t1 == null && t2 == null) null
         else teamRepository.getTeam(t1?.id ?: 0, t2?.id ?: 0).first()
-        log("1 t1 $t1 t2 $t2")
         if (checkTeam != null) return
         val newTeam = Team(
             playerId1 = t1?.id ?: 0,
@@ -32,7 +31,6 @@ class CreateTeamUseCaseImpl(
         val t2 = playerRepository.getPlayer(team.player2.name).first()
         val checkTeam: Team? = if (t1 == null && t2 == null) null
         else teamRepository.getTeam(t1?.id ?: 0, t2?.id ?: 0).first()
-        log("2 t1 $t1 t2 $t2 check $checkTeam")
         if (checkTeam != null) return
         val newTeam = Team(
             playerId1 = t1?.id ?: 0,
@@ -42,7 +40,6 @@ class CreateTeamUseCaseImpl(
         )
         teamRepository.addTeam(newTeam)
     }
-    private fun log(m: String) = println("CreateTeamUseCase: $m")
 
 }
 

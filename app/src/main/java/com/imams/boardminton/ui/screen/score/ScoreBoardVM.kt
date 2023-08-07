@@ -1,5 +1,7 @@
 package com.imams.boardminton.ui.screen.score
 
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.data.toList
@@ -32,7 +34,7 @@ import javax.inject.Inject
 class ScoreBoardVM @Inject constructor(
     private val useCase: MatchBoardUseCase,
     private val repository: MatchRepository,
-) : ViewModel() {
+) : ViewModel(), DefaultLifecycleObserver {
 
     private var alreadySetup = false
     private var courtConfig = CourtSide(left = ISide.A, right = ISide.B)
@@ -217,12 +219,17 @@ class ScoreBoardVM @Inject constructor(
         Court.Right -> config.right
     }
 
-    fun updateGame(callback: () -> Unit) {
+    fun updateGame(callback: (() -> Unit)? = null) {
         val duration = timeGenerator.currentTimerInSeconds(pause = true)
         viewModelScope.launch {
             repository.updateMatch(_matchUiState.value.match.toRepo().apply { matchDuration = duration })
-            callback.invoke()
+            callback?.invoke()
         }
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        updateGame()
+        super.onDestroy(owner)
     }
 
 }

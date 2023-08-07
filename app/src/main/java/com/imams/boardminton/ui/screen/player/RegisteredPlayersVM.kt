@@ -138,7 +138,6 @@ class RegisteredPlayersVM @Inject constructor(
     private fun checkTeams() {
         viewModelScope.launch {
             teamRepository.getAllTeams().collectLatest {
-                println("Registered Players size: ${it.size} list: $it")
                 _tempData2.clear()
                 _tempData2.addAll(it)
                 _tempData2.proceed2()
@@ -170,10 +169,6 @@ sealed class SortPlayer(val asc: Sort) {
     data class Height(val sort: Sort): SortPlayer(sort)
     data class Weight(val sort: Sort): SortPlayer(sort)
 }
-
-data class FilterTeam(
-    val type: String,
-)
 
 sealed class SortTeam(val asc: Sort) {
     data class Id(val sort: Sort): SortTeam(sort)

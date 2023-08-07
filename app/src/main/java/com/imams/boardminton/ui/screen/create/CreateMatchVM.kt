@@ -175,7 +175,6 @@ class CreateMatchVM @Inject constructor(
                 0 -> {
                     callback.invoke(if (single) "single" else "double", save)
                 }
-
                 else -> {
                     if (single) {
                         callback.invoke("single", save)
@@ -189,7 +188,7 @@ class CreateMatchVM @Inject constructor(
         }
     }
 
-    private inline fun saveTeam(teamA: TeamViewParam, teamB: TeamViewParam, crossinline callback: () -> Unit) {
+    private fun saveTeam(teamA: TeamViewParam, teamB: TeamViewParam, callback: () -> Unit) {
         viewModelScope.launch {
             log("saveTeam A: $teamA B: $teamB")
             createTeamUseCase.createTeam(teamA)

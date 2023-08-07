@@ -28,7 +28,7 @@ interface TeamDao {
 
     @Query("SELECT * FROM team_entity WHERE (player_id_1 LIKE :first AND player_id_2 LIKE :last) " +
             "OR (player_id_1 LIKE:last AND player_id_2 LIKE:first) LIMIT 1")
-    fun findByPlayerId(first: Int, last: Int): Flow<TeamEntity>
+    fun findByPlayerId(first: Int, last: Int): Flow<TeamEntity?>
 
     @Delete
     suspend fun delete(team: TeamEntity)

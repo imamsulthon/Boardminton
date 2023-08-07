@@ -39,7 +39,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabPosition
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -66,6 +68,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.R
 import com.imams.boardminton.data.Athlete
 import com.imams.boardminton.ui.component.EmptyContent
+import com.imams.boardminton.ui.component.FancyIndicator
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.boardminton.ui.screen.create.player.GenderField
 import com.imams.boardminton.ui.screen.create.player.HandPlays
@@ -108,9 +111,11 @@ private fun ContentWrapper(
     val pagerState = rememberPagerState(pageCount = { tabData.size })
     val tabIndex = pagerState.currentPage
     val coroutineScope = rememberCoroutineScope()
-
+    val indicator = @Composable { tabPositions: List<TabPosition> ->
+        FancyIndicator(MaterialTheme.colorScheme.primary, Modifier.tabIndicatorOffset(tabPositions[tabIndex]))
+    }
     Column {
-        TabRow(selectedTabIndex = tabIndex) {
+        TabRow(modifier = Modifier.padding(10.dp), selectedTabIndex = tabIndex, indicator = indicator) {
             tabData.forEachIndexed { index, pair ->
                 Tab(
                     modifier = Modifier.padding(10.dp),
@@ -413,7 +418,7 @@ private fun SortSheet(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        Text(text = "Sort by:")
+        Text(text = "Sort by:", fontWeight = FontWeight.SemiBold)
         SortField(label = "ID", options = sortData, initialSelection = sortId?.name.orEmpty(),
             onSelected = {
                 init = SortPlayer.Id(it)

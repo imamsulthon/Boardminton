@@ -228,7 +228,7 @@ fun SortTeamSheet(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        Text(text = "Sort by:")
+        Text(text = "Sort by:", fontWeight = FontWeight.SemiBold)
         SortField(label = "ID", options = sortData, initialSelection = sortId?.name.orEmpty(),
             onSelected = {
                 init = SortTeam.Id(it)

@@ -60,12 +60,14 @@ fun CreateMatchScreen(
     val playerB2 by rememberSaveable { vm.playerB2 }
     val enableNext by rememberSaveable(singleMatch, playerA1, playerA2, playerB1, playerB2) {
         mutableStateOf(
-            if (singleMatch) isNotEmptyAndSameName(playerA1, playerA2)
+            if (singleMatch) isNotEmptyAndSameName(playerA1, playerB1)
             else isNotEmptyAndSameName(playerA1, playerA2, playerB1, playerB2)
         )
     }
     val enableClear by rememberSaveable(singleMatch, playerA1, playerA2, playerB1, playerB2) {
-        mutableStateOf(playerA1.isNotEmpty() || playerA2.isNotEmpty() || playerB1.isNotEmpty() || playerB2.isNotEmpty())
+        mutableStateOf(
+            if (singleMatch) playerA1.isNotEmpty() || playerB1.isNotEmpty()
+            else playerA1.isNotEmpty() || playerA2.isNotEmpty() || playerB1.isNotEmpty() || playerB2.isNotEmpty())
     }
 
     var openOptionalPlayer by rememberSaveable { mutableStateOf(false) }

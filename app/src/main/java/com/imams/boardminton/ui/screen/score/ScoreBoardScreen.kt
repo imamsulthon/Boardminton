@@ -36,6 +36,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,6 +63,7 @@ import com.imams.boardminton.ui.component.MainNameBoardView
 import com.imams.boardminton.ui.component.MyCourtMatch
 import com.imams.boardminton.ui.component.TimeCounterView
 import com.imams.boardminton.ui.screen.timer.TimeCounterUiState
+import com.imams.boardminton.ui.utils.ObserveLifecycle
 
 @Composable
 fun ScoreBoardScreen(
@@ -73,7 +75,7 @@ fun ScoreBoardScreen(
     savedStateHandle: SavedStateHandle?,
     onBackPressed: () -> Unit,
 ) {
-
+    scoreVm.ObserveLifecycle(LocalLifecycleOwner.current.lifecycle)
     BackHandler(true) {
         scoreVm.updateGame(onBackPressed)
     }

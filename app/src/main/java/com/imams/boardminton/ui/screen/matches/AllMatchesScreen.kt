@@ -39,7 +39,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabPosition
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -66,6 +68,7 @@ import com.imams.boardminton.domain.model.GameViewParam
 import com.imams.boardminton.domain.model.MatchViewParam
 import com.imams.boardminton.domain.model.ScoreViewParam
 import com.imams.boardminton.ui.component.EmptyContent
+import com.imams.boardminton.ui.component.FancyIndicator
 import com.imams.boardminton.ui.screen.player.Sort
 import com.imams.boardminton.ui.utils.getLabel
 import kotlinx.coroutines.launch
@@ -136,8 +139,13 @@ internal fun ContentWrapper(
     val pagerState = rememberPagerState(pageCount = { tabData.size })
     val tabIndex = pagerState.currentPage
     val coroutineScope = rememberCoroutineScope()
+    val indicator = @Composable { tabPositions: List<TabPosition> ->
+        FancyIndicator(MaterialTheme.colorScheme.primary, Modifier.tabIndicatorOffset(tabPositions[tabIndex]))
+    }
     Column {
-        TabRow(selectedTabIndex = tabIndex) {
+        TabRow(modifier = Modifier.padding(10.dp),
+            selectedTabIndex = tabIndex, indicator = indicator
+        ) {
             tabData.forEachIndexed { index, pair ->
                 Tab(
                     modifier = Modifier.padding(10.dp),
@@ -503,7 +511,7 @@ private fun SortSheet(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        Text(text = "Sort by:")
+        Text(text = "Sort by:", fontWeight = FontWeight.SemiBold)
         SortField(label = "ID",
             options = sortData,
             initialSelection = sortId?.name.orEmpty(),

@@ -12,6 +12,7 @@ object PlayerMapper {
         weight = weight,
         height = height,
         handPlay = handPlay,
+        dob = dob,
     )
 
     fun Player.toEntity(withId: Boolean = false) = PlayerEntity(
@@ -22,6 +23,7 @@ object PlayerMapper {
         weight = weight,
         height = height,
         handPlay = handPlay,
+        dob = dob,
     ).also {
         if (withId) it.id = id
     }

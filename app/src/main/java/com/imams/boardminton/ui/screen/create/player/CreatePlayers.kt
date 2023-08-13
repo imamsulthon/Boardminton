@@ -14,8 +14,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,9 +31,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +55,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.imams.boardminton.data.asDateTime
 import com.imams.boardminton.ui.screen.create.ipModifierP
 import com.imams.boardminton.ui.utils.keyboardNext
 
@@ -104,6 +113,7 @@ fun EditPlayerCreatedScreen(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CreatePlayerContent(
     screenName: String,
@@ -134,6 +144,9 @@ internal fun CreatePlayerContent(
             )
         }
     ) { p ->
+        val datePickerDialog = remember { mutableStateOf(false) }
+        var datePickerState = rememberDatePickerState()
+
         FormContent(
             Modifier
                 .fillMaxWidth()
@@ -144,13 +157,51 @@ internal fun CreatePlayerContent(
             onHeight = { event.invoke(CreatePlayerEvent.Height(it)) },
             onWeight = { event.invoke(CreatePlayerEvent.Weight(it)) },
             onHandPlay = { event.invoke(CreatePlayerEvent.HandPlay(it)) },
+            onDob = { datePickerDialog.value = true },
             onGender = { event.invoke(CreatePlayerEvent.Gender(it)) }
         )
+
+        if (datePickerDialog.value) {
+            MyDatePicker(
+                datePickerState = datePickerState,
+                onDismiss = { datePickerDialog.value = false },
+                onConfirm = { it?.let { event.invoke(CreatePlayerEvent.DOB(it)) } },
+                onState = { state -> datePickerState = state}
+            )
+        }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun FormContent(
+private fun MyDatePicker(
+    datePickerState: DatePickerState = rememberDatePickerState(),
+    confirmEnabled: State<Boolean> = remember { derivedStateOf { datePickerState.selectedDateMillis != null} },
+    onDismiss: () -> Unit,
+    onConfirm: (Long?) -> Unit,
+    onState: ((DatePickerState) -> Unit)? = null,
+) {
+    DatePickerDialog(
+        onDismissRequest = { onDismiss.invoke() },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val value = datePickerState.selectedDateMillis
+                    onState?.invoke(datePickerState)
+                    onConfirm.invoke(value)
+                    onDismiss.invoke()
+                },
+                enabled = confirmEnabled.value
+            ) { Text("OK") }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismiss.invoke() }) { Text("Cancel") }
+        }
+    ) { DatePicker(state = datePickerState) }
+}
+
+@Composable
+private fun FormContent(
     modifier: Modifier,
     data: CreatePlayerState = CreatePlayerState(),
     onFirstName: (String) -> Unit,
@@ -158,6 +209,7 @@ internal fun FormContent(
     onHandPlay: (String) -> Unit,
     onWeight: (Int) -> Unit,
     onHeight: (Int) -> Unit,
+    onDob: (Long) -> Unit,
     onGender: (String) -> Unit,
 ) {
     Column(
@@ -228,10 +280,23 @@ internal fun FormContent(
                 )
             )
         }
-        GenderField(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+            value = data.dob.toString().asDateTime("dd MMM yyyy") ?: data.dob.toString(),
+            onValueChange = {},
+            trailingIcon = { IconButton(onClick = { onDob.invoke(data.dob) }) {
+                Icon(Icons.Outlined.DateRange, contentDescription = "icon_import_date")
+            } },
+            enabled = false,
+        )
+        GenderField(modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp),
             onSelected = onGender::invoke, initialSelection = data.gender
         )
-        HandPlays(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+        HandPlays(modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp),
             initialSelection = data.handPlay, onSelected = onHandPlay::invoke
         )
     }

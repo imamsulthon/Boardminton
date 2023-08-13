@@ -15,5 +15,6 @@ data class PlayerEntity(
     @ColumnInfo("weight") val weight: Int,
     @ColumnInfo("gender") val gender: String,
     @ColumnInfo("hand_play") val handPlay: String,
+    @ColumnInfo("dob") val dob: Long,
 
 )

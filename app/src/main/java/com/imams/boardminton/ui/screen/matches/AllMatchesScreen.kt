@@ -1,12 +1,8 @@
 package com.imams.boardminton.ui.screen.matches
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,30 +16,22 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Card
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabPosition
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDismissState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,8 +44,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -69,6 +55,7 @@ import com.imams.boardminton.domain.model.MatchViewParam
 import com.imams.boardminton.domain.model.ScoreViewParam
 import com.imams.boardminton.ui.component.EmptyContent
 import com.imams.boardminton.ui.component.FancyIndicator
+import com.imams.boardminton.ui.component.SwipeToDismissItem
 import com.imams.boardminton.ui.screen.player.Sort
 import com.imams.boardminton.ui.utils.getLabel
 import kotlinx.coroutines.launch
@@ -215,59 +202,12 @@ internal fun MatchListContent(
                     items = list,
                     key = { listItem: MatchViewParam -> listItem.id }
                 ) {
-                    val dismissState = rememberDismissState(
-                        confirmValueChange = { dismissState ->
-                            if (dismissState == DismissValue.DismissedToStart || dismissState == DismissValue.DismissedToEnd) {
-                                onRemove(it)
-                            }
-                            true
-                        }
-                    )
-                    SwipeToDismiss(
-                        state = dismissState,
-                        directions = setOf(DismissDirection.EndToStart),
-                        background = {
-                            val color by animateColorAsState(
-                                targetValue = when (dismissState.targetValue) {
-                                    DismissValue.Default -> Color.Transparent
-                                    DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.outline
-                                    DismissValue.DismissedToStart -> MaterialTheme.colorScheme.outline
-                                }
-                            )
-                            val scale by animateFloatAsState(
-                                if (dismissState.targetValue == DismissValue.Default) 0.60f else 1f
-                            )
-                            Box(
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(color)
-                                    .padding(20.dp),
-                                contentAlignment = Alignment.CenterEnd
-                            ) {
-                                Icon(
-                                    Icons.Default.Delete,
-                                    contentDescription = "Delete Icon",
-                                    modifier = Modifier.scale(scale)
-                                )
-                            }
-                        },
-                        dismissContent = {
-                            Card(
-                                onClick = {
-                                    onItemClick?.invoke(it)
-                                },
-                                shape = RoundedCornerShape(
-                                    topStart = 20.dp,
-                                    topEnd = 5.dp,
-                                    bottomEnd = 5.dp,
-                                    bottomStart = 5.dp
-                                ),
-                                modifier = Modifier
-                                    .padding(vertical = 5.dp, horizontal = 10.dp),
-                            ) {
-                                MatchItem(item = it, onClick = { onItemClick?.invoke(it) })
-                            }
-                        })
+                    SwipeToDismissItem(
+                        onSwipeDismiss = { onRemove.invoke(it) },
+                        onItemClick = { onItemClick?.invoke(it) }
+                    ) {
+                        MatchItem(item = it, onClick = { onItemClick?.invoke(it) })
+                    }
                 }
             }
             if (openSortDialog) {

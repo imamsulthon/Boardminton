@@ -97,6 +97,10 @@ class RegisteredPlayersVM @Inject constructor(
                 if (params.asc == Sort.Ascending) _savePlayers.sortBy { it.height }
                 else _savePlayers.sortByDescending { it.height }
             }
+            is SortPlayer.Age -> {
+                if (params.asc == Sort.Ascending) _savePlayers.sortBy { it.dob }
+                else _savePlayers.sortByDescending { it.dob }
+            }
         }
     }
 
@@ -168,6 +172,7 @@ sealed class SortPlayer(val asc: Sort) {
     data class Name(val sort: Sort): SortPlayer(sort)
     data class Height(val sort: Sort): SortPlayer(sort)
     data class Weight(val sort: Sort): SortPlayer(sort)
+    data class Age(val sort: Sort): SortPlayer(sort)
 }
 
 sealed class SortTeam(val asc: Sort) {

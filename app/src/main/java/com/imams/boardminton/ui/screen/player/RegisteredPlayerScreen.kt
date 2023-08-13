@@ -1,35 +1,28 @@
 package com.imams.boardminton.ui.screen.player
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Card
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -37,13 +30,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
-import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabPosition
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDismissState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -55,8 +46,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
@@ -67,8 +56,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.R
 import com.imams.boardminton.data.Athlete
+import com.imams.boardminton.data.asDateTime
+import com.imams.boardminton.data.epochToAge
+import com.imams.boardminton.ui.component.BackgroundListItem
 import com.imams.boardminton.ui.component.EmptyContent
 import com.imams.boardminton.ui.component.FancyIndicator
+import com.imams.boardminton.ui.component.SwipeToOptional
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.boardminton.ui.screen.create.player.GenderField
 import com.imams.boardminton.ui.screen.create.player.HandPlays
@@ -187,61 +180,59 @@ internal fun PlayerList(
                     .wrapContentHeight()
                     .padding(padding)
             ) {
-                items(items = list, key = { listItem: CreatePlayerState -> listItem.id }) {
-                    val dismissState = rememberDismissState(
-                        confirmValueChange = { dismissState ->
-                            if (dismissState == DismissValue.DismissedToStart || dismissState == DismissValue.DismissedToEnd) {
-                                viewModel.removePlayer(it)
-                            }
-                            true
-                        }
-                    )
-                    SwipeToDismiss(
-                        state = dismissState,
-                        directions = setOf(DismissDirection.EndToStart),
-                        background = {
-                            val color by animateColorAsState(
-                                targetValue = when (dismissState.targetValue) {
-                                    DismissValue.Default -> Color.Transparent
-                                    DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.outline
-                                    DismissValue.DismissedToStart -> MaterialTheme.colorScheme.outline
-                                }
-                            )
-                            val scale by animateFloatAsState(
-                                if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
-                            )
-                            Box(
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(color)
-                                    .padding(20.dp),
-                                contentAlignment = Alignment.CenterEnd
-                            ) {
-                                Icon(
-                                    Icons.Default.Delete,
-                                    contentDescription = "Delete Icon",
-                                    modifier = Modifier.scale(scale)
+                itemsIndexed(
+                    items = list,
+                    itemContent = { index, obj ->
+                        SwipeToOptional(
+                            index = index,
+                            onItemSwiped = {
+                                printLog("onSwipe $it")
+                                viewModel.removePlayer(obj)
+                            },
+                            onEdit = {
+                                printLog("onEdit $it")
+                            },
+                            onDelete = {
+                                printLog("onDelete $it")
+                                viewModel.removePlayer(obj)
+                            },
+                            content = { PlayerItem(obj) },
+                            actionContent = {
+                                BackgroundListItem(
+                                    this,
+                                    onDelete = {
+                                        printLog("onDelete $index")
+//                                        onDelete.invoke(index)
+                                    },
+                                    onEdit = {
+                                        printLog("onDelete $index")
+//                                        onEdit.invoke(index)
+                                    },
                                 )
                             }
-                        },
-                        dismissContent = {
-                            Card(
-                                onClick = {
-                                    onItemClick.invoke(it)
-                                },
-                                shape = RoundedCornerShape(
-                                    topStart = 20.dp,
-                                    topEnd = 5.dp,
-                                    bottomEnd = 5.dp,
-                                    bottomStart = 5.dp
-                                ),
-                                modifier = Modifier
-                                    .padding(vertical = 5.dp, horizontal = 10.dp),
-                            ) {
-                                PlayerItem(it)
-                            }
-                        })
-                }
+                        )
+
+//                        SwipeToRevealContainer(
+//                            swipeToRevealParameters = SwipeToRevealParameters(
+//                                swipeToRevealAnimationDurationMs = 500,
+//                                cardOffset = ACTION_ROW_WIDTH.dp,
+//                            ),
+//                            isRevealed = false,
+//                            onExpand = {
+//                                printLog("ActionRow onExpand")
+//                            },
+//                            onCollapse = {
+//                                printLog("ActionRow onCollapse")
+//                            },
+//                            rowContent = { PlayerItem(obj) },
+//                            actionContent = {
+//                                ActionRow(index = index, rowScope = this) {
+//                                    printLog("ActionRow OnEdit")
+//                                }
+//                            }
+//                        )
+                    }
+                )
             }
             if (openFilterDialog) {
                 ModalBottomSheet(
@@ -276,6 +267,28 @@ internal fun PlayerList(
     }
 }
 
+const val ACTION_ROW_WIDTH = 500
+
+@Composable
+fun ActionRow(
+    index: Int,
+    rowScope: RowScope,
+    onEdit: () -> Unit,
+) {
+    rowScope.apply {
+        IconButton(onClick = onEdit::invoke) {
+            Icon(
+                imageVector = Icons.Default.AccountBox,
+                contentDescription = null
+            )
+        }
+    }
+}
+
+private fun printLog(m: String) {
+    println("SwipeToOptional Page $m")
+}
+
 @Composable
 private fun PlayerItem(
     item: CreatePlayerState,
@@ -287,12 +300,10 @@ private fun PlayerItem(
                     painter = painterResource(id = R.drawable.ic_player_man),
                     contentDescription = "player_man"
                 )
-
                 "woman" -> Icon(
                     painter = painterResource(id = R.drawable.ic_player_woman),
                     contentDescription = "player_man"
                 )
-
                 else -> Icon(Icons.Outlined.Person, contentDescription = "player_man")
             }
         },
@@ -307,7 +318,8 @@ private fun PlayerItem(
         },
         supportingContent = {
             Text(
-                text = "ID: ${item.id}, Height: ${item.height} cm / Weight: ${item.weight} kg",
+                text = "ID: ${item.id}, Height: ${item.height} cm / Weight: ${item.weight} kg" +
+                        "\nDoB: ${item.dob.toString().asDateTime("dd MMM yyyy")} Age: ${item.dob.epochToAge()}",
                 fontSize = 10.sp
             )
         }
@@ -410,6 +422,7 @@ private fun SortSheet(
     var sortName: Sort? by remember { mutableStateOf(null) }
     var sortHeight: Sort? by remember { mutableStateOf(null) }
     var sortWeight: Sort? by remember { mutableStateOf(null) }
+    var sortAge: Sort? by remember { mutableStateOf(null) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -426,6 +439,7 @@ private fun SortSheet(
                 sortName = null
                 sortWeight = null
                 sortHeight = null
+                sortAge = null
             }
         )
         SortField(label = "Name", options = sortData, initialSelection = sortName?.name.orEmpty(),
@@ -435,6 +449,7 @@ private fun SortSheet(
                 sortId = null
                 sortWeight = null
                 sortHeight = null
+                sortAge = null
             }
         )
         SortField(label = "Height", options = sortData, initialSelection = sortHeight?.name.orEmpty(),
@@ -444,6 +459,7 @@ private fun SortSheet(
                 sortId = null
                 sortName = null
                 sortWeight = null
+                sortAge = null
             }
         )
         SortField(label = "Weight", options = sortData, initialSelection = sortWeight?.name.orEmpty(),
@@ -453,6 +469,17 @@ private fun SortSheet(
                 sortId = null
                 sortName = null
                 sortHeight = null
+                sortAge = null
+            }
+        )
+        SortField(label = "Age", options = sortData, initialSelection = sortAge?.name.orEmpty(),
+            onSelected = {
+                init = SortPlayer.Weight(it)
+                sortWeight = null
+                sortId = null
+                sortName = null
+                sortHeight = null
+                sortAge = init.asc
             }
         )
         Row(

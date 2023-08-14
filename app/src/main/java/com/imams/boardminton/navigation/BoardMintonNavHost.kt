@@ -34,6 +34,7 @@ import com.imams.boardminton.ui.screen.home.HomeScreenVM
 import com.imams.boardminton.ui.screen.matches.AllMatchesScreen
 import com.imams.boardminton.ui.screen.player.PlayerAndTeamsList
 import com.imams.boardminton.ui.screen.score.ScoreBoardScreen
+import com.imams.boardminton.ui.settings.ChangeThemeState
 
 sealed class Destination(protected val route: String, vararg params: String) {
 
@@ -95,6 +96,8 @@ sealed class Destination(protected val route: String, vararg params: String) {
 @Composable
 fun BoardMintonNavHost(
     viewModel: HomeScreenVM = hiltViewModel<HomeScreenVM>().apply { getLatestMatch() },
+    changeThemeState: ChangeThemeState,
+    onChangeTheme: (ChangeThemeState) -> Unit,
     navController: NavHostController = rememberNavController(),
 ) {
 
@@ -103,6 +106,8 @@ fun BoardMintonNavHost(
     NavHost(navController = navController, startDestination = Home.fullRoute) {
         composable(Home.fullRoute) {
             HomeScreen(
+                changeThemeData = changeThemeState,
+                onChangeTheme = onChangeTheme::invoke,
                 onGoingMatches = latestMatch,
                 onCreateMatch = { navController.navigate(CreateMatch.invoke(it)) },
                 onCreatePlayer = {

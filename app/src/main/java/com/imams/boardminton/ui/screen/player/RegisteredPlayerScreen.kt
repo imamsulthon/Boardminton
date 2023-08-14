@@ -108,10 +108,10 @@ private fun ContentWrapper(
         FancyIndicator(MaterialTheme.colorScheme.primary, Modifier.tabIndicatorOffset(tabPositions[tabIndex]))
     }
     Column {
-        TabRow(modifier = Modifier.padding(10.dp), selectedTabIndex = tabIndex, indicator = indicator) {
+        TabRow(modifier = Modifier, selectedTabIndex = tabIndex, indicator = indicator) {
             tabData.forEachIndexed { index, pair ->
                 Tab(
-                    modifier = Modifier.padding(10.dp),
+                    modifier = Modifier.padding(15.dp),
                     selected = tabIndex == index,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
                 ) {

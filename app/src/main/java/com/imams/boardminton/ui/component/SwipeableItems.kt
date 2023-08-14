@@ -1,26 +1,33 @@
 package com.imams.boardminton.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.swipeable
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
@@ -32,13 +39,17 @@ import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,21 +121,52 @@ enum class SwipeState {
 @Composable
 fun SwipeToOptional(
     index: Int,
-    onItemSwiped: (Int) -> Unit,
+    onItemFullSwipe: (Int) -> Unit,
+    onItemClick: () -> Unit,
     onDelete: (Int) -> Unit,
     onEdit: (Int) -> Unit,
     content: @Composable () -> Unit,
-    actionContent: @Composable (RowScope.() -> Unit)
 ) {
-    Box(modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer)) {
-        ActionRow(modifier = Modifier.align(Alignment.CenterEnd)) {
-            actionContent(this)
-        }
+    var visible by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clickable { onItemClick.invoke() },
+        contentAlignment = Alignment.Center,
+    ) {
         ForegroundListItem(
             index,
-            onItemSwiped = { onItemSwiped.invoke(index) },
+            onFullSwiped = { onItemFullSwipe.invoke(index) },
+            onHalfSwiped = { visible = true },
+            onFullVisible = { visible = false },
             content
         )
+        val transitionState = remember { MutableTransitionState(visible).apply { targetState = !visible } }
+        val transition = updateTransition(transitionState, "cardTransition")
+        val alphaTransition by transition.animateFloat(
+            label = "alphaTransition",
+            transitionSpec = { tween(durationMillis = 500) },
+            targetValueByState = { if (it) 1f else 0f },
+        )
+        AnimatedVisibility(visible = visible,
+            enter = fadeIn(animationSpec = tween(500)),
+            exit = fadeOut(animationSpec = tween(200))
+        ) {
+            ActionRow(modifier = Modifier.align(Alignment.CenterEnd), alphaTransition) {
+                BackgroundListItem(
+                    this,
+                    onDelete = {
+                        printLog("onDelete $index")
+                        onDelete.invoke(index)
+                    },
+                    onEdit = {
+                        printLog("onDelete $index")
+                        onEdit.invoke(index)
+                    },
+                )
+            }
+        }
     }
 }
 
@@ -133,53 +175,64 @@ private fun printLog(m: String) {
     println("SwipeToOptional $m")
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ForegroundListItem(
     index: Int,
-    onItemSwiped: (Int) -> Unit,
+    onFullSwiped: (Int) -> Unit,
+    onHalfSwiped: (Int) -> Unit,
+    onFullVisible: (Int) -> Unit,
     content: @Composable () -> Unit,
 ) {
-    val swipeState = androidx.compose.material.rememberSwipeableState(
-        initialValue = SwipeState.VISIBLE,
-        confirmStateChange = {
-            if (it == SwipeState.SWIPED) {
-                onItemSwiped.invoke(index)
-            }
-            true
-        }
-    )
-    val swipeAnchors =
-        mapOf(0f to SwipeState.VISIBLE, -1000f to SwipeState.SWIPED, -500f to SwipeState.MIDDLE)
+    val density = LocalDensity.current
+    val swipeAnchors = DraggableAnchors {
+        SwipeState.VISIBLE at 0f
+        SwipeState.MIDDLE at -500f
+        SwipeState.SWIPED at -1000f
+    }
+    val swipeState = remember {
+        AnchoredDraggableState(
+            initialValue = SwipeState.VISIBLE,
+            anchors = swipeAnchors,
+            confirmValueChange = {
+                printLog("confirmValueChange $it")
+                when (it) {
+                    SwipeState.VISIBLE -> onFullVisible.invoke(index)
+                    SwipeState.MIDDLE -> onHalfSwiped.invoke(index)
+                    SwipeState.SWIPED -> onFullSwiped.invoke(index)
+                }
+                true
+            },
+            animationSpec = tween(500),
+            velocityThreshold = { with(density) { 100.dp.toPx() } },
+            positionalThreshold = { distance: Float -> distance * 0.5f },
+        )
+    }
 
     Row(
         modifier = Modifier
-            .swipeable(
-                state = swipeState,
-                anchors = swipeAnchors,
-                thresholds = { _, _ -> FractionalThreshold(0.5f) },
-                orientation = Orientation.Horizontal
-            )
-            .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
-            .background(MaterialTheme.colorScheme.primary)
-            ,
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .anchoredDraggable(state = swipeState, orientation = Orientation.Horizontal)
+            .offset { IntOffset(swipeState.requireOffset().toInt(), 0) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         content()
     }
-
 }
-
-private const val MIN_DRAG = 5
 
 @Composable
 private fun ActionRow(
     modifier: Modifier,
+    alpha: Float,
     actionContent: @Composable (RowScope.() -> Unit)
 ) {
     Row(
-        modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .alpha(alpha),
         horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         actionContent(this)
     }
@@ -192,21 +245,15 @@ fun BackgroundListItem(
     onEdit: () -> Unit,
 ) {
     rowScope.apply {
-        Button(onClick = {
-            printLog("BackGroundAction onDelete")
-            onDelete.invoke()
-        }) {
+        IconButton(onClick = onDelete::invoke) {
             Icon(
-                imageVector = Icons.Default.Build,
+                imageVector = Icons.Default.Delete,
                 contentDescription = null
             )
         }
-        IconButton(onClick = {
-            printLog("BackGroundAction onEdit")
-            onEdit.invoke()
-        }) {
+        IconButton(onClick = onEdit::invoke) {
             Icon(
-                imageVector = Icons.Default.AccountBox,
+                imageVector = Icons.Default.Edit,
                 contentDescription = null
             )
         }

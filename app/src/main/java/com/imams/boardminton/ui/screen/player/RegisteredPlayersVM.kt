@@ -101,6 +101,7 @@ class RegisteredPlayersVM @Inject constructor(
                 if (params.asc == Sort.Ascending) _savePlayers.sortBy { it.dob }
                 else _savePlayers.sortByDescending { it.dob }
             }
+            else -> {}
         }
     }
 
@@ -130,6 +131,7 @@ class RegisteredPlayersVM @Inject constructor(
                 if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.lose }
                 else _savePlayers.sortByDescending { it.height }
             }
+            else -> {}
         }
     }
 

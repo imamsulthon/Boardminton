@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,7 +21,6 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -58,7 +56,6 @@ import com.imams.boardminton.R
 import com.imams.boardminton.data.Athlete
 import com.imams.boardminton.data.asDateTime
 import com.imams.boardminton.data.epochToAge
-import com.imams.boardminton.ui.component.BackgroundListItem
 import com.imams.boardminton.ui.component.EmptyContent
 import com.imams.boardminton.ui.component.FancyIndicator
 import com.imams.boardminton.ui.component.SwipeToOptional
@@ -81,13 +78,16 @@ fun PlayerAndTeamsList(
                 viewModel = viewModel,
                 addNewPlayer = addNewPlayer::invoke,
                 onItemClick = { onEditPlayer.invoke(it.id) },
-            )},
+                onEditPlayer = { onEditPlayer.invoke(it.id) }
+            )
+        },
         teamList = {
             TeamList(
                 viewModel = viewModel,
                 addNewTeam = addNewTeam::invoke,
                 onItemClick = { },
-            ) },
+            )
+        },
     )
 }
 
@@ -146,6 +146,7 @@ internal fun PlayerList(
     viewModel: RegisteredPlayersVM,
     addNewPlayer: () -> Unit,
     onItemClick: (CreatePlayerState) -> Unit,
+    onEditPlayer: (CreatePlayerState) -> Unit,
 ) {
 
     val list by viewModel.savePlayers.collectAsState()
@@ -182,105 +183,50 @@ internal fun PlayerList(
             ) {
                 itemsIndexed(
                     items = list,
-                    itemContent = { index, obj ->
+                    itemContent = { index, data ->
                         SwipeToOptional(
                             index = index,
-                            onItemSwiped = {
-                                printLog("onSwipe $it")
-                                viewModel.removePlayer(obj)
+                            onItemClick = { onItemClick.invoke(data) },
+                            onItemFullSwipe = {
+                                viewModel.removePlayer(data)
                             },
-                            onEdit = {
-                                printLog("onEdit $it")
-                            },
-                            onDelete = {
-                                printLog("onDelete $it")
-                                viewModel.removePlayer(obj)
-                            },
-                            content = { PlayerItem(obj) },
-                            actionContent = {
-                                BackgroundListItem(
-                                    this,
-                                    onDelete = {
-                                        printLog("onDelete $index")
-//                                        onDelete.invoke(index)
-                                    },
-                                    onEdit = {
-                                        printLog("onDelete $index")
-//                                        onEdit.invoke(index)
-                                    },
-                                )
-                            }
+                            onEdit = { onEditPlayer.invoke(data) },
+                            onDelete = { viewModel.removePlayer(data) },
+                            content = { PlayerItem(data) },
                         )
-
-//                        SwipeToRevealContainer(
-//                            swipeToRevealParameters = SwipeToRevealParameters(
-//                                swipeToRevealAnimationDurationMs = 500,
-//                                cardOffset = ACTION_ROW_WIDTH.dp,
-//                            ),
-//                            isRevealed = false,
-//                            onExpand = {
-//                                printLog("ActionRow onExpand")
-//                            },
-//                            onCollapse = {
-//                                printLog("ActionRow onCollapse")
-//                            },
-//                            rowContent = { PlayerItem(obj) },
-//                            actionContent = {
-//                                ActionRow(index = index, rowScope = this) {
-//                                    printLog("ActionRow OnEdit")
-//                                }
-//                            }
-//                        )
                     }
                 )
             }
-            if (openFilterDialog) {
-                ModalBottomSheet(
-                    onDismissRequest = { openFilterDialog = false },
-                    sheetState = bottomSheetState,
-                ) {
-                    FilterSheet(
-                        filter = FilterPlayer(),
-                        onApply = {
-                            openFilterDialog = false
-                            viewModel.setFilter(it)
-                        },
-                        onCancel = { openFilterDialog = false }
-                    )
-                }
-            }
-            if (openSortDialog) {
-                ModalBottomSheet(
-                    onDismissRequest = { openSortDialog = false },
-                    sheetState = bottomSheetState2,
-                ) {
-                    SortSheet(
-                        filter = SortPlayer.Id(Sort.Ascending),
-                        onApply = {
-                            openSortDialog = false
-                            viewModel.setSorting(it)
-                        },
-                        onCancel = { openSortDialog = false })
-                }
-            }
         }
     }
-}
 
-const val ACTION_ROW_WIDTH = 500
-
-@Composable
-fun ActionRow(
-    index: Int,
-    rowScope: RowScope,
-    onEdit: () -> Unit,
-) {
-    rowScope.apply {
-        IconButton(onClick = onEdit::invoke) {
-            Icon(
-                imageVector = Icons.Default.AccountBox,
-                contentDescription = null
+    if (openFilterDialog) {
+        ModalBottomSheet(
+            onDismissRequest = { openFilterDialog = false },
+            sheetState = bottomSheetState,
+        ) {
+            FilterSheet(
+                filter = FilterPlayer(),
+                onApply = {
+                    openFilterDialog = false
+                    viewModel.setFilter(it)
+                },
+                onCancel = { openFilterDialog = false }
             )
+        }
+    }
+    if (openSortDialog) {
+        ModalBottomSheet(
+            onDismissRequest = { openSortDialog = false },
+            sheetState = bottomSheetState2,
+        ) {
+            SortSheet(
+                filter = SortPlayer.Id(Sort.Ascending),
+                onApply = {
+                    openSortDialog = false
+                    viewModel.setSorting(it)
+                },
+                onCancel = { openSortDialog = false })
         }
     }
 }
@@ -302,7 +248,7 @@ private fun PlayerItem(
                 )
                 "woman" -> Icon(
                     painter = painterResource(id = R.drawable.ic_player_woman),
-                    contentDescription = "player_man"
+                    contentDescription = "player_woman"
                 )
                 else -> Icon(Icons.Outlined.Person, contentDescription = "player_man")
             }
@@ -373,7 +319,7 @@ private fun FilterSheet(
     Column(
         modifier = Modifier
             .padding(horizontal = 20.dp)
-            .padding(bottom = 10.dp)
+            .padding(bottom = 20.dp)
     ) {
         Text(text = "Filter by:")
         GenderField(
@@ -427,7 +373,7 @@ private fun SortSheet(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .padding(bottom = 10.dp),
+            .padding(bottom = 20.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
@@ -474,12 +420,12 @@ private fun SortSheet(
         )
         SortField(label = "Age", options = sortData, initialSelection = sortAge?.name.orEmpty(),
             onSelected = {
-                init = SortPlayer.Weight(it)
+                init = SortPlayer.Age(it)
+                sortAge = init.asc
                 sortWeight = null
                 sortId = null
                 sortName = null
                 sortHeight = null
-                sortAge = init.asc
             }
         )
         Row(

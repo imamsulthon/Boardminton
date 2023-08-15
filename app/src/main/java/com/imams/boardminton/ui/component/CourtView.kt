@@ -1,5 +1,6 @@
 package com.imams.boardminton.ui.component
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +17,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -181,6 +182,8 @@ private fun getIndexServer(court: ScoreByCourt): MutableState<Int> {
     )
 }
 
+private val paddingLine = 1.dp
+
 @Composable
 fun CourtView(
     modifier: Modifier = Modifier,
@@ -190,91 +193,100 @@ fun CourtView(
     pBEven: String? = null,
     pBOdd: String? = null,
 ) {
-    GridPad(
+    Box(
+        contentAlignment = Alignment.Center,
         modifier = modifier
-            .aspectRatio(ratio = 13.4f / 6.1f)
-            .background(MaterialTheme.colorScheme.background),
-        cells = GridPadCells.Builder(rowCount = 4, columnCount = 6)
-            .rowSize(index = 0, size = GridPadCellSize.Weight(0.5f))
-            .rowSize(index = 1, size = GridPadCellSize.Weight(2f))
-            .rowSize(index = 2, size = GridPadCellSize.Weight(2f))
-            .rowSize(index = 3, size = GridPadCellSize.Weight(0.5f))
-            .columnSize(index = 0, size = GridPadCellSize.Weight(0.5f))
-            .columnSize(index = 1, size = GridPadCellSize.Weight(2f))
-            .columnSize(index = 2, size = GridPadCellSize.Weight(1f))
-            .columnSize(index = 3, size = GridPadCellSize.Weight(1f))
-            .columnSize(index = 4, size = GridPadCellSize.Weight(2f))
-            .columnSize(index = 5, size = GridPadCellSize.Weight(0.5f))
-            .build()
+            .background(MaterialTheme.colorScheme.surfaceTint)
+            .padding(paddingLine * 4),
     ) {
-        item(row = 0, column = 0) {
-            FieldPlain()
-        }
-        item(row = 0, column = 1) {
-            FieldPlain()
-        }
-        item(row = 0, column = 2) {
-            FieldPlain()
-        }
-        item(row = 0, column = 3) {
-            FieldPlain()
-        }
-        item(row = 0, column = 4) {
-            FieldPlain()
-        }
-        item(row = 0, column = 5) {
-            FieldPlain()
-        }
-        // row 1
-        item(row = 1, column = 0) {
-            FieldPlain()
-        }
-        item(row = 1, column = 1) {
-            FieldPlayer(text = pAOdd.orEmpty(), onIndex == 1)
-        }
-        item(row = 1, column = 2, rowSpan = 2, columnSpan = 2) {
-            FieldPlain()
-        }
-        item(row = 1, column = 4) {
-            FieldPlayer(text = pBEven.orEmpty(), onIndex == 4)
-        }
-        item(row = 1, column = 5) {
-            FieldPlain()
-        }
-        // row 2
-        item(row = 2, column = 0) {
-            FieldPlain()
-        }
-        item(row = 2, column = 1) {
-            FieldPlayer(text = pAEven.orEmpty(), onIndex == 2)
-        }
-        item(row = 2, column = 2, rowSpan = 3, columnSpan = 2) {
-            FieldPlain()
-        }
-        item(row = 2, column = 4) {
-            FieldPlayer(text = pBOdd.orEmpty(), onIndex == 3)
-        }
-        item(row = 2, column = 5) {
-            FieldPlain()
-        }
-        // row 3
-        item(row = 3, column = 0) {
-            FieldPlain()
-        }
-        item(row = 3, column = 1) {
-            FieldPlain()
-        }
-        item(row = 3, column = 2) {
-            FieldPlain()
-        }
-        item(row = 3, column = 3) {
-            FieldPlain()
-        }
-        item(row = 3, column = 4) {
-            FieldPlain()
-        }
-        item(row = 3, column = 5) {
-            FieldPlain()
+        GridPad(
+            modifier = Modifier
+                .padding(paddingLine)
+                .aspectRatio(ratio = 13.4f / 6.1f)
+                .background(Color.White)
+                .padding(paddingLine),
+            cells = GridPadCells.Builder(rowCount = 4, columnCount = 6)
+                .rowSize(index = 0, size = GridPadCellSize.Weight(0.5f))
+                .rowSize(index = 1, size = GridPadCellSize.Weight(2f))
+                .rowSize(index = 2, size = GridPadCellSize.Weight(2f))
+                .rowSize(index = 3, size = GridPadCellSize.Weight(0.5f))
+                .columnSize(index = 0, size = GridPadCellSize.Weight(0.5f))
+                .columnSize(index = 1, size = GridPadCellSize.Weight(2f))
+                .columnSize(index = 2, size = GridPadCellSize.Weight(1f))
+                .columnSize(index = 3, size = GridPadCellSize.Weight(1f))
+                .columnSize(index = 4, size = GridPadCellSize.Weight(2f))
+                .columnSize(index = 5, size = GridPadCellSize.Weight(0.5f))
+                .build()
+        ) {
+            item(row = 0, column = 0) {
+                FieldPlain()
+            }
+            item(row = 0, column = 1) {
+                FieldPlain()
+            }
+            item(row = 0, column = 2) {
+                FieldPlain()
+            }
+            item(row = 0, column = 3) {
+                FieldPlain()
+            }
+            item(row = 0, column = 4) {
+                FieldPlain()
+            }
+            item(row = 0, column = 5) {
+                FieldPlain()
+            }
+            // row 1
+            item(row = 1, column = 0) {
+                FieldPlain()
+            }
+            item(row = 1, column = 1) {
+                FieldPlayer(text = pAOdd.orEmpty(), onIndex == 1)
+            }
+            item(row = 1, column = 2, rowSpan = 2, columnSpan = 2) {
+                FieldPlain()
+            }
+            item(row = 1, column = 4) {
+                FieldPlayer(text = pBEven.orEmpty(), onIndex == 4)
+            }
+            item(row = 1, column = 5) {
+                FieldPlain()
+            }
+            // row 2
+            item(row = 2, column = 0) {
+                FieldPlain()
+            }
+            item(row = 2, column = 1) {
+                FieldPlayer(text = pAEven.orEmpty(), onIndex == 2)
+            }
+            item(row = 2, column = 2, rowSpan = 3, columnSpan = 2) {
+                FieldPlain()
+            }
+            item(row = 2, column = 4) {
+                FieldPlayer(text = pBOdd.orEmpty(), onIndex == 3)
+            }
+            item(row = 2, column = 5) {
+                FieldPlain()
+            }
+            // row 3
+            item(row = 3, column = 0) {
+                FieldPlain()
+            }
+            item(row = 3, column = 1) {
+                FieldPlain()
+            }
+            item(row = 3, column = 2) {
+                FieldPlain()
+            }
+            item(row = 3, column = 3) {
+                FieldPlain()
+            }
+            item(row = 3, column = 4) {
+                FieldPlain()
+            }
+            item(row = 3, column = 5) {
+                FieldPlain()
+            }
         }
     }
 }
@@ -295,7 +307,9 @@ private fun FieldPlayer(text: String, onServe: Boolean = false) {
             )
             AnimatedVisibility(visible = onServe) {
                 Icon(
-                    modifier = Modifier.size(height = 24.dp, width = 24.dp).padding(vertical = 2.dp),
+                    modifier = Modifier
+                        .size(height = 24.dp, width = 24.dp)
+                        .padding(vertical = 2.dp),
                     painter = painterResource(id = R.drawable.ic_cock),
                     contentDescription = "cock",
                     tint = MaterialTheme.colorScheme.background
@@ -319,7 +333,7 @@ private fun ItemComponent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(2.dp)
+            .padding(paddingLine)
             .background(MaterialTheme.colorScheme.surfaceTint),
         contentAlignment = Alignment.Center
     ) {
@@ -345,7 +359,7 @@ private fun CourtViewLandscape() {
     )
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 private fun CourtViewPreview() {
     Column(

@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,13 +34,20 @@ fun MainNameBoardView(
         Text(
             modifier = Modifier.padding(top = 5.dp),
             text = "${if (single) "Single" else "Double"} Match",
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.ExtraBold,
+            color = MaterialTheme.colorScheme.onSurface
         )
         LazyRow {
             item {
                 Column {
-                    Text(text = teamLabel1, modifier = Modifier.padding(top = 5.dp))
-                    Text(text = teamLabel2, modifier = Modifier.padding(top = 5.dp))
+                    Text(
+                        text = teamLabel1, modifier = Modifier.padding(top = 5.dp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = teamLabel2, modifier = Modifier.padding(top = 5.dp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
                 Spacer(modifier = Modifier.padding(horizontal = 10.dp))
             }
@@ -48,11 +55,13 @@ fun MainNameBoardView(
                 Column {
                     Text(
                         text = histories[it].scoreA.point.toString(),
-                        modifier = Modifier.padding(start = 10.dp, top = 5.dp)
+                        modifier = Modifier.padding(start = 10.dp, top = 5.dp),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = histories[it].scoreB.point.toString(),
-                        modifier = Modifier.padding(start = 10.dp, top = 5.dp)
+                        modifier = Modifier.padding(start = 10.dp, top = 5.dp),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -61,11 +70,13 @@ fun MainNameBoardView(
                 Column {
                     Text(
                         text = scoreA.toString(),
-                        modifier = Modifier.padding(start = 10.dp, top = 5.dp)
+                        modifier = Modifier.padding(start = 10.dp, top = 5.dp),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = scoreB.toString(),
-                        modifier = Modifier.padding(start = 10.dp, top = 5.dp)
+                        modifier = Modifier.padding(start = 10.dp, top = 5.dp),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -73,10 +84,11 @@ fun MainNameBoardView(
     }
 }
 
+@Composable
 private fun Modifier.drawBorder() = this
     .border(
         width = 1.dp,
-        color = Color.Black,
+        color = MaterialTheme.colorScheme.onBackground,
         shape = RoundedCornerShape(1.dp)
     )
     .padding(vertical = 10.dp, horizontal = 10.dp)

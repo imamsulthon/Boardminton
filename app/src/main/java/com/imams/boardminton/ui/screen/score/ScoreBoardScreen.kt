@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -142,7 +143,7 @@ private fun ScoreBoardScreen(
     @Composable
     fun scoreBoard() = UmpireBoard(
         modifier = Modifier
-            .widthIn(max = 450.dp)
+            .widthIn(max = 400.dp)
             .heightIn(max = 350.dp),
         board = uiState.scoreByCourt,
         plus = {
@@ -350,7 +351,7 @@ private fun LandscapeContent(
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         scoreBoard()
-        Divider(
+        VerticalDivider(
             color = MaterialTheme.colorScheme.onBackground, modifier = Modifier
                 .fillMaxHeight()
                 .padding(horizontal = 20.dp)
@@ -360,7 +361,7 @@ private fun LandscapeContent(
             verticalArrangement = Arrangement.Top,
         ) {
             mainBoard()
-            LineDivider(padding = 5.dp, thick = 1.dp)
+            LineDivider(padding = 4.dp, thick = 1.dp)
             courtView()
         }
     }

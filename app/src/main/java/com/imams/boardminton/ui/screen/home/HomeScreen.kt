@@ -1,7 +1,9 @@
 package com.imams.boardminton.ui.screen.home
 
+import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,8 +36,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -148,54 +152,77 @@ internal fun HomeContent(
     gotoMatch: ((String, Int) -> Unit)? = null,
     seeAllMatch: () -> Unit,
 ) {
-    VerticalScroll(
-        modifier = modifier.fillMaxSize(),
-        ChildLayout(contentType = "menu_section",
-            content = {
-                Column(
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    MenuGroup(label = "Create New Match") {
-                        ItemMenu(label = "Single Match") {
-                            onCreateMatch.invoke(true)
-                        }
-                        ItemMenu(label = "Double Match") {
-                            onCreateMatch.invoke(false)
-                        }
-                    }
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(MaterialTheme.colorScheme.onBackground)
-                    )
-                    MenuGroup(label = "Create New Player") {
-                        ItemMenu(label = "New Player") {
-                            onCreatePlayer.invoke("create")
-                        }
-                        ItemMenu(label = "Registered Players", enabled = true) {
-                            onCreatePlayer.invoke("seeAll")
-                        }
-                    }
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(MaterialTheme.colorScheme.onBackground)
-                    )
-                }
-            }
-        ),
-        *latestMatchGroup(
-            list = onGoingMatches,
-            gotoMatch = { type, id -> gotoMatch?.invoke(type, id) },
-            seeAllMatch = seeAllMatch::invoke
+    @Composable
+    fun menuWrapper(modifier: Modifier) {
+        MenuWrap(
+            modifier = modifier,
+            onCreateMatch = onCreateMatch::invoke,
+            onCreatePlayer = onCreatePlayer::invoke
         )
-    )
+    }
+
+    val config = LocalConfiguration.current
+    when (config.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            VerticalScroll(
+                modifier = modifier.fillMaxSize(),
+                ChildLayout(contentType = "menu_section",
+                    content = {
+                        menuWrapper(Modifier.fillMaxWidth())
+                    }
+                ),
+                *latestMatchGroup(
+                    list = onGoingMatches,
+                    gotoMatch = { type, id -> gotoMatch?.invoke(type, id) },
+                    seeAllMatch = seeAllMatch::invoke
+                )
+            )
+        }
+        else -> {
+            Row(modifier.fillMaxSize(), verticalAlignment = Alignment.Top) {
+                menuWrapper(Modifier.weight(1f))
+                VerticalScroll(
+                    modifier = Modifier.weight(1f),
+                    *latestMatchGroup(
+                        list = onGoingMatches,
+                        gotoMatch = { type, id -> gotoMatch?.invoke(type, id) },
+                        seeAllMatch = seeAllMatch::invoke
+                    )
+                )
+            }
+        }
+    }
+
+}
+
+@Composable
+internal fun MenuWrap(
+    modifier: Modifier,
+    onCreateMatch: (Boolean) -> Unit,
+    onCreatePlayer: (String) -> Unit,
+) {
+    Column(
+        modifier = modifier.padding(10.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        MenuGroup(label = "Create New Match") {
+            ItemMenu(label = "Single Match") {
+                onCreateMatch.invoke(true)
+            }
+            ItemMenu(label = "Double Match") {
+                onCreateMatch.invoke(false)
+            }
+        }
+        MenuGroup(label = "Create New Player") {
+            ItemMenu(label = "New Player") {
+                onCreatePlayer.invoke("create")
+            }
+            ItemMenu(label = "Registered Players", enabled = true) {
+                onCreatePlayer.invoke("seeAll")
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -218,7 +245,8 @@ private fun latestMatchGroup(
                 ) {
                     Text(
                         text = "On Going Match",
-                        modifier = Modifier.wrapContentWidth()
+                        modifier = Modifier.wrapContentWidth(),
+                        fontWeight = FontWeight.SemiBold
                     )
                     Text(
                         text = "See All",
@@ -262,6 +290,7 @@ private fun latestMatchGroup(
     ),
 )
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MenuGroup(
     label: String,
@@ -271,7 +300,7 @@ private fun MenuGroup(
         modifier = Modifier
             .wrapContentWidth()
             .padding(vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.Start
     ) {
         Text(
             text = label,
@@ -283,10 +312,17 @@ private fun MenuGroup(
                 .wrapContentWidth()
                 .widthIn(max = 400.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.Start
         ) {
             content()
         }
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .padding(top = 10.dp)
+                .background(MaterialTheme.colorScheme.onBackground)
+        )
     }
 }
 
@@ -317,6 +353,7 @@ private fun ItemMenu(
 }
 
 @Preview(showSystemUi = true, uiMode = UI_MODE_NIGHT_YES, showBackground = true)
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 512, showSystemUi = true)
 @Composable
 private fun HomeScreenPreview() {
     HomeScreen(changeThemeData = ChangeThemeState(), onChangeTheme = {}, onCreateMatch = {}, onCreatePlayer = {}, seeAllMatch = {})

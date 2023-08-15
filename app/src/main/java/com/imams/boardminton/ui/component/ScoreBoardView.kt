@@ -1,15 +1,44 @@
 package com.imams.boardminton.ui.component
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -34,9 +63,10 @@ fun BaseScore(
     winner: Boolean = false,
     callback: ((Int, Boolean) -> Unit)? = null,
 ) {
-    var before by remember { mutableStateOf(score) }
+    var before by remember { mutableIntStateOf(score) }
     val boardColor by animateColorAsState(
-        if (onTurn) MaterialTheme.colorScheme.primaryContainer else White, tween(500)
+        if (onTurn) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+        tween(500), label = ""
     )
     Box(
         modifier = modifier
@@ -74,14 +104,14 @@ fun BaseScore(
                 transitionSpec = {
                     scoreUpDownAnimation(increase = score >= before)
                         .using(SizeTransform(clip = false))
-                }
+                }, label = ""
             ) { targetCount ->
                 Text(
                     text = targetCount.toString(), fontSize = 64.sp,
                     color = if (lastPoint) {
-                        if (winner) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                        if (winner) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                     } else if (onTurn) {
-                        MaterialTheme.colorScheme.tertiary
+                        MaterialTheme.colorScheme.onSurface
                     } else {
                         MaterialTheme.colorScheme.tertiary
                     },
@@ -94,6 +124,7 @@ fun BaseScore(
 
 }
 
+@Composable
 private fun Modifier.scoreMod(
     score: Int,
     callback: ((Int, Boolean) -> Unit)?
@@ -102,7 +133,7 @@ private fun Modifier.scoreMod(
     .widthIn(min = 80.dp, max = 180.dp)
     .border(
         width = 2.dp,
-        color = Color.Black,
+        color = MaterialTheme.colorScheme.onBackground,
         shape = RoundedCornerShape(2.dp)
     )
     .clickable { callback?.invoke(score + 1, true) }
@@ -119,14 +150,12 @@ fun PlayerNameBoard(
             modifier = mod, alignment,
             name = teamPlayer.player1.name.prettifyName(), teamPlayer.player1.onServe
         )
-        AnimatedVisibility(visible = !teamPlayer.isSingle) {
-            PlayerName(
-                modifier = mod,
-                alignment,
-                name = teamPlayer.player2.name.prettifyName(),
-                teamPlayer.player2.onServe,
-            )
-        }
+        PlayerName(
+            modifier = mod,
+            alignment,
+            name = teamPlayer.player2.name.prettifyName(),
+            teamPlayer.player2.onServe,
+        )
     }
 
 }
@@ -183,7 +212,8 @@ fun PlayerName(
     verticalAlignment = Alignment.CenterVertically,
 ) {
     if (alignment == Alignment.End && onServe) ServeIc()
-    Text(text = name, modifier = Modifier.padding(horizontal = 6.dp))
+    Text(text = name, modifier = Modifier.padding(horizontal = 6.dp),
+        color = MaterialTheme.colorScheme.onSurface)
     if (alignment == Alignment.Start && onServe) ServeIc()
 }
 
@@ -262,7 +292,7 @@ fun GameFinishDialogContent(
         val title = if (state.type == WinnerState.Type.Game) "Game ${state.index} Done"
         else "Match Done"
         Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        Text(text = "Winner by: ${state.by}", modifier = compMod, color = Green)
+        Text(text = "Winner by: ${state.by}", modifier = compMod, color = MaterialTheme.colorScheme.primary)
         Row {
             OutlinedButton(onClick = { onDone.invoke(false, state.type) }, modifier = compMod) {
                 Text(text = "Cancel")
@@ -279,8 +309,6 @@ fun GameFinishDialogContent(
 private fun PreviewDialog() {
     GameFinishDialogContent(
         WinnerState(type = WinnerState.Type.Game, index = 1, by = "Imams" , show = true, isWin = true),
-        onDone = { _, _ -> {
-
-        }}
+        onDone = { _, _ -> }
     )
 }

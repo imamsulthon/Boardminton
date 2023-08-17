@@ -57,6 +57,7 @@ import com.imams.boardminton.ui.component.EmptyContent
 import com.imams.boardminton.ui.component.FancyIndicator
 import com.imams.boardminton.ui.component.SwipeToDismissItem
 import com.imams.boardminton.ui.screen.player.Sort
+import com.imams.boardminton.ui.utils.bottomDialogPadding
 import com.imams.boardminton.ui.utils.getLabel
 import kotlinx.coroutines.launch
 
@@ -130,12 +131,10 @@ internal fun ContentWrapper(
         FancyIndicator(MaterialTheme.colorScheme.primary, Modifier.tabIndicatorOffset(tabPositions[tabIndex]))
     }
     Column {
-        TabRow(modifier = Modifier.padding(10.dp),
-            selectedTabIndex = tabIndex, indicator = indicator
-        ) {
+        TabRow(selectedTabIndex = tabIndex, indicator = indicator) {
             tabData.forEachIndexed { index, pair ->
                 Tab(
-                    modifier = Modifier.padding(10.dp),
+                    modifier = Modifier.padding(15.dp),
                     selected = tabIndex == index,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
                 ) {
@@ -383,10 +382,7 @@ private fun FilterSheet(
     val optionals = mutableListOf("All", "Single", "Double")
     var selected : String? by remember { mutableStateOf(filter.type) }
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(bottom = 10.dp),
+        modifier = Modifier.fillMaxWidth().bottomDialogPadding(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
@@ -444,10 +440,7 @@ private fun SortSheet(
     var sortDuration: Sort? by remember { mutableStateOf(null) }
     var sortGameCount: Sort? by remember { mutableStateOf(null) }
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(bottom = 10.dp),
+        modifier = Modifier.fillMaxWidth().bottomDialogPadding(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {

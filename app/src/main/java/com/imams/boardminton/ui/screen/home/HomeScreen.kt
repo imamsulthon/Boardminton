@@ -3,7 +3,6 @@ package com.imams.boardminton.ui.screen.home
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
@@ -53,6 +54,7 @@ import com.imams.boardminton.ui.component.VerticalScroll
 import com.imams.boardminton.ui.screen.matches.MatchItem
 import com.imams.boardminton.ui.settings.ChangeThemeDialog
 import com.imams.boardminton.ui.settings.ChangeThemeState
+import com.imams.boardminton.ui.utils.linearGradientBackground
 
 @Composable
 fun HomeScreen(
@@ -71,9 +73,7 @@ fun HomeScreen(
             .fillMaxSize()
             .widthIn(max = 840.dp),
         topBar = {
-            HomeAppBar(onSettings = {
-                dialogStateChangeTheme = true
-            })
+            HomeAppBar(onSettings = { dialogStateChangeTheme = true })
         }
     ) { padding ->
         HomeContent(
@@ -112,21 +112,16 @@ fun HomeScreen(
 private fun HomeAppBar(
     onSettings: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .padding(10.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val appName = stringResource(id = R.string.app_name)
-        Text(
-            text = appName,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 18.sp
-        )
-    }
     TopAppBar(
+        navigationIcon = {
+            IconButton(onClick = { }, enabled = false) {
+                Icon(
+                    painterResource(id = R.drawable.ic_cock),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    contentDescription = "Localized description"
+                )
+            }
+        },
         title = {
             val appName = stringResource(id = R.string.app_name)
             Text(
@@ -201,25 +196,34 @@ internal fun MenuWrap(
     onCreateMatch: (Boolean) -> Unit,
     onCreatePlayer: (String) -> Unit,
 ) {
-    Column(
-        modifier = modifier.padding(10.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+    ElevatedCard(
+        modifier = modifier.fillMaxWidth().padding(10.dp),
+        shape = RoundedCornerShape(10.dp)
     ) {
-        MenuGroup(label = "Create New Match") {
-            ItemMenu(label = "Single Match") {
-                onCreateMatch.invoke(true)
+        Column(
+            modifier = modifier.padding(6.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            MenuGroup(label = "Create New Match") {
+                ItemMenu(label = "Single Match") {
+                    onCreateMatch.invoke(true)
+                }
+                ItemMenu(label = "Double Match") {
+                    onCreateMatch.invoke(false)
+                }
             }
-            ItemMenu(label = "Double Match") {
-                onCreateMatch.invoke(false)
-            }
-        }
-        MenuGroup(label = "Create New Player") {
-            ItemMenu(label = "New Player") {
-                onCreatePlayer.invoke("create")
-            }
-            ItemMenu(label = "Registered Players", enabled = true) {
-                onCreatePlayer.invoke("seeAll")
+            HorizontalDivider(
+                modifier = Modifier.fillMaxWidth().height(1.dp).padding(vertical = 5.dp)
+                    .background(MaterialTheme.colorScheme.onBackground)
+            )
+            MenuGroup(label = "Create New Player") {
+                ItemMenu(label = "New Player") {
+                    onCreatePlayer.invoke("create")
+                }
+                ItemMenu(label = "Registered Players", enabled = true) {
+                    onCreatePlayer.invoke("seeAll")
+                }
             }
         }
     }
@@ -250,6 +254,7 @@ private fun latestMatchGroup(
                     )
                     Text(
                         text = "See All",
+                        fontSize = 11.sp,
                         modifier = Modifier
                             .wrapContentWidth()
                             .padding(start = 10.dp)
@@ -290,7 +295,6 @@ private fun latestMatchGroup(
     ),
 )
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MenuGroup(
     label: String,
@@ -316,13 +320,6 @@ private fun MenuGroup(
         ) {
             content()
         }
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .padding(top = 10.dp)
-                .background(MaterialTheme.colorScheme.onBackground)
-        )
     }
 }
 
@@ -333,6 +330,7 @@ private fun ItemMenu(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
+
     Card(
         onClick = { onClick.invoke() },
         enabled = enabled,
@@ -346,7 +344,11 @@ private fun ItemMenu(
             .size(width = 160.dp, height = 70.dp)
             .padding(5.dp),
     ) {
-        Box(Modifier.fillMaxSize()) {
+        val grad = listOf(
+            MaterialTheme.colorScheme.primary.copy(alpha = .6f),
+            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = .5f)
+        )
+        Box(Modifier.fillMaxSize().linearGradientBackground(grad)) {
             Text(label, Modifier.align(Alignment.Center))
         }
     }

@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 fun FancyIndicator(color: Color, modifier: Modifier = Modifier) {
     Box(
         modifier
-            .padding(10.dp)
+            .padding(12.dp)
             .fillMaxSize()
             .border(BorderStroke(2.dp, color), RoundedCornerShape(10.dp))
     )

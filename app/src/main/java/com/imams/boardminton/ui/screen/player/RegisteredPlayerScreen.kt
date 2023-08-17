@@ -62,6 +62,7 @@ import com.imams.boardminton.ui.component.SwipeToOptional
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.boardminton.ui.screen.create.player.GenderField
 import com.imams.boardminton.ui.screen.create.player.HandPlays
+import com.imams.boardminton.ui.utils.bottomDialogPadding
 import kotlinx.coroutines.launch
 
 @Composable
@@ -69,6 +70,7 @@ fun PlayerAndTeamsList(
     viewModel: RegisteredPlayersVM = hiltViewModel(),
     addNewPlayer: () -> Unit,
     onEditPlayer: (id: Int) -> Unit,
+    onDetailPlayer: (Int) -> Unit,
     onEditTeam: (id: Int) -> Unit,
     addNewTeam: () -> Unit,
 ) {
@@ -77,7 +79,7 @@ fun PlayerAndTeamsList(
             PlayerList(
                 viewModel = viewModel,
                 addNewPlayer = addNewPlayer::invoke,
-                onItemClick = { onEditPlayer.invoke(it.id) },
+                onItemClick = { onDetailPlayer.invoke(it.id) },
                 onEditPlayer = { onEditPlayer.invoke(it.id) }
             )
         },
@@ -187,9 +189,7 @@ internal fun PlayerList(
                         SwipeToOptional(
                             index = index,
                             onItemClick = { onItemClick.invoke(data) },
-                            onItemFullSwipe = {
-                                viewModel.removePlayer(data)
-                            },
+                            onItemFullSwipe = { viewModel.removePlayer(data) },
                             onEdit = { onEditPlayer.invoke(data) },
                             onDelete = { viewModel.removePlayer(data) },
                             content = { PlayerItem(data) },
@@ -235,6 +235,7 @@ private fun printLog(m: String) {
     println("SwipeToOptional Page $m")
 }
 
+// todo chane List Item to other layout component
 @Composable
 private fun PlayerItem(
     item: CreatePlayerState,
@@ -254,7 +255,10 @@ private fun PlayerItem(
             }
         },
         trailingContent = {
-            Text(text = item.handPlay)
+            Text(text = "Hand Play\n${item.handPlay}")
+        },
+        overlineContent = {
+            Text(text = "Player ID: ${item.id}")
         },
         tonalElevation = 2.dp,
         shadowElevation = 2.dp,
@@ -264,7 +268,7 @@ private fun PlayerItem(
         },
         supportingContent = {
             Text(
-                text = "ID: ${item.id}, Height: ${item.height} cm / Weight: ${item.weight} kg" +
+                text = "Height: ${item.height} cm / Weight: ${item.weight} kg" +
                         "\nDoB: ${item.dob.toString().asDateTime("dd MMM yyyy")} Age: ${item.dob.epochToAge()}",
                 fontSize = 10.sp
             )
@@ -317,9 +321,7 @@ private fun FilterSheet(
     var sGender by remember { mutableStateOf(filter.gender) }
     var sHandPlay by remember { mutableStateOf(filter.handPlay) }
     Column(
-        modifier = Modifier
-            .padding(horizontal = 20.dp)
-            .padding(bottom = 20.dp)
+        modifier = Modifier.bottomDialogPadding()
     ) {
         Text(text = "Filter by:")
         GenderField(
@@ -370,10 +372,7 @@ private fun SortSheet(
     var sortWeight: Sort? by remember { mutableStateOf(null) }
     var sortAge: Sort? by remember { mutableStateOf(null) }
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(bottom = 20.dp),
+        modifier = Modifier.fillMaxWidth().bottomDialogPadding(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {

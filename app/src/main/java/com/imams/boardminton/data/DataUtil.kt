@@ -30,6 +30,11 @@ fun <T, M> StateFlow<T>.map(
 fun String.prettifyDate(): String {
     return "${this.asDateTime("EEEE, dd MMM yyyy")}, at ${this.asDateTime("hh:mm:ss")}"
 }
+
+fun Long.asDateTime(pattern: String = "EEEE, dd MMM yyyy hh:mm:ss"): String? {
+    return this.toString().asDateTime(pattern)
+}
+
 fun String.asDateTime(pattern: String = "EEEE, dd MMM yyyy hh:mm:ss"): String? {
     return try {
         val sdf = SimpleDateFormat(pattern)

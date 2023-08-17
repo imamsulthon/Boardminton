@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import com.imams.boardminton.ui.component.EmptyContent
 import com.imams.boardminton.ui.component.SwipeToDismissItem
 import com.imams.boardminton.ui.screen.create.player.CreateTeamState
+import com.imams.boardminton.ui.utils.bottomDialogPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -161,10 +162,7 @@ fun SortTeamSheet(
     var sortLose: Sort? by remember { mutableStateOf(null) }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(bottom = 10.dp),
+        modifier = Modifier.fillMaxWidth().bottomDialogPadding(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {

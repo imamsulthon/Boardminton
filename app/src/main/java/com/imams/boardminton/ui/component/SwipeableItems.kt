@@ -150,7 +150,7 @@ fun SwipeToOptional(
             targetValueByState = { if (it) 1f else 0f },
         )
         AnimatedVisibility(visible = visible,
-            enter = fadeIn(animationSpec = tween(500)),
+            enter = fadeIn(animationSpec = tween(200)),
             exit = fadeOut(animationSpec = tween(200))
         ) {
             ActionRow(modifier = Modifier.align(Alignment.CenterEnd), alphaTransition) {

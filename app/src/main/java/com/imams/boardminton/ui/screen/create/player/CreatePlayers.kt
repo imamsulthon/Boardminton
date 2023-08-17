@@ -345,11 +345,12 @@ fun HandPlays(
         Text(
             text = "Hand Play: ",
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(end = 10.dp),
+            modifier = Modifier.padding(end = 10.dp).weight(.25f),
         )
         Row(
             Modifier
                 .fillMaxWidth()
+                .weight(.75f)
                 .selectableGroup()
         ) {
             radioOptions.forEach { text ->
@@ -387,9 +388,9 @@ fun GenderField(
         Text(
             text = "Gender: ",
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(end = 10.dp),
+            modifier = Modifier.padding(end = 10.dp).weight(.25f),
         )
-        Row(Modifier.selectableGroup()) {
+        Row(Modifier.selectableGroup().weight(.75f)) {
             radioOptions.forEach { text ->
                 InputChip(
                     modifier = Modifier.padding(horizontal = 5.dp),

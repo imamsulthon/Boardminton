@@ -13,6 +13,7 @@ object PlayerMapper {
         height = height,
         handPlay = handPlay,
         dob = dob,
+        photoProfileUri = photoProfileUri,
     )
 
     fun Player.toEntity(withId: Boolean = false) = PlayerEntity(
@@ -24,6 +25,7 @@ object PlayerMapper {
         height = height,
         handPlay = handPlay,
         dob = dob,
+        photoProfileUri = photoProfileUri
     ).also {
         if (withId) it.id = id
     }

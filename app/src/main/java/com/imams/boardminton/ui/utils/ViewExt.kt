@@ -22,6 +22,13 @@ fun String.lastNameWith(friend: String): String {
 fun String.lastName(): String {
     return this.substringAfterLast(" ")
 }
+fun String.firstName(): String {
+    return this.substringBefore(" ")
+}
+
+fun String.underScore(): String {
+    return this.firstName() + "_" + this.lastName()
+}
 
 fun String.prettifyName(): String {
     val words = this.split(" ".toRegex()).toTypedArray().toMutableList()

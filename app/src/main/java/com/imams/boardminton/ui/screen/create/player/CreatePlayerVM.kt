@@ -1,9 +1,13 @@
 package com.imams.boardminton.ui.screen.create.player
 
+import android.net.Uri
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.domain.impl.CreatePlayerUseCase
+import com.imams.boardminton.ui.screen.create.PhotoUriManager
+import com.imams.boardminton.ui.utils.underScore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CreatePlayerVM @Inject constructor(
     private val useCase: CreatePlayerUseCase,
+    private val photoUriManager: PhotoUriManager,
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(CreatePlayerState())
@@ -39,6 +44,7 @@ class CreatePlayerVM @Inject constructor(
             is CreatePlayerEvent.Height -> _uiState.update { it.copy(height = event.value) }
             is CreatePlayerEvent.Weight -> _uiState.update { it.copy(weight = event.value) }
             is CreatePlayerEvent.DOB -> _uiState.update { it.copy(dob = event.value) }
+            is CreatePlayerEvent.GenerateSelfie -> { onSelfieResponse(event.uri) }
             is CreatePlayerEvent.Clear -> _uiState.update { CreatePlayerState() }
         }
     }
@@ -51,26 +57,31 @@ class CreatePlayerVM @Inject constructor(
             useCase.getPlayer(id).collectLatest { player ->
                 isInit = true
                 _uiState.update { player }
+                onSelfieResponse(Uri.parse(player.photoProfileUri))
             }
         }
     }
 
     fun savePlayer(callback: (() -> Unit)? = null, data: CreatePlayerState = uiState.value) {
-        viewModelScope.launch {
-            useCase.createPlayer(data)
-            delay(500)
-            callback?.invoke()
-            _uiState.update { CreatePlayerState() }
+        saveSelfie {
+            viewModelScope.launch {
+                useCase.createPlayer(data.copy(photoProfileUri = it))
+                delay(500)
+                callback?.invoke()
+                _uiState.update { CreatePlayerState() }
+            }
         }
     }
 
     fun updatePlayer(callback: (() -> Unit)? = null, data: CreatePlayerState = uiState.value) {
-        viewModelScope.launch {
-            useCase.updatePlayer(data)
-            delay(500)
-            callback?.invoke()
-            _uiState.update { CreatePlayerState() }
-        }
+        saveSelfie(data.id, callback = { uri ->
+            viewModelScope.launch {
+                useCase.updatePlayer(data.copy(photoProfileUri = uri))
+                delay(500)
+                callback?.invoke()
+                _uiState.update { CreatePlayerState() }
+            }
+        })
     }
 
     private fun checkSavedPlayers() {
@@ -82,6 +93,32 @@ class CreatePlayerVM @Inject constructor(
         }
     }
 
+    private val _selfieUri = mutableStateOf<Uri?>(null)
+    val selfieUri get() = _selfieUri.value
+    fun getNewSelfieUri() = photoUriManager.buildNewUri()
+    private fun onSelfieResponse(uri: Uri) {
+        log("onSelfieResponse -> ${uri.path} Uri $uri")
+        _selfieUri.value = uri
+        _uiState.update {
+            it.copy(photoProfileUri = uri.toString())
+        }
+    }
+
+    private fun saveSelfie(id: Int? = null, callback: ((String) -> Unit)? = null) {
+        viewModelScope.launch {
+            selfieUri?.let {
+                log("saveSelfie -> id: $id path: ${it.path} Uri: $it")
+                photoUriManager.savePlayerImage(it, "boardminton_player_$id-${_uiState.value.fullName.underScore()}",
+                    callback = { path ->
+                        callback?.invoke(path)
+                        log("saveSelfie callback $path")
+                    }
+                )
+            }
+        }
+    }
+    private fun log(m: String) = println("CreatePlayerVM: $m")
+
 }
 
 data class CreatePlayerState(
@@ -92,7 +129,8 @@ data class CreatePlayerState(
     val gender: String = "",
     val height: Int = 0,
     val weight: Int = 0,
-    val dob: Long = 0
+    val dob: Long = 0,
+    var photoProfileUri: String = "",
 ) {
     val fullName = "$firstName $lastName"
 }
@@ -106,4 +144,5 @@ sealed class CreatePlayerEvent {
     data class HandPlay(val value: String): CreatePlayerEvent()
     data class Gender(val value: String): CreatePlayerEvent()
     object Clear: CreatePlayerEvent()
+    data class GenerateSelfie(val uri: Uri): CreatePlayerEvent()
 }

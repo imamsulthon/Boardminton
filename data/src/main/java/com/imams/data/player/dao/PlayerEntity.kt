@@ -16,5 +16,6 @@ data class PlayerEntity(
     @ColumnInfo("gender") val gender: String,
     @ColumnInfo("hand_play") val handPlay: String,
     @ColumnInfo("dob") val dob: Long,
+    @ColumnInfo("photo_profile_uri") val photoProfileUri: String,
 
 )

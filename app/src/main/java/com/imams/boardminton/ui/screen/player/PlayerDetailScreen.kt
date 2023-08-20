@@ -1,5 +1,6 @@
 package com.imams.boardminton.ui.screen.player
 
+import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -44,6 +45,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -52,6 +54,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.imams.boardminton.R
 import com.imams.boardminton.data.asDateTime
 import com.imams.boardminton.data.epochToAge
@@ -173,6 +177,7 @@ fun TopScrollingContent(
         val imgRes = if (state.gender.equals("man", true))
             R.drawable.ic_player_man_color else R.drawable.ic_player_woman_color
         AnimatedImage(
+            state.photoProfileUri,
             imgRes,
             scroll = scrollState.value.toFloat()
         )
@@ -195,7 +200,8 @@ fun TopScrollingContent(
                 val iSize = 20.dp
                 IconButton(
                     onClick = onEdit::invoke,
-                    modifier = Modifier.padding(start = 4.dp)
+                    modifier = Modifier
+                        .padding(start = 4.dp)
                         .size(width = iSize, height = iSize),
                 ) {
                     Icon(
@@ -206,7 +212,8 @@ fun TopScrollingContent(
                 IconButton(
                     onClick = onEdit::invoke,
                     enabled = false,
-                    modifier = Modifier.padding(start = 4.dp)
+                    modifier = Modifier
+                        .padding(start = 4.dp)
                         .size(width = iSize, height = iSize),
                 ) {
                     Icon(
@@ -221,12 +228,17 @@ fun TopScrollingContent(
 
 @Composable
 fun AnimatedImage(
-    @DrawableRes imgRes: Int,
+    imgUriPath: String? = null,
+    @DrawableRes imgDefault: Int,
     scroll: Float
 ) {
     val dynamicAnimationSizeValue = (initialImageFloat - scroll).coerceIn(36f, initialImageFloat)
-    Image(
-        painter = painterResource(id = imgRes),
+    val i = ImageRequest.Builder(LocalContext.current)
+        .data(if (imgUriPath.isNullOrEmpty())  imgDefault else Uri.parse(imgUriPath))
+        .crossfade(true)
+        .build()
+    AsyncImage(
+        model = i,
         contentScale = ContentScale.Crop,
         contentDescription = null,
         modifier = Modifier

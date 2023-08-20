@@ -1,5 +1,6 @@
 package com.imams.boardminton.ui.screen.create.player
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -56,6 +57,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.data.asDateTime
+import com.imams.boardminton.ui.screen.create.TakePhoto
 import com.imams.boardminton.ui.screen.create.ipModifierP
 import com.imams.boardminton.ui.utils.keyboardNext
 
@@ -74,7 +76,9 @@ fun CreatePlayerScreen(
         uiState = uiState,
         event = { viewModel.execute(it) },
         onSave = { viewModel.savePlayer(callback = onSave) },
-        onCheckSavePlayers = { openBottomSheet = true }
+        onCheckSavePlayers = { openBottomSheet = true },
+        onNewSelfie = { viewModel.getNewSelfieUri() },
+        selfieState = viewModel.selfieUri
     )
 
     // region check dialog
@@ -108,7 +112,9 @@ fun EditPlayerCreatedScreen(
         uiState = uiState,
         event = { viewModel.execute(it) },
         onSave = { viewModel.updatePlayer(callback = onSave) },
-        onCheckSavePlayers = {  }
+        onCheckSavePlayers = { },
+        onNewSelfie = { viewModel.getNewSelfieUri() },
+        selfieState = viewModel.selfieUri
     )
 
 }
@@ -121,6 +127,8 @@ internal fun CreatePlayerContent(
     event: (CreatePlayerEvent) -> Unit,
     onSave: () -> Unit,
     onCheckSavePlayers: (() -> Unit)? = null,
+    onNewSelfie: () -> Uri,
+    selfieState: Uri?,
 ) {
     val enableSave by rememberSaveable(uiState) {
         mutableStateOf(uiState.firstName.isNotEmpty() && uiState.gender.isNotEmpty()
@@ -158,7 +166,15 @@ internal fun CreatePlayerContent(
             onWeight = { event.invoke(CreatePlayerEvent.Weight(it)) },
             onHandPlay = { event.invoke(CreatePlayerEvent.HandPlay(it)) },
             onDob = { datePickerDialog.value = true },
-            onGender = { event.invoke(CreatePlayerEvent.Gender(it)) }
+            onGender = { event.invoke(CreatePlayerEvent.Gender(it)) },
+            takeSelfie = {
+                TakePhoto(
+                    imageUri = selfieState,
+                    getNewImageUri = { onNewSelfie.invoke() },
+                    onPhotoTaken = { event.invoke(CreatePlayerEvent.GenerateSelfie(it)) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         )
 
         if (datePickerDialog.value) {
@@ -211,6 +227,7 @@ private fun FormContent(
     onHeight: (Int) -> Unit,
     onDob: (Long) -> Unit,
     onGender: (String) -> Unit,
+    takeSelfie: @Composable () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -218,7 +235,6 @@ private fun FormContent(
             .padding(horizontal = 10.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        // first name
         Row(
             modifier = ipModifierP.padding(vertical = 5.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -299,6 +315,7 @@ private fun FormContent(
             .padding(vertical = 5.dp),
             initialSelection = data.handPlay, onSelected = onHandPlay::invoke
         )
+        takeSelfie()
     }
 }
 
@@ -345,7 +362,9 @@ fun HandPlays(
         Text(
             text = "Hand Play: ",
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(end = 10.dp).weight(.25f),
+            modifier = Modifier
+                .padding(end = 10.dp)
+                .weight(.25f),
         )
         Row(
             Modifier
@@ -388,9 +407,14 @@ fun GenderField(
         Text(
             text = "Gender: ",
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(end = 10.dp).weight(.25f),
+            modifier = Modifier
+                .padding(end = 10.dp)
+                .weight(.25f),
         )
-        Row(Modifier.selectableGroup().weight(.75f)) {
+        Row(
+            Modifier
+                .selectableGroup()
+                .weight(.75f)) {
             radioOptions.forEach { text ->
                 InputChip(
                     modifier = Modifier.padding(horizontal = 5.dp),
@@ -466,5 +490,7 @@ fun BottomView(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun CreatePlayerPreview() {
-    CreatePlayerContent("Create Player", CreatePlayerState(), event = {}, onSave = {}, onCheckSavePlayers = {})
+    CreatePlayerContent("Create Player", CreatePlayerState(), event = {}, onSave = {},
+        onCheckSavePlayers = {}, selfieState = null, onNewSelfie = { Uri.parse("") }
+    )
 }

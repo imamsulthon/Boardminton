@@ -1,5 +1,7 @@
 package com.imams.boardminton.ui.screen.player
 
+import android.net.Uri
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,17 +9,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,14 +47,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.imams.boardminton.R
 import com.imams.boardminton.data.Athlete
 import com.imams.boardminton.data.asDateTime
@@ -235,6 +240,25 @@ private fun printLog(m: String) {
     println("SwipeToOptional Page $m")
 }
 
+@Composable
+private fun ProfileImage(
+    imgUriPath: String? = null,
+    @DrawableRes imgDefault: Int,
+) {
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(if (imgUriPath.isNullOrEmpty())  imgDefault else Uri.parse(imgUriPath))
+            .crossfade(true)
+            .error(imgDefault)
+            .build(),
+        contentScale = ContentScale.Crop,
+        contentDescription = null,
+        modifier = Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+    )
+}
+
 // todo chane List Item to other layout component
 @Composable
 private fun PlayerItem(
@@ -242,17 +266,9 @@ private fun PlayerItem(
 ) {
     ListItem(
         leadingContent = {
-            when (item.gender.toLowerCase(Locale.current)) {
-                "man" -> Icon(
-                    painter = painterResource(id = R.drawable.ic_player_man),
-                    contentDescription = "player_man"
-                )
-                "woman" -> Icon(
-                    painter = painterResource(id = R.drawable.ic_player_woman),
-                    contentDescription = "player_woman"
-                )
-                else -> Icon(Icons.Outlined.Person, contentDescription = "player_man")
-            }
+            val imgRes = if (item.gender.equals("man", true))
+                R.drawable.ic_player_man else R.drawable.ic_player_woman
+            ProfileImage(imgUriPath = item.photoProfileUri, imgDefault = imgRes)
         },
         trailingContent = {
             Text(text = "Hand Play\n${item.handPlay}")
@@ -372,7 +388,9 @@ private fun SortSheet(
     var sortWeight: Sort? by remember { mutableStateOf(null) }
     var sortAge: Sort? by remember { mutableStateOf(null) }
     Column(
-        modifier = Modifier.fillMaxWidth().bottomDialogPadding(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .bottomDialogPadding(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {

@@ -12,12 +12,13 @@ object UseCaseMapper {
         id = id,
         firstName = firstName, lastName = lastName, handPlay = handPlay,
         gender = gender, height = height, weight = weight,
-        dob = dob,
+        dob = dob, photoProfileUri = photoProfileUri,
     )
 
     fun CreatePlayerState.toModel(withId: Boolean = false) = Player(
         firstName = firstName, lastName = lastName, handPlay = handPlay,
         gender = gender, height = height, weight = weight, dob = dob,
+        photoProfileUri = photoProfileUri,
     ).also {
         if (withId) it.id = id
     }

@@ -1,7 +1,5 @@
 package com.imams.boardminton.ui.screen.player
 
-import android.net.Uri
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,14 +7,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
@@ -47,22 +43,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.imams.boardminton.R
 import com.imams.boardminton.data.Athlete
 import com.imams.boardminton.data.asDateTime
 import com.imams.boardminton.data.epochToAge
 import com.imams.boardminton.ui.component.EmptyContent
 import com.imams.boardminton.ui.component.FancyIndicator
+import com.imams.boardminton.ui.component.ProfileImage
 import com.imams.boardminton.ui.component.SwipeToOptional
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.boardminton.ui.screen.create.player.GenderField
@@ -77,6 +69,7 @@ fun PlayerAndTeamsList(
     onEditPlayer: (id: Int) -> Unit,
     onDetailPlayer: (Int) -> Unit,
     onEditTeam: (id: Int) -> Unit,
+    onDetailTeam: (id: Int) -> Unit,
     addNewTeam: () -> Unit,
 ) {
     ContentWrapper(
@@ -92,7 +85,8 @@ fun PlayerAndTeamsList(
             TeamList(
                 viewModel = viewModel,
                 addNewTeam = addNewTeam::invoke,
-                onItemClick = { },
+                onItemClick = { onDetailTeam.invoke(it.id) },
+                onEditTeam = { onEditTeam.invoke(it.id)}
             )
         },
     )
@@ -238,25 +232,6 @@ internal fun PlayerList(
 
 private fun printLog(m: String) {
     println("SwipeToOptional Page $m")
-}
-
-@Composable
-private fun ProfileImage(
-    imgUriPath: String? = null,
-    @DrawableRes imgDefault: Int,
-) {
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(if (imgUriPath.isNullOrEmpty())  imgDefault else Uri.parse(imgUriPath))
-            .crossfade(true)
-            .error(imgDefault)
-            .build(),
-        contentScale = ContentScale.Crop,
-        contentDescription = null,
-        modifier = Modifier
-            .size(48.dp)
-            .clip(CircleShape)
-    )
 }
 
 // todo chane List Item to other layout component

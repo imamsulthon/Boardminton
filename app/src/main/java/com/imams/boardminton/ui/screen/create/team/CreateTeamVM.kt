@@ -50,25 +50,27 @@ class CreateTeamVM @Inject constructor(
         when (event) {
             is CreateTeamEvent.Player1 -> {
                 _uiState.update {
-                    it.copy(playerName1 = event.data.fullName, playerId1 = event.data.id)
+                    it.copy(playerName1 = event.data.fullName, playerId1 = event.data.id,
+                        profilePhotoUri1 = event.data.photoProfileUri)
                 }
             }
             is CreateTeamEvent.Player2 -> {
                 _uiState.update {
-                    it.copy(playerName2 = event.data.fullName, playerId2 = event.data.id)
+                    it.copy(playerName2 = event.data.fullName, playerId2 = event.data.id,
+                        profilePhotoUri2 = event.data.photoProfileUri)
                 }
             }
             is CreateTeamEvent.Swap -> {
                 _uiState.update {
                     it.copy(
-                        playerName1 = it.playerName2, playerId1 = it.playerId2,
-                        playerName2 = it.playerName1, playerId2 = it.playerId1
+                        playerName1 = it.playerName2, playerId1 = it.playerId2, profilePhotoUri1 = it.profilePhotoUri1,
+                        playerName2 = it.playerName1, playerId2 = it.playerId1, profilePhotoUri2 = it.profilePhotoUri2,
                     )
                 }
             }
             is CreateTeamEvent.Clear -> {
                 _uiState.update {
-                    it.copy(playerId1 = 0, playerName1 = "", playerId2 = 0, playerName2 = "")
+                    it.copy(playerId1 = 0, playerName1 = "", playerId2 = 0, playerName2 = "", profilePhotoUri1 = "", profilePhotoUri2 = "")
                 }
             }
         }

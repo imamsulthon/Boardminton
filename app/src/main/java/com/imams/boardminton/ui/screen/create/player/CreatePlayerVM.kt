@@ -2,10 +2,10 @@ package com.imams.boardminton.ui.screen.create.player
 
 import android.net.Uri
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.domain.impl.CreatePlayerUseCase
+import com.imams.boardminton.ui.screen.create.FileNamingExt
 import com.imams.boardminton.ui.screen.create.PhotoUriManager
 import com.imams.boardminton.ui.utils.underScore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +22,7 @@ import javax.inject.Inject
 class CreatePlayerVM @Inject constructor(
     private val useCase: CreatePlayerUseCase,
     private val photoUriManager: PhotoUriManager,
-): ViewModel() {
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreatePlayerState())
     val uiState: StateFlow<CreatePlayerState> = _uiState.asStateFlow()
@@ -44,8 +44,12 @@ class CreatePlayerVM @Inject constructor(
             is CreatePlayerEvent.Height -> _uiState.update { it.copy(height = event.value) }
             is CreatePlayerEvent.Weight -> _uiState.update { it.copy(weight = event.value) }
             is CreatePlayerEvent.DOB -> _uiState.update { it.copy(dob = event.value) }
-            is CreatePlayerEvent.GenerateSelfie -> { onSelfieResponse(event.uri) }
+            is CreatePlayerEvent.GenerateSelfie -> {
+                onSelfieResponse(event.uri)
+            }
+
             is CreatePlayerEvent.Clear -> _uiState.update { CreatePlayerState() }
+            else -> {}
         }
     }
 
@@ -63,25 +67,33 @@ class CreatePlayerVM @Inject constructor(
     }
 
     fun savePlayer(callback: (() -> Unit)? = null, data: CreatePlayerState = uiState.value) {
-        saveSelfie {
+        saveSelfie { uri, fileName ->
             viewModelScope.launch {
-                useCase.createPlayer(data.copy(photoProfileUri = it))
+                useCase.createPlayer(data.copy(photoProfileUri = uri))
                 delay(500)
                 callback?.invoke()
                 _uiState.update { CreatePlayerState() }
+                _tempSelfieUri.update { it.copy(uri = Uri.parse(uri), fileName = fileName) }
             }
         }
     }
 
     fun updatePlayer(callback: (() -> Unit)? = null, data: CreatePlayerState = uiState.value) {
-        saveSelfie(data.id, callback = { uri ->
-            viewModelScope.launch {
-                useCase.updatePlayer(data.copy(photoProfileUri = uri))
-                delay(500)
-                callback?.invoke()
-                _uiState.update { CreatePlayerState() }
-            }
-        })
+        if (_tempSelfieUri.value.uri.toString() == data.photoProfileUri) {
+            viewModelScope.launch { useCase.updatePlayer(data) }
+        } else {
+            saveSelfie(data.id,
+                callback = { uri, fileName ->
+                    viewModelScope.launch {
+                        useCase.updatePlayer(data.copy(photoProfileUri = uri))
+                        delay(500)
+                        callback?.invoke()
+                        _uiState.update { CreatePlayerState() }
+                        _tempSelfieUri.update { it.copy(uri = Uri.parse(uri), fileName = fileName) }
+                    }
+                }
+            )
+        }
     }
 
     private fun checkSavedPlayers() {
@@ -93,25 +105,30 @@ class CreatePlayerVM @Inject constructor(
         }
     }
 
-    private val _selfieUri = mutableStateOf<Uri?>(null)
-    val selfieUri get() = _selfieUri.value
+    private val _tempSelfieUri = MutableStateFlow(SelfieFieldState())
+    val tempSelfieUri = _tempSelfieUri.asStateFlow()
     fun getNewSelfieUri() = photoUriManager.buildNewUri()
+
     private fun onSelfieResponse(uri: Uri) {
         log("onSelfieResponse -> ${uri.path} Uri $uri")
-        _selfieUri.value = uri
-        _uiState.update {
-            it.copy(photoProfileUri = uri.toString())
+        _tempSelfieUri.update {
+            it.copy(uri = uri, fileName = photoUriManager.checkFileName(uri))
         }
     }
 
-    private fun saveSelfie(id: Int? = null, callback: ((String) -> Unit)? = null) {
+    private fun saveSelfie(id: Int? = null, callback: ((String, String) -> Unit)? = null) {
         viewModelScope.launch {
-            selfieUri?.let {
+            _tempSelfieUri.value.uri?.let {
                 log("saveSelfie -> id: $id path: ${it.path} Uri: $it")
-                photoUriManager.savePlayerImage(it, "boardminton_player_$id-${_uiState.value.fullName.underScore()}",
-                    callback = { path ->
-                        callback?.invoke(path)
-                        log("saveSelfie callback $path")
+                photoUriManager.savePlayerImage(
+                    uri = it,
+                    name = FileNamingExt.generatePhotoPlayer(
+                        id ?: 0,
+                        _uiState.value.fullName.underScore()
+                    ),
+                    callback = { path, fileName ->
+                        callback?.invoke(path, fileName)
+                        log("saveSelfie callback -> path: $path fileName: $fileName")
                     }
                 )
             }
@@ -120,6 +137,11 @@ class CreatePlayerVM @Inject constructor(
     private fun log(m: String) = println("CreatePlayerVM: $m")
 
 }
+
+data class SelfieFieldState(
+    val uri: Uri? = null,
+    val fileName: String? = null
+)
 
 data class CreatePlayerState(
     val id: Int = 0,
@@ -136,13 +158,13 @@ data class CreatePlayerState(
 }
 
 sealed class CreatePlayerEvent {
-    data class FirstName(val name: String): CreatePlayerEvent()
-    data class LastName(val name: String): CreatePlayerEvent()
-    data class Height(val value: Int): CreatePlayerEvent()
-    data class Weight(val value: Int): CreatePlayerEvent()
-    data class DOB(val value: Long): CreatePlayerEvent()
-    data class HandPlay(val value: String): CreatePlayerEvent()
-    data class Gender(val value: String): CreatePlayerEvent()
-    object Clear: CreatePlayerEvent()
-    data class GenerateSelfie(val uri: Uri): CreatePlayerEvent()
+    data class FirstName(val name: String) : CreatePlayerEvent()
+    data class LastName(val name: String) : CreatePlayerEvent()
+    data class Height(val value: Int) : CreatePlayerEvent()
+    data class Weight(val value: Int) : CreatePlayerEvent()
+    data class DOB(val value: Long) : CreatePlayerEvent()
+    data class HandPlay(val value: String) : CreatePlayerEvent()
+    data class Gender(val value: String) : CreatePlayerEvent()
+    object Clear : CreatePlayerEvent()
+    data class GenerateSelfie(val uri: Uri) : CreatePlayerEvent()
 }

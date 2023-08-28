@@ -7,13 +7,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -30,10 +32,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+import com.imams.boardminton.R
 import com.imams.boardminton.ui.component.EmptyContent
-import com.imams.boardminton.ui.component.SwipeToDismissItem
+import com.imams.boardminton.ui.component.ProfileImage
+import com.imams.boardminton.ui.component.SwipeToOptional
 import com.imams.boardminton.ui.screen.create.player.CreateTeamState
 import com.imams.boardminton.ui.utils.bottomDialogPadding
 
@@ -43,6 +49,7 @@ internal fun TeamList(
     viewModel: RegisteredPlayersVM,
     addNewTeam: () -> Unit,
     onItemClick: (CreateTeamState) -> Unit,
+    onEditTeam: (CreateTeamState) -> Unit,
 ) {
 
     val list by viewModel.saveTeams.collectAsState()
@@ -78,14 +85,19 @@ internal fun TeamList(
                     .wrapContentHeight()
                     .padding(padding)
             ) {
-                items(items = list, key = { listItem: CreateTeamState -> listItem.id }) {
-                    SwipeToDismissItem(
-                        onSwipeDismiss = { viewModel.removeTeams(it) },
-                        onItemClick = { onItemClick.invoke(it) }
-                    ) {
-                        TeamItem(it)
+                itemsIndexed(
+                    items = list,
+                    itemContent = { index, item ->
+                        SwipeToOptional(
+                            index = index,
+                            onItemFullSwipe = { viewModel.removeTeams(item) },
+                            onItemClick = { onItemClick.invoke(item) },
+                            onDelete = { viewModel.removeTeams(item) },
+                            onEdit = { onEditTeam.invoke(item) },
+                            content = { TeamItem(item) }
+                        )
                     }
-                }
+                )
             }
             if (openFilterDialog) {
                 ModalBottomSheet(
@@ -117,33 +129,62 @@ internal fun TeamList(
 fun TeamItem(
     item: CreateTeamState
 ) {
-    ListItem(
-        leadingContent = {
-            Text(text = item.rank.toString())
-        },
-        trailingContent = {
-            Text(text = item.id.toString())
-        },
-        tonalElevation = 2.dp,
-        shadowElevation = 2.dp,
-        overlineContent = {
-            Text(text = item.type)
-        },
-        headlineContent = {
-            val label = item.alias
-            Text(label, fontWeight = FontWeight.Bold)
-        },
-        supportingContent = {
+    Card {
+        ConstraintLayout(
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxWidth()
+        ) {
+            val (vS, vC, vE) = createRefs()
+            val compPad = 2.dp
+            Row(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .constrainAs(vS) {
+                        top.linkTo(vC.top)
+                        bottom.linkTo(vC.bottom)
+                        start.linkTo(parent.start)
+                    }
+                    .padding(compPad),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val imgRes = R.drawable.ic_player_man
+                ProfileImage(modifier = Modifier.padding(end = 4.dp),
+                    imgUriPath = item.profilePhotoUri1, imgDefault = imgRes, size = 32.dp,
+                )
+                ProfileImage(modifier = Modifier.padding(end = 4.dp),
+                    imgUriPath = item.profilePhotoUri2, imgDefault = imgRes, size = 32.dp
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .constrainAs(vC) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(vS.end)
+                        end.linkTo(vE.start)
+                        width = Dimension.fillToConstraints
+                    }
+                    .padding(compPad),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(item.alias, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = "${item.playerName1} (${item.playerId1}) & ${item.playerName2} (${item.playerId2})\n" +
+                            "Play; ${item.play}. Win; ${item.win}. Lose; ${item.lose}.",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
             Text(
-                text = "${item.playerName1} (${item.playerId1}) & ${item.playerName2} (${item.playerId2})",
-                fontSize = 10.sp
-            )
-            Text(
-                text = "Play; ${item.play}. Win; ${item.win}. Lose; ${item.lose}.",
-                fontSize = 10.sp
+                modifier = Modifier.wrapContentSize().padding(compPad).constrainAs(vE) {
+                        end.linkTo(parent.end)
+                        top.linkTo(vC.top)
+                        bottom.linkTo(vC.bottom)
+                    },
+                text = item.id.toString()
             )
         }
-    )
+    }
 }
 
 @Composable
@@ -162,7 +203,9 @@ fun SortTeamSheet(
     var sortLose: Sort? by remember { mutableStateOf(null) }
 
     Column(
-        modifier = Modifier.fillMaxWidth().bottomDialogPadding(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .bottomDialogPadding(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
@@ -252,4 +295,10 @@ fun SortTeamSheet(
             ) { Text(text = "Apply") }
         }
     }
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+private fun Preview() {
+    TeamItem(item = CreateTeamState(playerName1 = "Imam Sulthon", playerName2 = "Ratna Yunita"))
 }

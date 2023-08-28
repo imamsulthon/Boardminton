@@ -260,6 +260,7 @@ fun BoardMintonNavHost(
                 onEditPlayer = { navController.navigate(EditCreatedPlayer.invoke(it)) },
                 onDetailPlayer = { navController.navigate(PlayerDetail.invoke(it)) },
                 onEditTeam = { },
+                onDetailTeam = { },
                 addNewTeam = { navController.navigate(CreateTeam.fullRoute) }
             )
         }

@@ -20,8 +20,10 @@ class CreateTeamUseCaseImpl(
         val newTeam = Team(
             playerId1 = t1?.id ?: 0,
             playerName1 = team.playerName1,
+            profilePhotoUri1 = team.profilePhotoUri1,
             playerId2 = t2?.id ?: 0,
-            playerName2 = team.playerName2
+            playerName2 = team.playerName2,
+            profilePhotoUri2 = team.profilePhotoUri2,
         )
         teamRepository.addTeam(newTeam)
     }

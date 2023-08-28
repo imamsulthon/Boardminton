@@ -6,6 +6,8 @@ data class Team(
     val playerId2: Int = 0,
     val playerName1: String,
     val playerName2: String,
+    val profilePhotoUri1: String = "",
+    val profilePhotoUri2: String = "",
     val type: String = "double",
     val rank: Int = 0,
     val play: Int = 0,

@@ -41,7 +41,12 @@ class HomeScreenVM @Inject constructor(
 
     val theme = preferenceStore.currentTheme.map { number ->
         number?.let {
-            AppThemes.values()[it]
+            try {
+                AppThemes.values()[it]
+            } catch (e: Exception) {
+                e.printStackTrace()
+                AppThemes.values()[0]
+            }
         }
     }
 

@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.imams.boardminton.data.Athlete
+import com.imams.boardminton.ui.utils.bottomDialogPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,9 +25,7 @@ fun PlayerBottomSheetContent(
     list: List<CreatePlayerState>,
     onSelect: ((CreatePlayerState) -> Unit)? = null,
 ) {
-    LazyColumn(modifier = Modifier
-        .padding(bottom = 10.dp)
-        .padding(horizontal = 10.dp)) {
+    LazyColumn(modifier = Modifier.bottomDialogPadding()) {
         item {
             Text(
                 text = "Registered Players (${list.size})", fontSize = 16.sp,

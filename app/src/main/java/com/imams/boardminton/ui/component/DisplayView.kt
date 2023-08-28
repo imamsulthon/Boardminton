@@ -1,18 +1,28 @@
 package com.imams.boardminton.ui.component
 
+import android.net.Uri
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.imams.boardminton.domain.model.GameViewParam
 import com.imams.boardminton.domain.model.TeamViewParam
 import com.imams.boardminton.ui.utils.getLabel
@@ -92,6 +102,25 @@ private fun Modifier.drawBorder() = this
         shape = RoundedCornerShape(1.dp)
     )
     .padding(vertical = 10.dp, horizontal = 10.dp)
+
+@Composable
+fun ProfileImage(
+    modifier: Modifier = Modifier,
+    imgUriPath: String? = null,
+    @DrawableRes imgDefault: Int,
+    size: Dp = 48.dp
+) {
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(if (imgUriPath.isNullOrEmpty())  imgDefault else Uri.parse(imgUriPath))
+            .crossfade(true)
+            .error(imgDefault)
+            .build(),
+        contentScale = ContentScale.Crop,
+        contentDescription = null,
+        modifier = modifier.size(size).clip(CircleShape)
+    )
+}
 
 @Preview
 @Composable

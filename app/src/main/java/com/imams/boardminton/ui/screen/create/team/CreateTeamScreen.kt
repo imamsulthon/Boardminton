@@ -17,6 +17,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -47,7 +48,7 @@ fun CreateTeamScreen(
     val savedTeams by viewModel.saveTeams.collectAsState()
     var openPlayerOptional by rememberSaveable { mutableStateOf(false) }
     val savedPlayers by viewModel.savePlayers.collectAsState()
-    var selectedField by remember { mutableStateOf(1) }
+    var selectedField by remember { mutableIntStateOf(1) }
 
     CreateTeamContent(
         uiState = uiState,

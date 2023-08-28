@@ -45,23 +45,23 @@ import com.imams.boardminton.ui.utils.REQUIRED_PERMISSIONS
 
 @Composable
 fun TakePhoto(
+    modifier: Modifier = Modifier,
     imageUri: Uri?,
+    fileName: String? = null,
     getNewImageUri: () -> Uri,
     onPhotoTaken: (Uri) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val hasPhoto = imageUri != null
     var newImageUri: Uri? = null
 
     val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-        onResult = { success ->
-            if (success) {
-                onPhotoTaken(newImageUri!!)
-            }
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            newImageUri?.let(onPhotoTaken)
         }
-    )
+    }
 
     var hasCamPermission by remember {
         mutableStateOf(
@@ -82,9 +82,6 @@ fun TakePhoto(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { success ->
             success?.let(onPhotoTaken)
-            success?.let {
-                onPhotoTaken.invoke(it)
-            }
         }
     )
 
@@ -95,10 +92,11 @@ fun TakePhoto(
         }
     )
 
-    Column(
-        modifier = modifier.padding(),
-    ) {
-        Text(text = "Take Player Photo")
+    Column(modifier) {
+        Text(
+            text = "Take Player Photo",
+            style = MaterialTheme.typography.bodyMedium,
+        )
         Spacer(modifier = Modifier.padding(vertical = 3.dp))
         Box(
             contentAlignment = Alignment.Center,
@@ -126,7 +124,9 @@ fun TakePhoto(
                 PhotoDefaultImage(modifier = Modifier.padding(5.dp))
             }
         }
-        Text(text = "URI: ${imageUri?.path}", style = MaterialTheme.typography.bodySmall)
+        Spacer(modifier = Modifier.padding(vertical = 2.dp))
+        Text(text = "Uri: ${imageUri?.path} \n FileName: $fileName",
+            style = MaterialTheme.typography.bodySmall)
         Spacer(modifier = Modifier.padding(vertical = 3.dp))
         Row (
             modifier = Modifier.fillMaxWidth(),
@@ -186,7 +186,7 @@ private fun PhotoDefaultImage(
 @Composable
 fun PhotoQuestionPreview() {
     BoardMintonTheme {
-        Surface {
+        Surface(modifier = Modifier.padding(6.dp)) {
             TakePhoto(
                 imageUri = Uri.parse("https://example.bogus/wow"),
                 getNewImageUri = { Uri.EMPTY },
@@ -196,3 +196,4 @@ fun PhotoQuestionPreview() {
         }
     }
 }
+

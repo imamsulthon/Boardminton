@@ -70,6 +70,7 @@ fun CreatePlayerScreen(
     val uiState by viewModel.uiState.collectAsState()
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val savedPlayers by viewModel.savePlayers.collectAsState()
+    val selfieState by viewModel.tempSelfieUri.collectAsState()
 
     CreatePlayerContent(
         screenName = "Create Player",
@@ -78,7 +79,7 @@ fun CreatePlayerScreen(
         onSave = { viewModel.savePlayer(callback = onSave) },
         onCheckSavePlayers = { openBottomSheet = true },
         onNewSelfie = { viewModel.getNewSelfieUri() },
-        selfieState = viewModel.selfieUri
+        selfieState = selfieState
     )
 
     // region check dialog
@@ -106,6 +107,7 @@ fun EditPlayerCreatedScreen(
     onSave: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val selfieState by viewModel.tempSelfieUri.collectAsState()
 
     CreatePlayerContent(
         screenName = "Edit Player (id = ${uiState.id})",
@@ -114,9 +116,8 @@ fun EditPlayerCreatedScreen(
         onSave = { viewModel.updatePlayer(callback = onSave) },
         onCheckSavePlayers = { },
         onNewSelfie = { viewModel.getNewSelfieUri() },
-        selfieState = viewModel.selfieUri
+        selfieState = selfieState
     )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -128,7 +129,7 @@ internal fun CreatePlayerContent(
     onSave: () -> Unit,
     onCheckSavePlayers: (() -> Unit)? = null,
     onNewSelfie: () -> Uri,
-    selfieState: Uri?,
+    selfieState: SelfieFieldState?,
 ) {
     val enableSave by rememberSaveable(uiState) {
         mutableStateOf(uiState.firstName.isNotEmpty() && uiState.gender.isNotEmpty()
@@ -169,10 +170,11 @@ internal fun CreatePlayerContent(
             onGender = { event.invoke(CreatePlayerEvent.Gender(it)) },
             takeSelfie = {
                 TakePhoto(
-                    imageUri = selfieState,
+                    modifier = Modifier.fillMaxWidth(),
+                    imageUri = selfieState?.uri,
+                    fileName = selfieState?.fileName,
                     getNewImageUri = { onNewSelfie.invoke() },
                     onPhotoTaken = { event.invoke(CreatePlayerEvent.GenerateSelfie(it)) },
-                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         )

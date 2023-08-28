@@ -25,12 +25,14 @@ object UseCaseMapper {
 
     fun Team.toState() = CreateTeamState(
         id = id,
-        playerId1 = playerId1, playerId2 = playerId2, playerName1 = playerName1, playerName2 = playerName2
+        playerId1 = playerId1, playerId2 = playerId2, playerName1 = playerName1, playerName2 = playerName2,
+        profilePhotoUri1 = profilePhotoUri1, profilePhotoUri2 = profilePhotoUri2
     )
 
     fun CreateTeamState.toModel(withId: Boolean = false) = Team(
         playerId1 = playerId1, playerId2 = playerId2,
         playerName1 = playerName1, playerName2 = playerName2,
+        profilePhotoUri1 = profilePhotoUri1, profilePhotoUri2 = profilePhotoUri2,
     ).also {
         if (withId) it.id = id
     }

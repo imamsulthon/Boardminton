@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.imams.boardminton.ui.screen.create.player.CreateTeamState
+import com.imams.boardminton.ui.utils.bottomDialogPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,7 +24,7 @@ fun TeamBottomSheetContent(
     list: List<CreateTeamState>,
     onSelect: ((CreateTeamState) -> Unit)? = null,
 ) {
-    LazyColumn(modifier = Modifier.padding(bottom = 10.dp).padding(horizontal = 10.dp)) {
+    LazyColumn(modifier = Modifier.bottomDialogPadding()) {
         item {
             Text(
                 text = "Registered Teams (${list.size})", fontSize = 16.sp,

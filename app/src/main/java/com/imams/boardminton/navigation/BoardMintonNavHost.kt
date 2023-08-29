@@ -25,11 +25,13 @@ import com.imams.boardminton.navigation.Destination.EditPlayers
 import com.imams.boardminton.navigation.Destination.Home
 import com.imams.boardminton.navigation.Destination.PlayerDetail
 import com.imams.boardminton.navigation.Destination.ScoreBoard
+import com.imams.boardminton.navigation.Destination.TeamDetail
 import com.imams.boardminton.ui.screen.create.CreateMatchScreen
 import com.imams.boardminton.ui.screen.create.EditPlayersScreen
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerScreen
 import com.imams.boardminton.ui.screen.create.player.EditPlayerCreatedScreen
 import com.imams.boardminton.ui.screen.create.team.CreateTeamScreen
+import com.imams.boardminton.ui.screen.create.team.TeamDetailScreen
 import com.imams.boardminton.ui.screen.home.HomeScreen
 import com.imams.boardminton.ui.screen.home.HomeScreenVM
 import com.imams.boardminton.ui.screen.matches.AllMatchesScreen
@@ -92,6 +94,10 @@ sealed class Destination(protected val route: String, vararg params: String) {
     object PlayerDetail: Destination("player-detail", "id") {
         operator fun invoke(id: Int): String = route.appendParams("id" to id)
 
+    }
+
+    object TeamDetail: Destination("team-detail", "id") {
+        operator fun invoke(id: Int): String = route.appendParams("id" to id)
     }
 
     object AllPlayers: DestinationNoArgs("registered-players")
@@ -228,6 +234,19 @@ fun BoardMintonNavHost(
             )
         }
 
+        composable(TeamDetail.fullRoute,
+            arguments = listOf(navArgument("id") {type = NavType.IntType})
+        ) {
+            val id = it.arguments?.getInt("id") ?: 0
+            TeamDetailScreen(teamId = id,
+                onEdit = { },
+                onClickPlayer = { playerId ->
+                    navController.navigate(PlayerDetail.invoke(playerId))
+                },
+                onBackPressed = navController::popBackStack
+            )
+        }
+
         composable(
             EditCreatedPlayer.fullRoute,
             arguments = listOf(navArgument("id") {type = NavType.IntType})
@@ -259,9 +278,9 @@ fun BoardMintonNavHost(
                 addNewPlayer = { navController.navigate(CreatePlayer.fullRoute) },
                 onEditPlayer = { navController.navigate(EditCreatedPlayer.invoke(it)) },
                 onDetailPlayer = { navController.navigate(PlayerDetail.invoke(it)) },
-                onEditTeam = { },
-                onDetailTeam = { },
-                addNewTeam = { navController.navigate(CreateTeam.fullRoute) }
+                addNewTeam = { navController.navigate(CreateTeam.fullRoute) },
+                onEditTeam = { navController.navigate(TeamDetail.invoke(it)) },
+                onDetailTeam = { navController.navigate(TeamDetail.invoke(it))},
             )
         }
 

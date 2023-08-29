@@ -11,14 +11,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,7 +37,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -59,10 +56,11 @@ import coil.request.ImageRequest
 import com.imams.boardminton.R
 import com.imams.boardminton.data.asDateTime
 import com.imams.boardminton.data.epochToAge
+import com.imams.boardminton.ui.component.RowInfoData
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.boardminton.ui.utils.horizontalGradientBackground
 
-const val initialImageFloat = 150f
+private const val initialImageFloat = 150f
 
 private fun log(m: String) = println("PlayerDetail: $m")
 
@@ -263,7 +261,7 @@ fun BottomScrollingContent(state: CreatePlayerState) {
 }
 
 @Composable
-private fun SectionPlayerData(
+fun SectionPlayerData(
     modifier: Modifier = Modifier,
     state: CreatePlayerState,
 ) {
@@ -294,37 +292,6 @@ private fun SectionPlayerData(
         }
     }
 
-}
-
-@Composable
-private fun RowInfoData(
-    label: String,
-    content: String,
-    weightLabel: Float = .25f,
-    weightContent: Float = .7f
-) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        TableCell(text = label, weight = weightLabel)
-        TableCell(text = ": ", weight = .05f)
-        TableCell(text = content, weight = weightContent, maxLines = 2)
-    }
-}
-
-@Composable
-private fun RowScope.TableCell(
-    text: String,
-    weight: Float,
-    maxLines : Int = 1,
-) {
-    Text(modifier = Modifier
-        .weight(weight)
-        .padding(vertical = 4.dp, horizontal = 4.dp), text = text, maxLines = maxLines,
-    )
 }
 
 @Preview

@@ -7,7 +7,7 @@ interface TeamRepository {
 
     suspend fun getAllTeams(): Flow<List<Team>>
 
-    suspend fun getTeam(id: Int): Flow<Team>
+    suspend fun getTeam(id: Int): Flow<Team?>
 
     suspend fun getTeam(first: Int, second: Int): Flow<Team?>
 

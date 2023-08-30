@@ -3,6 +3,8 @@ package com.imams.boardminton.ui.utils
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.core.content.ContextCompat
@@ -25,7 +27,14 @@ val REQUIRED_PERMISSIONS = mutableListOf(android.Manifest.permission.CAMERA).app
         }
     }.toTypedArray()
 
-fun allPermissionsGranted(ctx: Context) =
-    REQUIRED_PERMISSIONS.all {
+fun allPermissionsGranted(ctx: Context) = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(ctx, it) == PackageManager.PERMISSION_GRANTED
-    }
+}
+
+fun vibrateClick(context: Context?, milliseconds: Long = 100) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+    val vibrator = context?.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    val vibrationEffect1: VibrationEffect = VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE)
+    vibrator.cancel()
+    vibrator.vibrate(vibrationEffect1)
+}

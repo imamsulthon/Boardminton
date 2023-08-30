@@ -52,14 +52,14 @@ import com.imams.boardminton.ui.component.ChildLayout
 import com.imams.boardminton.ui.component.LoadItemAfterSafeCast
 import com.imams.boardminton.ui.component.VerticalScroll
 import com.imams.boardminton.ui.screen.matches.MatchItem
-import com.imams.boardminton.ui.settings.ChangeThemeDialog
-import com.imams.boardminton.ui.settings.ChangeThemeState
+import com.imams.boardminton.ui.settings.AppConfig
+import com.imams.boardminton.ui.settings.AppConfigDialog
 import com.imams.boardminton.ui.utils.linearGradientBackground
 
 @Composable
 fun HomeScreen(
-    changeThemeData: ChangeThemeState,
-    onChangeTheme: (ChangeThemeState) -> Unit,
+    appConfig: AppConfig,
+    onAppConfig: (AppConfig) -> Unit,
     onGoingMatches: List<MatchViewParam>? = null,
     onCreateMatch: (String) -> Unit,
     onCreatePlayer: (String) -> Unit,
@@ -95,10 +95,12 @@ fun HomeScreen(
             Dialog(
                 onDismissRequest = { dialogStateChangeTheme = false },
                 content = {
-                    ChangeThemeDialog(
-                        stateData = changeThemeData,
-                        onApply = onChangeTheme::invoke,
-                        onDismiss = { dialogStateChangeTheme = false }
+                    AppConfigDialog(
+                        stateData = appConfig,
+                        onApply = { config ->
+                            onAppConfig.invoke(config)
+                        },
+                        onDismiss = { dialogStateChangeTheme = false },
                     )
                 },
                 properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
@@ -358,5 +360,8 @@ private fun ItemMenu(
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 512, showSystemUi = true)
 @Composable
 private fun HomeScreenPreview() {
-    HomeScreen(changeThemeData = ChangeThemeState(), onChangeTheme = {}, onCreateMatch = {}, onCreatePlayer = {}, seeAllMatch = {})
+    HomeScreen(appConfig = AppConfig(),
+        onAppConfig = {}, onCreateMatch = {},
+        onCreatePlayer = {}, seeAllMatch = {},
+    )
 }

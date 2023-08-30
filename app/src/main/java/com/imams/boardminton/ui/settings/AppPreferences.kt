@@ -16,7 +16,9 @@ class DesignPreferenceStore(context: Context) {
 
     private val themeMode = intPreferencesKey("theme")
     private val themeDynamicColor = booleanPreferencesKey("theme_dynamic_colors")
+    private val isVibratePoint = booleanPreferencesKey("is_vibrate_point")
 
+    // region App Themes
     suspend fun setTheme(id: Int) {
         dataStore.edit { settings ->
             settings[themeMode] = id
@@ -34,22 +36,41 @@ class DesignPreferenceStore(context: Context) {
     }
 
     val dynamicColorTheme = dataStore.data.map { pref -> pref[themeDynamicColor] }
+    // endregion
 
-    val appThemes = dataStore.data.map { pref ->
-        ChangeThemeState(selected = pref[themeMode] ?: 0, dynamicColor = pref[themeDynamicColor] ?: false)
+    // region Match Board Config
+    suspend fun setVibrate(isVibrate: Boolean) {
+        dataStore.edit {
+            it[isVibratePoint] = isVibrate
+        }
     }
 
-    suspend fun setTheme(state: ChangeThemeState) {
-        dataStore.edit {
-            setTheme(state.selected)
-            setDynamicColor(state.dynamicColor)
+    val isPointButtonVibrate = dataStore.data.map { pref -> pref[isVibratePoint] }
+    // endregion
+
+    val appConfig = dataStore.data.map { pref ->
+        AppConfig(
+            theme = ChangeThemeState(
+                selected = pref[themeMode] ?: 0,
+                dynamicColor = pref[themeDynamicColor] ?: false
+            ),
+            matchBoard = MatchBoardSetting(
+                isVibrateAddPoint = pref[isVibratePoint] ?: false
+            )
+        )
+    }
+
+    suspend fun setAppConfig(appConfig: AppConfig) {
+        dataStore.edit { settings ->
+            settings[themeMode] = appConfig.theme.selected
+            settings[themeDynamicColor] = appConfig.theme.dynamicColor
+            settings[isVibratePoint] = appConfig.matchBoard.isVibrateAddPoint
         }
     }
 
 }
 
-enum class AppThemes {
-    MODE_AUTO,
-    MODE_LIGHT,
-    MODE_DARK,
-}
+data class AppConfig(
+    val theme: ChangeThemeState = ChangeThemeState(),
+    var matchBoard: MatchBoardSetting = MatchBoardSetting(),
+)

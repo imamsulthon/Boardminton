@@ -10,8 +10,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.tooling.preview.Preview
 import com.imams.boardminton.navigation.BoardMintonNavHost
 import com.imams.boardminton.ui.screen.home.HomeScreenVM
+import com.imams.boardminton.ui.settings.AppConfig
 import com.imams.boardminton.ui.settings.AppThemes
-import com.imams.boardminton.ui.settings.ChangeThemeState
+import com.imams.boardminton.ui.settings.toAppThemes
 import com.imams.boardminton.ui.theme.BoardMintonTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -23,26 +24,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val theme = viewModel.theme.collectAsState(initial = AppThemes.MODE_AUTO).value
-            val themeState = viewModel.dynamic.collectAsState(initial = false).value ?: false
-            val useDarkTheme = theme?.let {
+            val appConfig = viewModel.appConfig.collectAsState(initial = AppConfig()).value
+            val useDarkTheme = appConfig.theme.toAppThemes().let {
                 when (it) {
                     AppThemes.MODE_AUTO -> isSystemInDarkTheme()
                     AppThemes.MODE_LIGHT -> false
                     AppThemes.MODE_DARK -> true
                 }
-            } ?: isSystemInDarkTheme()
+            }
 
             BoardMintonTheme(
                 darkTheme = useDarkTheme,
-                isDynamicColor = themeState
+                isDynamicColor = appConfig.theme.dynamicColor
             ) {
                 BoardMintonNavHost(
-                    changeThemeState = ChangeThemeState().copy(
-                        selected = theme?.ordinal ?: -1,
-                        dynamicColor = themeState
-                    ),
-                    onChangeTheme = { viewModel.saveTheme(it) }
+                    appConfig = appConfig,
+                    onAppConfig = { viewModel.saveConfig(it) },
                 )
             }
         }

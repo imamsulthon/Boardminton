@@ -5,15 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.domain.mapper.MatchRepoMapper.toVp
 import com.imams.boardminton.domain.model.MatchViewParam
-import com.imams.boardminton.ui.settings.AppThemes
-import com.imams.boardminton.ui.settings.ChangeThemeState
+import com.imams.boardminton.ui.settings.AppConfig
 import com.imams.boardminton.ui.settings.DesignPreferenceStore
 import com.imams.data.match.repository.MatchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,24 +37,11 @@ class HomeScreenVM @Inject constructor(
         }
     }
 
-    val theme = preferenceStore.currentTheme.map { number ->
-        number?.let {
-            try {
-                AppThemes.values()[it]
-            } catch (e: Exception) {
-                e.printStackTrace()
-                AppThemes.values()[0]
-            }
-        }
-    }
+    val appConfig = preferenceStore.appConfig
 
-    val dynamic = preferenceStore.dynamicColorTheme
-
-    fun saveTheme(data: ChangeThemeState) {
+    fun saveConfig(config: AppConfig) {
         viewModelScope.launch {
-            log("ChangeTheme $data")
-            preferenceStore.setTheme(data.selected)
-            preferenceStore.setDynamicColor(data.dynamicColor)
+            preferenceStore.setAppConfig(config)
         }
     }
 

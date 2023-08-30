@@ -20,6 +20,8 @@ import com.imams.boardminton.domain.model.MatchUIState
 import com.imams.boardminton.domain.model.WinnerState
 import com.imams.boardminton.ui.screen.timer.MatchTimerGenerator
 import com.imams.boardminton.ui.screen.timer.TimeCounterUiState
+import com.imams.boardminton.ui.settings.DesignPreferenceStore
+import com.imams.boardminton.ui.settings.MatchBoardSetting
 import com.imams.data.match.repository.MatchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +36,7 @@ import javax.inject.Inject
 class ScoreBoardVM @Inject constructor(
     private val useCase: MatchBoardUseCase,
     private val repository: MatchRepository,
+    private val preferenceStore: DesignPreferenceStore,
 ) : ViewModel(), DefaultLifecycleObserver {
 
     private var alreadySetup = false
@@ -224,6 +227,13 @@ class ScoreBoardVM @Inject constructor(
         viewModelScope.launch {
             repository.updateMatch(_matchUiState.value.match.toRepo().apply { matchDuration = duration })
             callback?.invoke()
+        }
+    }
+
+    val appConfig = preferenceStore.appConfig
+    fun updateAppConfig(matchBoardSetting: MatchBoardSetting) {
+        viewModelScope.launch {
+            preferenceStore.setVibrate(matchBoardSetting.isVibrateAddPoint)
         }
     }
 

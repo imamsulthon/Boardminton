@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.selection.selectableGroup
@@ -53,10 +54,11 @@ import com.imams.boardminton.data.prettifyDate
 import com.imams.boardminton.domain.model.GameViewParam
 import com.imams.boardminton.domain.model.MatchViewParam
 import com.imams.boardminton.domain.model.ScoreViewParam
+import com.imams.boardminton.domain.model.Sort
 import com.imams.boardminton.ui.component.EmptyContent
 import com.imams.boardminton.ui.component.FancyIndicator
-import com.imams.boardminton.ui.component.SwipeToDismissItem
-import com.imams.boardminton.ui.screen.player.Sort
+import com.imams.boardminton.ui.component.SortField
+import com.imams.boardminton.ui.component.SwipeToOptional
 import com.imams.boardminton.ui.utils.bottomDialogPadding
 import com.imams.boardminton.ui.utils.getLabel
 import kotlinx.coroutines.launch
@@ -197,17 +199,21 @@ internal fun MatchListContent(
                     .wrapContentHeight()
                     .padding(p)
             ) {
-                items(
+                itemsIndexed(
                     items = list,
-                    key = { listItem: MatchViewParam -> listItem.id }
-                ) {
-                    SwipeToDismissItem(
-                        onSwipeDismiss = { onRemove.invoke(it) },
-                        onItemClick = { onItemClick?.invoke(it) }
-                    ) {
-                        MatchItem(item = it, onClick = { onItemClick?.invoke(it) })
+                    itemContent = { index, data ->
+                        SwipeToOptional(
+                            index = index,
+                            onItemClick = { onItemClick?.invoke(data) },
+                            onItemFullSwipe = {  },
+                            onEdit = { onItemClick?.invoke(data) },
+                            onDelete = { onRemove.invoke(data) },
+                            content = {
+                                MatchItem(item = data, onClick = { onItemClick?.invoke(it) })
+                            },
+                        )
                     }
-                }
+                )
             }
             if (openSortDialog) {
                 ModalBottomSheet(
@@ -506,35 +512,6 @@ private fun SortSheet(
                     .weight(1f),
                 onClick = { onApply.invoke(init) }
             ) { Text(text = "Apply") }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SortField(
-    label: String,
-    options: List<Sort>,
-    initialSelection: String = "",
-    onSelected: (Sort) -> Unit,
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text = "$label:")
-        Row(Modifier.selectableGroup()) {
-            options.forEach { text ->
-                InputChip(
-                    modifier = Modifier.padding(horizontal = 5.dp),
-                    selected = text.name.equals(initialSelection, true),
-                    onClick = { onSelected.invoke(text) },
-                    label = {
-                        Text(
-                            text = text.name,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(5.dp)
-                        )
-                    }
-                )
-            }
         }
     }
 }

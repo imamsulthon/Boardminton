@@ -68,17 +68,13 @@ class CreateTeamVM @Inject constructor(
                     )
                 }
             }
-            is CreateTeamEvent.Clear -> {
-                _uiState.update {
-                    it.copy(playerId1 = 0, playerName1 = "", playerId2 = 0, playerName2 = "", profilePhotoUri1 = "", profilePhotoUri2 = "")
-                }
-            }
+            is CreateTeamEvent.Clear -> _uiState.update { CreateTeamState() }
         }
     }
 
     fun saveTeams(callback: () -> Unit) {
         viewModelScope.launch {
-            createTeamUseCase.createTeam(uiState.value.toModel())
+            createTeamUseCase.createTeam(_uiState.value.toModel())
             delay(500)
             callback.invoke()
         }

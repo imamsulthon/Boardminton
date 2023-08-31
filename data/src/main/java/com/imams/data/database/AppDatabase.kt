@@ -11,7 +11,8 @@ import com.imams.data.team.dao.TeamEntity
 
 @Database(
     entities = [PlayerEntity::class, TeamEntity::class, MatchEntity::class],
-    version = 1
+    version = 1,
+    exportSchema = false
 )
 abstract class AppDatabase: RoomDatabase() {
     abstract fun playerDao(): PlayerDao

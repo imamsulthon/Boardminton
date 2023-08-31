@@ -230,7 +230,8 @@ fun BoardMintonNavHost(
             CreateTeamScreen (
                 onSave = {
                     Toast.makeText(context, "Success save", Toast.LENGTH_LONG).show()
-                }
+                },
+                onCreatePlayer = { navController.navigate(CreatePlayer.fullRoute)}
             )
         }
 

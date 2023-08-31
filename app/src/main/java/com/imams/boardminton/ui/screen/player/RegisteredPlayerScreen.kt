@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.InputChip
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -52,9 +51,11 @@ import com.imams.boardminton.R
 import com.imams.boardminton.data.Athlete
 import com.imams.boardminton.data.asDateTime
 import com.imams.boardminton.data.epochToAge
+import com.imams.boardminton.domain.model.Sort
 import com.imams.boardminton.ui.component.EmptyContent
 import com.imams.boardminton.ui.component.FancyIndicator
 import com.imams.boardminton.ui.component.ProfileImage
+import com.imams.boardminton.ui.component.SortField
 import com.imams.boardminton.ui.component.SwipeToOptional
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.boardminton.ui.screen.create.player.GenderField
@@ -420,6 +421,7 @@ private fun SortSheet(
                 sortHeight = null
             }
         )
+        Spacer(modifier = Modifier.padding(vertical = 5.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -437,35 +439,6 @@ private fun SortSheet(
                     .weight(1f),
                 onClick = { onApply.invoke(init) }
             ) { Text(text = "Apply") }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SortField(
-    label: String,
-    options: List<Sort>,
-    initialSelection: String = "",
-    onSelected: (Sort) -> Unit,
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text = "$label:")
-        Row(Modifier.selectableGroup()) {
-            options.forEach { text ->
-                InputChip(
-                    modifier = Modifier.padding(horizontal = 5.dp),
-                    selected = text.name.equals(initialSelection, true),
-                    onClick = { onSelected.invoke(text) },
-                    label = {
-                        Text(
-                            text = text.name,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(5.dp)
-                        )
-                    }
-                )
-            }
         }
     }
 }

@@ -81,11 +81,16 @@ fun CreateMatchScreen(
     val config = LocalConfiguration.current
 
     fun gotoScoreBoard() {
-        vm.saveInputPlayer(singleMatch, callback = {t, id ->
-            if (id > 0) toScoreBoardWithId?.invoke(t, id)
-            else toScoreBoard.invoke(if (singleMatch) "single" else "double",
-                listOf(playerA1, playerA2, playerB1, playerB2).toJson())
-        })
+        vm.saveInputPlayer(
+            singleMatch,
+            callback = {t, id ->
+                if (id > 0) toScoreBoardWithId?.invoke(t, id)
+                else toScoreBoard.invoke(
+                    if (singleMatch) "single" else "double",
+                    listOf(playerA1, playerA2, playerB1, playerB2).toJson()
+                )
+            }
+        )
     }
 
     val bottomListener = object : BottomListener {

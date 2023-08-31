@@ -3,6 +3,7 @@ package com.imams.boardminton.ui.screen.player
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -37,8 +38,10 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.imams.boardminton.R
+import com.imams.boardminton.domain.model.Sort
 import com.imams.boardminton.ui.component.EmptyContent
 import com.imams.boardminton.ui.component.ProfileImage
+import com.imams.boardminton.ui.component.SortField
 import com.imams.boardminton.ui.component.SwipeToOptional
 import com.imams.boardminton.ui.screen.create.player.CreateTeamState
 import com.imams.boardminton.ui.utils.bottomDialogPadding
@@ -276,6 +279,7 @@ fun SortTeamSheet(
                 sortWin = null
             }
         )
+        Spacer(modifier = Modifier.padding(vertical = 5.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween

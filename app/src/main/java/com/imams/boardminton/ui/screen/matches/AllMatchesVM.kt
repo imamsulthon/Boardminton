@@ -9,7 +9,7 @@ import com.imams.boardminton.domain.mapper.MatchRepoMapper.toVp
 import com.imams.boardminton.domain.mapper.any
 import com.imams.boardminton.domain.mapper.isSingle
 import com.imams.boardminton.domain.model.MatchViewParam
-import com.imams.boardminton.ui.screen.player.Sort
+import com.imams.boardminton.domain.model.Sort
 import com.imams.data.match.repository.MatchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

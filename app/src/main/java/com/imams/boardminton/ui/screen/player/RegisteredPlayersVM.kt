@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.domain.mapper.UseCaseMapper.toModel
 import com.imams.boardminton.domain.mapper.UseCaseMapper.toState
+import com.imams.boardminton.domain.model.Sort
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.boardminton.ui.screen.create.player.CreateTeamState
 import com.imams.data.player.model.Player
@@ -109,7 +110,7 @@ class RegisteredPlayersVM @Inject constructor(
         when (params) {
             is SortTeam.Id -> {
                 if (params.asc == Sort.Ascending)_saveTeams.sortBy { it.id }
-                else _savePlayers.sortByDescending { it.id }
+                else _saveTeams.sortByDescending { it.id }
             }
             is SortTeam.Name -> {
                 if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.playerName1 }
@@ -117,19 +118,19 @@ class RegisteredPlayersVM @Inject constructor(
             }
             is SortTeam.Rank -> {
                 if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.rank }
-                else _savePlayers.sortByDescending { it.weight }
+                else _saveTeams.sortByDescending { it.rank }
             }
             is SortTeam.Play -> {
                 if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.play }
-                else _savePlayers.sortByDescending { it.height }
+                else _saveTeams.sortByDescending { it.play }
             }
             is SortTeam.Win -> {
                 if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.win }
-                else _savePlayers.sortByDescending { it.weight }
+                else _saveTeams.sortByDescending { it.win }
             }
             is SortTeam.Lose -> {
                 if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.lose }
-                else _savePlayers.sortByDescending { it.height }
+                else _saveTeams.sortByDescending { it.lose }
             }
             else -> {}
         }
@@ -184,8 +185,4 @@ sealed class SortTeam(val asc: Sort) {
     data class Play(val sort: Sort): SortTeam(sort)
     data class Win(val sort: Sort): SortTeam(sort)
     data class Lose(val sort: Sort): SortTeam(sort)
-}
-
-enum class Sort {
-    Ascending, Descending
 }

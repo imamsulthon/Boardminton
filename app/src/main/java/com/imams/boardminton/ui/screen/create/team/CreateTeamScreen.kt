@@ -3,6 +3,7 @@ package com.imams.boardminton.ui.screen.create.team
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -42,6 +44,7 @@ import com.imams.boardminton.ui.utils.keyBoardDone
 fun CreateTeamScreen(
     viewModel: CreateTeamVM = hiltViewModel(),
     onSave: () -> Unit,
+    onCreatePlayer: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var openSavedTeams by rememberSaveable { mutableStateOf(false) }
@@ -63,6 +66,7 @@ fun CreateTeamScreen(
             selectedField = 2
         },
         onCheckSaveTeams = { openSavedTeams = true },
+        onCreatePlayer = onCreatePlayer::invoke
     )
     // region check dialog
     val skipPartiallyExpanded1 by remember { mutableStateOf(false) }
@@ -110,6 +114,7 @@ internal fun CreateTeamContent(
     onSave: () -> Unit,
     import1: () -> Unit,
     import2: () -> Unit,
+    onCreatePlayer: () -> Unit,
     onCheckSaveTeams: (() -> Unit)? = null,
 ) {
     val enableSave by rememberSaveable(uiState) {
@@ -142,6 +147,7 @@ internal fun CreateTeamContent(
             swap = { event.invoke(CreateTeamEvent.Swap) },
             import1 = { import1.invoke() },
             import2 = { import2.invoke() },
+            onCreatePlayer = onCreatePlayer::invoke
         )
     }
 }
@@ -154,6 +160,7 @@ internal fun FormContent(
     swap: () -> Unit,
     import1: () -> Unit,
     import2: () -> Unit,
+    onCreatePlayer: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -186,5 +193,12 @@ internal fun FormContent(
             keyboardOptions = keyBoardDone(),
             endIconClick = import2::invoke
         )
+        Spacer(modifier = Modifier.padding(vertical = 10.dp))
+        Text(text = "No Player Found?")
+        Spacer(modifier = Modifier.padding(vertical = 5.dp))
+        OutlinedButton(onClick = onCreatePlayer::invoke) {
+            Text(text = "Create Player")
+        }
+
     }
 }

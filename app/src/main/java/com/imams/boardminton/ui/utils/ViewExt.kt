@@ -22,6 +22,13 @@ fun String.lastNameWith(friend: String): String {
 fun String.lastName(): String {
     return this.substringAfterLast(" ")
 }
+fun String.firstName(): String {
+    return this.substringBefore(" ")
+}
+
+fun String.underScore(): String {
+    return this.firstName() + "_" + this.lastName()
+}
 
 fun String.prettifyName(): String {
     val words = this.split(" ".toRegex()).toTypedArray().toMutableList()
@@ -70,6 +77,17 @@ private fun String.justLastName(): String {
     return first.trim() + " " + new.lastOrNull()
 }
 
+fun isNotEmptyAndSameName(vararg names: String): Boolean {
+    return !isAnyEmpty(*names) && isNotSamePlayer(*names)
+}
+fun isAnyEmpty(vararg names: String): Boolean {
+    return names.any { it.isEmpty() }
+}
+
+fun isNotSamePlayer(vararg names: String):  Boolean {
+    val new = names.toSet()
+    return new.size == names.size
+}
 
 fun keyboardNext() = KeyboardOptions(
     capitalization = KeyboardCapitalization.Words,

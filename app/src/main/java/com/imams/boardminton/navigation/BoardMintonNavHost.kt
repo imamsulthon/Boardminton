@@ -19,19 +19,26 @@ import com.imams.boardminton.navigation.Destination.AllMatches
 import com.imams.boardminton.navigation.Destination.AllPlayers
 import com.imams.boardminton.navigation.Destination.CreateMatch
 import com.imams.boardminton.navigation.Destination.CreatePlayer
+import com.imams.boardminton.navigation.Destination.CreateTeam
 import com.imams.boardminton.navigation.Destination.EditCreatedPlayer
 import com.imams.boardminton.navigation.Destination.EditPlayers
 import com.imams.boardminton.navigation.Destination.Home
+import com.imams.boardminton.navigation.Destination.PlayerDetail
 import com.imams.boardminton.navigation.Destination.ScoreBoard
+import com.imams.boardminton.navigation.Destination.TeamDetail
 import com.imams.boardminton.ui.screen.create.CreateMatchScreen
 import com.imams.boardminton.ui.screen.create.EditPlayersScreen
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerScreen
 import com.imams.boardminton.ui.screen.create.player.EditPlayerCreatedScreen
+import com.imams.boardminton.ui.screen.create.team.CreateTeamScreen
+import com.imams.boardminton.ui.screen.create.team.TeamDetailScreen
 import com.imams.boardminton.ui.screen.home.HomeScreen
 import com.imams.boardminton.ui.screen.home.HomeScreenVM
 import com.imams.boardminton.ui.screen.matches.AllMatchesScreen
 import com.imams.boardminton.ui.screen.player.PlayerAndTeamsList
+import com.imams.boardminton.ui.screen.player.PlayerDetailScreen
 import com.imams.boardminton.ui.screen.score.ScoreBoardScreen
+import com.imams.boardminton.ui.settings.AppConfig
 
 sealed class Destination(protected val route: String, vararg params: String) {
 
@@ -79,7 +86,17 @@ sealed class Destination(protected val route: String, vararg params: String) {
     }
 
     object CreatePlayer: DestinationNoArgs("create-player")
+    object CreateTeam: Destination("create-team")
     object EditCreatedPlayer: Destination("edit-create-player", "id") {
+        operator fun invoke(id: Int): String = route.appendParams("id" to id)
+    }
+
+    object PlayerDetail: Destination("player-detail", "id") {
+        operator fun invoke(id: Int): String = route.appendParams("id" to id)
+
+    }
+
+    object TeamDetail: Destination("team-detail", "id") {
         operator fun invoke(id: Int): String = route.appendParams("id" to id)
     }
 
@@ -92,6 +109,8 @@ sealed class Destination(protected val route: String, vararg params: String) {
 @Composable
 fun BoardMintonNavHost(
     viewModel: HomeScreenVM = hiltViewModel<HomeScreenVM>().apply { getLatestMatch() },
+    appConfig: AppConfig,
+    onAppConfig: (AppConfig) -> Unit,
     navController: NavHostController = rememberNavController(),
 ) {
 
@@ -100,6 +119,8 @@ fun BoardMintonNavHost(
     NavHost(navController = navController, startDestination = Home.fullRoute) {
         composable(Home.fullRoute) {
             HomeScreen(
+                appConfig = appConfig,
+                onAppConfig = onAppConfig::invoke,
                 onGoingMatches = latestMatch,
                 onCreateMatch = { navController.navigate(CreateMatch.invoke(it)) },
                 onCreatePlayer = {
@@ -113,7 +134,7 @@ fun BoardMintonNavHost(
                 },
                 seeAllMatch = {
                     navController.navigate(AllMatches.fullRoute)
-                }
+                },
             )
         }
 
@@ -204,6 +225,29 @@ fun BoardMintonNavHost(
             )
         }
 
+        composable(CreateTeam.fullRoute) {
+            val context = LocalContext.current
+            CreateTeamScreen (
+                onSave = {
+                    Toast.makeText(context, "Success save", Toast.LENGTH_LONG).show()
+                },
+                onCreatePlayer = { navController.navigate(CreatePlayer.fullRoute)}
+            )
+        }
+
+        composable(TeamDetail.fullRoute,
+            arguments = listOf(navArgument("id") {type = NavType.IntType})
+        ) {
+            val id = it.arguments?.getInt("id") ?: 0
+            TeamDetailScreen(teamId = id,
+                onEdit = { },
+                onClickPlayer = { playerId ->
+                    navController.navigate(PlayerDetail.invoke(playerId))
+                },
+                onBackPressed = navController::popBackStack
+            )
+        }
+
         composable(
             EditCreatedPlayer.fullRoute,
             arguments = listOf(navArgument("id") {type = NavType.IntType})
@@ -218,12 +262,26 @@ fun BoardMintonNavHost(
             )
         }
 
+        composable(
+            PlayerDetail.fullRoute,
+            arguments = listOf(navArgument("id") {type = NavType.IntType})
+        ) {
+            val id = it.arguments?.getInt("id") ?: 0
+            PlayerDetailScreen(
+                playerId = id, onEdit = { playerId ->
+                    navController.navigate(EditCreatedPlayer.invoke(playerId))
+                }
+            )
+        }
+
         composable(AllPlayers.fullRoute) {
             PlayerAndTeamsList(
                 addNewPlayer = { navController.navigate(CreatePlayer.fullRoute) },
-                onEditPlayer = {
-                    navController.navigate(EditCreatedPlayer.invoke(it))
-                }
+                onEditPlayer = { navController.navigate(EditCreatedPlayer.invoke(it)) },
+                onDetailPlayer = { navController.navigate(PlayerDetail.invoke(it)) },
+                addNewTeam = { navController.navigate(CreateTeam.fullRoute) },
+                onEditTeam = { navController.navigate(TeamDetail.invoke(it)) },
+                onDetailTeam = { navController.navigate(TeamDetail.invoke(it))},
             )
         }
 

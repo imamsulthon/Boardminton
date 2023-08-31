@@ -9,9 +9,12 @@ object PlayerMapper {
         firstName = firstName,
         lastName = lastName,
         gender = gender,
+        phoneNumber = phoneNumber,
         weight = weight,
         height = height,
         handPlay = handPlay,
+        dob = dob,
+        photoProfileUri = photoProfileUri,
     )
 
     fun Player.toEntity(withId: Boolean = false) = PlayerEntity(
@@ -19,9 +22,12 @@ object PlayerMapper {
         lastName = lastName,
         fullName = "$firstName $lastName",
         gender = gender,
+        phoneNumber = phoneNumber,
         weight = weight,
         height = height,
         handPlay = handPlay,
+        dob = dob,
+        photoProfileUri = photoProfileUri
     ).also {
         if (withId) it.id = id
     }

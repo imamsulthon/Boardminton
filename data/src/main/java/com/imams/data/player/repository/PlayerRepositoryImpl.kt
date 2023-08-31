@@ -5,6 +5,7 @@ import com.imams.data.player.model.Player
 import com.imams.data.player.model.PlayerMapper.toEntity
 import com.imams.data.player.model.PlayerMapper.toModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -20,6 +21,10 @@ class PlayerRepositoryImpl @Inject constructor(
 
     override suspend fun getPlayer(id: Int): Flow<Player> {
         return dao.getById(id).map { it.toModel() }
+    }
+
+    override suspend fun getPlayer(query: String): Flow<Player?> {
+        return dao.getByName(query)?.map { it.toModel() } ?: flowOf(null)
     }
 
     override suspend fun addPlayer(player: Player) {

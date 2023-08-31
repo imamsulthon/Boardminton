@@ -7,7 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.data.toList
 import com.imams.boardminton.domain.impl.CreatePlayerUseCase
+import com.imams.boardminton.domain.impl.CreateTeamUseCase
 import com.imams.boardminton.domain.mapper.MatchRepoMapper.toJson
+import com.imams.boardminton.domain.mapper.UseCaseMapper.toState
 import com.imams.boardminton.domain.model.GameViewParam
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ITeam
@@ -15,8 +17,10 @@ import com.imams.boardminton.domain.model.PlayerViewParam
 import com.imams.boardminton.domain.model.TeamViewParam
 import com.imams.boardminton.engine.data.model.Winner
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
+import com.imams.boardminton.ui.screen.create.player.CreateTeamState
 import com.imams.data.match.model.Match
 import com.imams.data.match.repository.MatchRepository
+import com.imams.data.team.repository.TeamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,8 +30,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreateMatchVM @Inject constructor(
-    private val useCase: CreatePlayerUseCase,
+    private val createPlayerUseCase: CreatePlayerUseCase,
     private val repository: MatchRepository,
+    private val createTeamUseCase: CreateTeamUseCase,
+    private val teamRepository: TeamRepository,
 ) : ViewModel() {
 
     private val _playerA1 = mutableStateOf("")
@@ -43,8 +49,13 @@ class CreateMatchVM @Inject constructor(
     private val _savePlayersFlow = MutableStateFlow(_savePlayers)
     val savePlayers: StateFlow<List<CreatePlayerState>> = _savePlayersFlow
 
+    private val _saveTeams = mutableStateListOf<CreateTeamState>()
+    private val _saveTeamsFlow = MutableStateFlow(_saveTeams)
+    val saveTeams: StateFlow<List<CreateTeamState>> = _saveTeamsFlow
+
     init {
         initOptionalPlayers()
+        initOptionalTeams()
     }
 
     fun setupPlayers(isSingle: Boolean, json: String) {
@@ -71,6 +82,19 @@ class CreateMatchVM @Inject constructor(
 
     fun updatePlayerName(iTeam: ITeam, data: CreatePlayerState) {
         updatePlayerName(iTeam, "${data.firstName} ${data.lastName}")
+    }
+
+    fun updatePlayerName(iSide: ISide, data: CreateTeamState) {
+        when (iSide) {
+            ISide.A -> {
+                updatePlayerName(ITeam.A1, data.playerName1)
+                updatePlayerName(ITeam.A2, data.playerName2)
+            }
+            ISide.B -> {
+                updatePlayerName(ITeam.B1, data.playerName1)
+                updatePlayerName(ITeam.B2, data.playerName2)
+            }
+        }
     }
 
     fun swapSingleMatch() {
@@ -106,30 +130,39 @@ class CreateMatchVM @Inject constructor(
 
     private fun initOptionalPlayers() {
         viewModelScope.launch {
-            viewModelScope.launch {
-                useCase.getAllPlayers().collectLatest {
-                    _savePlayers.clear()
-                    _savePlayers.addAll(it)
-                }
+            createPlayerUseCase.getAllPlayers().collectLatest {
+                _savePlayers.clear()
+                _savePlayers.addAll(it)
+            }
+        }
+    }
+
+    private fun initOptionalTeams() {
+        viewModelScope.launch {
+            teamRepository.getAllTeams().collectLatest {
+                _saveTeams.clear()
+                _saveTeams.addAll(it.map { t -> t.toState() })
             }
         }
     }
 
     fun saveInputPlayer(single: Boolean, callback: (String, Int) -> Unit) {
         viewModelScope.launch {
+            val teamA = TeamViewParam(
+                PlayerViewParam(playerA1.value),
+                PlayerViewParam(playerA2.value),
+                false
+            )
+            val teamB = TeamViewParam(
+                PlayerViewParam(playerB1.value),
+                PlayerViewParam(playerB2.value),
+                false
+            )
             when (val save = repository.saveMatch(
                 Match(
                     type = if (single) "single" else "double",
-                    teamA = TeamViewParam(
-                        PlayerViewParam(playerA1.value),
-                        PlayerViewParam(playerA2.value),
-                        false
-                    ).toJson(),
-                    teamB = TeamViewParam(
-                        PlayerViewParam(playerB1.value),
-                        PlayerViewParam(playerB2.value),
-                        false
-                    ).toJson(),
+                    teamA = teamA.toJson(),
+                    teamB = teamB.toJson(),
                     currentGame = GameViewParam().toJson(),
                     games = listOf<GameViewParam>().toJson(),
                     winner = Winner.None.name,
@@ -139,16 +172,32 @@ class CreateMatchVM @Inject constructor(
                 )
             ).toInt()
             ) {
-                0 -> callback.invoke(
-                    if (single) "single" else "double", save
-                )
-
-                else -> callback.invoke(
-                    if (single) "single" else "double", save
-                )
+                0 -> {
+                    callback.invoke(if (single) "single" else "double", save)
+                }
+                else -> {
+                    if (single) {
+                        callback.invoke("single", save)
+                    } else {
+                        saveTeam(teamA, teamB) {
+                            callback.invoke("double", save)
+                        }
+                    }
+                }
             }
         }
     }
+
+    private fun saveTeam(teamA: TeamViewParam, teamB: TeamViewParam, callback: () -> Unit) {
+        viewModelScope.launch {
+            log("saveTeam A: $teamA B: $teamB")
+            createTeamUseCase.createTeam(teamA)
+            createTeamUseCase.createTeam(teamB)
+            callback.invoke()
+        }
+    }
+
+    private fun log(m: String) = println("TeamCreateMatch: $m")
 
     fun randomPlayers(single: Boolean) {
         val optionals = _savePlayersFlow.value.toList().shuffled().take(4)

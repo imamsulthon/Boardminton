@@ -15,3 +15,7 @@ enum class Court {
 enum class IMatchType {
     Single, Double
 }
+
+enum class Sort {
+    Ascending, Descending
+}

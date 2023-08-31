@@ -1,5 +1,6 @@
 package com.imams.boardminton.ui.screen.score
 
+import android.content.Context
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -10,9 +11,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Divider
@@ -28,14 +30,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,6 +70,9 @@ import com.imams.boardminton.ui.component.MainNameBoardView
 import com.imams.boardminton.ui.component.MyCourtMatch
 import com.imams.boardminton.ui.component.TimeCounterView
 import com.imams.boardminton.ui.screen.timer.TimeCounterUiState
+import com.imams.boardminton.ui.settings.AppConfig
+import com.imams.boardminton.ui.utils.ObserveLifecycle
+import com.imams.boardminton.ui.utils.vibrateClick
 
 @Composable
 fun ScoreBoardScreen(
@@ -73,7 +84,7 @@ fun ScoreBoardScreen(
     savedStateHandle: SavedStateHandle?,
     onBackPressed: () -> Unit,
 ) {
-
+    scoreVm.ObserveLifecycle(LocalLifecycleOwner.current.lifecycle)
     BackHandler(true) {
         scoreVm.updateGame(onBackPressed)
     }
@@ -124,6 +135,11 @@ private fun ScoreBoardScreen(
     scoreVm: ScoreBoardVM,
     toEditPlayers: (Boolean, TeamViewParam, TeamViewParam) -> Unit,
 ) {
+    val appConfig by scoreVm.appConfig.collectAsState(initial = AppConfig())
+    val isVibrate by remember(appConfig) { mutableStateOf(appConfig.matchBoard.isVibrateAddPoint) }
+    var matchSettingDialog by remember { mutableStateOf(false) }
+    val ctx = LocalContext.current
+
     @Composable
     fun mainBoard() = MainNameBoardView(
         modifier = Modifier
@@ -140,13 +156,19 @@ private fun ScoreBoardScreen(
     @Composable
     fun scoreBoard() = UmpireBoard(
         modifier = Modifier
-            .widthIn(max = 450.dp)
+            .widthIn(max = 400.dp)
             .heightIn(max = 350.dp),
         board = uiState.scoreByCourt,
         plus = {
             when (it) {
-                ISide.A -> scoreVm.pointTo(Court.Left)
-                ISide.B -> scoreVm.pointTo(Court.Right)
+                ISide.A -> {
+                    ctx.vibrateButton(isVibrate)
+                    scoreVm.pointTo(Court.Left)
+                }
+                ISide.B -> {
+                    ctx.vibrateButton(isVibrate)
+                    scoreVm.pointTo(Court.Right)
+                }
             }
         }
     )
@@ -186,7 +208,8 @@ private fun ScoreBoardScreen(
                     uiState.match.teamB,
                 )
             },
-            onReset = { scoreVm.resetGame() }
+            onReset = { scoreVm.resetGame() },
+            onSetting = { matchSettingDialog = true }
         )
 
         ContentView(
@@ -204,7 +227,6 @@ private fun ScoreBoardScreen(
             main = { mainBoard() },
             courtView = { courtView() }
         )
-
         BottomView(
             modifier = Modifier
                 .fillMaxWidth()
@@ -215,14 +237,32 @@ private fun ScoreBoardScreen(
                     start.linkTo(parent.start)
                     bottom.linkTo(parent.bottom)
                 },
-            aPlus = { scoreVm.pointTo(Court.Left) },
+            aPlus = {
+                ctx.vibrateButton(isVibrate)
+                scoreVm.pointTo(Court.Left)
+            },
             aMin = { scoreVm.minusPoint(Court.Left) },
-            bPlus = { scoreVm.pointTo(Court.Right) },
+            bPlus = {
+                ctx.vibrateButton(isVibrate)
+                scoreVm.pointTo(Court.Right)
+            },
             bMin = { scoreVm.minusPoint(Court.Right) },
             swap = { scoreVm.swapServe() },
             addCock = { scoreVm.addShuttleCock() },
             cockCount = uiState.match.shuttleCockCount,
             enabled = uiState.match.currentGame.winner.none()
+        )
+    }
+
+    if (matchSettingDialog) {
+        Dialog(onDismissRequest = { matchSettingDialog = false },
+            content = {
+                MatchSettingDialog(
+                    stateData = appConfig.matchBoard,
+                    onApply = scoreVm::updateAppConfig,
+                    onDismiss = { matchSettingDialog = false} )
+            },
+            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
         )
     }
 }
@@ -231,6 +271,7 @@ private fun ScoreBoardScreen(
 private fun TopView(
     modifier: Modifier,
     timer: String?,
+    onSetting: () -> Unit,
     onSwap: () -> Unit,
     onEdit: () -> Unit,
     onReset: () -> Unit,
@@ -261,15 +302,25 @@ private fun TopView(
                 }
         ) {
             OutlinedButton(
+                onClick = { onSetting.invoke() },
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(horizontal = 2.dp)
+            ) {
+                Icon(
+                    Icons.Outlined.Settings,
+                    modifier = Modifier.size(16.dp),
+                    contentDescription = "edit_icon"
+                )
+            }
+            OutlinedButton(
                 onClick = { onSwap.invoke() },
                 modifier = Modifier
                     .wrapContentSize()
                     .padding(horizontal = 2.dp)
             ) {
                 Icon(
-                    modifier = Modifier
-                        .width(18.dp)
-                        .height(18.dp),
+                    modifier = Modifier.size(16.dp),
                     painter = painterResource(id = R.drawable.ic_swap_3),
                     contentDescription = "swap_icon"
                 )
@@ -282,9 +333,7 @@ private fun TopView(
             ) {
                 Icon(
                     Icons.Outlined.Refresh,
-                    modifier = Modifier
-                        .width(18.dp)
-                        .height(18.dp),
+                    modifier = Modifier.size(16.dp),
                     contentDescription = "reset_icon"
                 )
             }
@@ -296,9 +345,7 @@ private fun TopView(
             ) {
                 Icon(
                     Icons.Outlined.Edit,
-                    modifier = Modifier
-                        .width(18.dp)
-                        .height(18.dp),
+                    modifier = Modifier.size(16.dp),
                     contentDescription = "edit_icon"
                 )
             }
@@ -348,7 +395,7 @@ private fun LandscapeContent(
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         scoreBoard()
-        Divider(
+        VerticalDivider(
             color = MaterialTheme.colorScheme.onBackground, modifier = Modifier
                 .fillMaxHeight()
                 .padding(horizontal = 20.dp)
@@ -358,7 +405,7 @@ private fun LandscapeContent(
             verticalArrangement = Arrangement.Top,
         ) {
             mainBoard()
-            LineDivider(padding = 5.dp, thick = 1.dp)
+            LineDivider(padding = 4.dp, thick = 1.dp)
             courtView()
         }
     }
@@ -425,7 +472,6 @@ private fun BottomView(
                 )
             }
         }
-
     }
     Row(
         modifier = modifier,
@@ -464,6 +510,10 @@ private fun LineDivider(padding: Dp = 20.dp, thick: Dp = 2.dp) = Divider(
     color = MaterialTheme.colorScheme.onBackground,
     thickness = thick
 )
+
+private fun Context.vibrateButton(isVibrate: Boolean? = true) {
+    isVibrate?.let { if (it) vibrateClick(this) }
+}
 
 @Preview(device = Devices.NEXUS_6)
 @Composable

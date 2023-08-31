@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,7 +23,6 @@ import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ScoreByCourt
 import com.imams.boardminton.ui.component.BaseScore
 import com.imams.boardminton.ui.component.PlayerNameWrapper
-import com.imams.boardminton.ui.theme.seed
 
 @Composable
 fun UmpireBoard(
@@ -64,10 +63,11 @@ fun UmpireBoard(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Game", color = seed, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+            val textColor = MaterialTheme.colorScheme.surfaceTint
+            Text(text = "Game", color = textColor, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             Text(
                 text = board.index.toString(),
-                color = seed,
+                color = textColor,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 24.sp
             )
@@ -88,7 +88,7 @@ fun UmpireBoard(
             winner = board.right.isWin,
             callback = { _, _ -> plus.invoke(ISide.B) })
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier.padding(top = 6.dp)
                 .constrainAs(div) {
                     start.linkTo(parent.start)
@@ -97,8 +97,8 @@ fun UmpireBoard(
                     top.linkTo(s1.bottom)
                     height = Dimension.preferredWrapContent
                 },
-            color = MaterialTheme.colorScheme.onBackground,
-            thickness = 1.dp
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         PlayerNameWrapper(

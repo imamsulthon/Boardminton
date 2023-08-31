@@ -5,9 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.domain.mapper.UseCaseMapper.toModel
 import com.imams.boardminton.domain.mapper.UseCaseMapper.toState
+import com.imams.boardminton.domain.model.Sort
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
+import com.imams.boardminton.ui.screen.create.player.CreateTeamState
 import com.imams.data.player.model.Player
 import com.imams.data.player.repository.PlayerRepository
+import com.imams.data.team.model.Team
+import com.imams.data.team.repository.TeamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisteredPlayersVM @Inject constructor(
     private val repository: PlayerRepository,
+    private val teamRepository: TeamRepository,
 ): ViewModel() {
 
     private val _tempData = mutableStateListOf<Player>()
@@ -25,8 +30,14 @@ class RegisteredPlayersVM @Inject constructor(
     private val _savePlayersFlow = MutableStateFlow(_savePlayers)
     val savePlayers: StateFlow<List<CreatePlayerState>> = _savePlayersFlow
 
+    private val _tempData2 = mutableStateListOf<Team>()
+    private val _saveTeams = mutableStateListOf<CreateTeamState>()
+    private val _saveTeamsFlow = MutableStateFlow(_saveTeams)
+    val saveTeams: StateFlow<List<CreateTeamState>> = _saveTeamsFlow
+
     init {
         checkSavedPlayers()
+        checkTeams()
     }
 
     private fun checkSavedPlayers() {
@@ -87,12 +98,68 @@ class RegisteredPlayersVM @Inject constructor(
                 if (params.asc == Sort.Ascending) _savePlayers.sortBy { it.height }
                 else _savePlayers.sortByDescending { it.height }
             }
+            is SortPlayer.Age -> {
+                if (params.asc == Sort.Ascending) _savePlayers.sortBy { it.dob }
+                else _savePlayers.sortByDescending { it.dob }
+            }
+            else -> {}
+        }
+    }
+
+    fun setSorting(params: SortTeam) {
+        when (params) {
+            is SortTeam.Id -> {
+                if (params.asc == Sort.Ascending)_saveTeams.sortBy { it.id }
+                else _saveTeams.sortByDescending { it.id }
+            }
+            is SortTeam.Name -> {
+                if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.playerName1 }
+                 else _saveTeams.sortByDescending { it.playerName1 }
+            }
+            is SortTeam.Rank -> {
+                if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.rank }
+                else _saveTeams.sortByDescending { it.rank }
+            }
+            is SortTeam.Play -> {
+                if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.play }
+                else _saveTeams.sortByDescending { it.play }
+            }
+            is SortTeam.Win -> {
+                if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.win }
+                else _saveTeams.sortByDescending { it.win }
+            }
+            is SortTeam.Lose -> {
+                if (params.asc == Sort.Ascending) _saveTeams.sortBy { it.lose }
+                else _saveTeams.sortByDescending { it.lose }
+            }
+            else -> {}
         }
     }
 
     fun removePlayer(item: CreatePlayerState) {
         viewModelScope.launch {
             repository.removePlayer(item.toModel(true))
+        }
+    }
+
+    private fun checkTeams() {
+        viewModelScope.launch {
+            teamRepository.getAllTeams().collectLatest {
+                _tempData2.clear()
+                _tempData2.addAll(it)
+                _tempData2.proceed2()
+            }
+        }
+    }
+    private fun List<Team>.proceed2() {
+        val data = this.toMutableList()
+        _saveTeams.clear()
+        _saveTeams.addAll(data.map { t -> t.toState() })
+    }
+
+    fun removeTeams(item: CreateTeamState) {
+        viewModelScope.launch {
+            teamRepository.removeTeam(item.toModel(true))
         }
     }
 
@@ -108,8 +175,14 @@ sealed class SortPlayer(val asc: Sort) {
     data class Name(val sort: Sort): SortPlayer(sort)
     data class Height(val sort: Sort): SortPlayer(sort)
     data class Weight(val sort: Sort): SortPlayer(sort)
+    data class Age(val sort: Sort): SortPlayer(sort)
 }
 
-enum class Sort {
-    Ascending, Descending
+sealed class SortTeam(val asc: Sort) {
+    data class Id(val sort: Sort): SortTeam(sort)
+    data class Name(val sort: Sort): SortTeam(sort)
+    data class Rank(val sort: Sort): SortTeam(sort)
+    data class Play(val sort: Sort): SortTeam(sort)
+    data class Win(val sort: Sort): SortTeam(sort)
+    data class Lose(val sort: Sort): SortTeam(sort)
 }

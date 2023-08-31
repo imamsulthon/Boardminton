@@ -9,7 +9,7 @@ import com.imams.boardminton.domain.mapper.MatchRepoMapper.toVp
 import com.imams.boardminton.domain.mapper.any
 import com.imams.boardminton.domain.mapper.isSingle
 import com.imams.boardminton.domain.model.MatchViewParam
-import com.imams.boardminton.ui.screen.player.Sort
+import com.imams.boardminton.domain.model.Sort
 import com.imams.data.match.repository.MatchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -91,36 +91,37 @@ class AllMatchesVM @Inject constructor(
     fun filter(filterOn: FilterOn) {
         when (filterOn) {
             is FilterOn.AllMatch -> {
-                var temp: List<MatchViewParam>
+                println("FilterOn: All")
+                var temp = _allMatches.toList()
                 filterOn.filter.type?.let {
                     temp = if (it.equals("all", true)) {
-                        _allMatches
+                        temp
                     } else if (it.equals("single", true)) {
-                        _allMatches.filter { m -> m.matchType.isSingle() }
+                        temp.filter { m -> m.matchType.isSingle() }
                     } else {
-                        _allMatches.filterNot { m -> m.matchType.isSingle() }
+                        temp.filterNot { m -> m.matchType.isSingle() }
                     }
                     temp.proceed(iAllMatches)
                 }
             }
             is FilterOn.OnGoing -> {
-                var temp: List<MatchViewParam>
+                var temp = _onGoingMatch.toList()
                 filterOn.filter.type?.let {
-                    temp = if (it.equals("all", true)) _onGoingMatch
-                    else if (it.equals("single", true)) {
-                        _onGoingMatch.filter { m -> m.matchType.isSingle() }
-                    } else _onGoingMatch.filterNot { m -> m.matchType.isSingle() }
+                    temp = if (it.equals("All", true)) temp
+                    else if (it.equals("Single", true)) {
+                        temp.filter { m -> m.matchType.isSingle() }
+                    } else temp.filterNot { m -> m.matchType.isSingle() }
                     temp.proceed(iOnGoingMatch)
                 }
             }
             is FilterOn.Finished -> {
-                var temp: List<MatchViewParam>
+                var temp = _finishMatches.toList()
                 filterOn.filter.type?.let {
-                    temp = if (it.equals("all", true)) _finishMatches
-                    else if (it.equals("single", true)) {
-                        _finishMatches.filter { m -> m.matchType.isSingle() }
+                    temp = if (it.equals("all", true)) temp
+                    else if (it.equals("Single", true)) {
+                        temp.filter { m -> m.matchType.isSingle() }
                     } else {
-                        _finishMatches.filterNot { m -> m.matchType.isSingle() }
+                        temp.filterNot { m -> m.matchType.isSingle() }
                     }
                     temp.proceed(iFinishMatches)
                 }

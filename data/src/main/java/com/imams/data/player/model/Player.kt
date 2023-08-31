@@ -6,6 +6,9 @@ data class Player(
     val lastName: String,
     val gender: String,
     val handPlay: String,
+    val phoneNumber: String = "",
     val height: Int = 0,
     val weight: Int = 0,
+    val dob: Long = 0,
+    val photoProfileUri: String,
 )

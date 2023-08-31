@@ -44,10 +44,8 @@ class CreatePlayerVM @Inject constructor(
             is CreatePlayerEvent.Height -> _uiState.update { it.copy(height = event.value) }
             is CreatePlayerEvent.Weight -> _uiState.update { it.copy(weight = event.value) }
             is CreatePlayerEvent.DOB -> _uiState.update { it.copy(dob = event.value) }
-            is CreatePlayerEvent.GenerateSelfie -> {
-                onSelfieResponse(event.uri)
-            }
-
+            is CreatePlayerEvent.GenerateSelfie -> { onSelfieResponse(event.uri) }
+            is CreatePlayerEvent.ImportContact -> _uiState.update { it.copy(phoneNumber = event.value) }
             is CreatePlayerEvent.Clear -> _uiState.update { CreatePlayerState() }
             else -> {}
         }
@@ -152,6 +150,7 @@ data class CreatePlayerState(
     val height: Int = 0,
     val weight: Int = 0,
     val dob: Long = 0,
+    val phoneNumber: String = "",
     var photoProfileUri: String = "",
 ) {
     val fullName = "$firstName $lastName"
@@ -165,6 +164,7 @@ sealed class CreatePlayerEvent {
     data class DOB(val value: Long) : CreatePlayerEvent()
     data class HandPlay(val value: String) : CreatePlayerEvent()
     data class Gender(val value: String) : CreatePlayerEvent()
+    data class ImportContact(val value: String): CreatePlayerEvent()
     object Clear : CreatePlayerEvent()
     data class GenerateSelfie(val uri: Uri) : CreatePlayerEvent()
 }

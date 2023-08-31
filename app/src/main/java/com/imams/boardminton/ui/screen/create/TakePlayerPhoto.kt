@@ -1,16 +1,14 @@
 
 package com.imams.boardminton.ui.screen.create
 
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -36,12 +33,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.imams.boardminton.R
 import com.imams.boardminton.ui.theme.BoardMintonTheme
-import com.imams.boardminton.ui.utils.REQUIRED_PERMISSIONS
+import com.imams.boardminton.ui.utils.allPermissionsGranted
+import com.imams.boardminton.ui.utils.cameraPermissionLauncher
+import com.imams.boardminton.ui.utils.dashedBorder
+import com.imams.boardminton.ui.utils.launchPermissionCamera
 
 @Composable
 fun TakePhoto(
@@ -55,6 +54,8 @@ fun TakePhoto(
     val hasPhoto = imageUri != null
     var newImageUri: Uri? = null
 
+    var hasCamPermission by remember { mutableStateOf(allPermissionsGranted(context)) }
+    val cameraPermissionLauncher = cameraPermissionLauncher(isPermitted = {hasCamPermission = it})
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
@@ -62,21 +63,6 @@ fun TakePhoto(
             newImageUri?.let(onPhotoTaken)
         }
     }
-
-    var hasCamPermission by remember {
-        mutableStateOf(
-            REQUIRED_PERMISSIONS.all {
-                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-            }
-        )
-    }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { granted ->
-            hasCamPermission = granted.size == 2
-        }
-    )
 
     val visualMediaLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -98,14 +84,11 @@ fun TakePhoto(
             style = MaterialTheme.typography.bodyMedium,
         )
         Spacer(modifier = Modifier.padding(vertical = 3.dp))
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = RoundedCornerShape(12.dp)
-                )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .dashedBorder(1.dp, MaterialTheme.colorScheme.onBackground, 10.dp)
+                .heightIn(min = 100.dp)
         ) {
             if (hasPhoto) {
                 AsyncImage(
@@ -121,49 +104,50 @@ fun TakePhoto(
                         .aspectRatio(4 / 3f)
                 )
             } else {
-                PhotoDefaultImage(modifier = Modifier.padding(5.dp))
+                PhotoDefaultImage(modifier = Modifier
+                    .padding(5.dp)
+                    .fillMaxWidth())
+            }
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 5.dp, end = 5.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.Bottom
+            ){
+                val padding = 4.dp
+                OutlinedButton(
+                    modifier = Modifier.padding(end = padding),
+                    onClick = {
+                        if (hasCamPermission) {
+                            newImageUri = getNewImageUri()
+                            cameraLauncher.launch(newImageUri)
+                        } else {
+                            cameraPermissionLauncher.launchPermissionCamera()
+                        }
+                    }) { Text(text = "Camera", style = MaterialTheme.typography.labelSmall) }
+                OutlinedButton(
+                    modifier = Modifier.padding(end = padding),
+                    onClick = {
+                        newImageUri = getNewImageUri()
+                        galleryLauncher.launch("image/*")
+                    }) { Text(text = "File", style = MaterialTheme.typography.labelSmall) }
+                OutlinedButton(
+                    modifier = Modifier.padding(end = padding),
+                    onClick = {
+                        newImageUri = getNewImageUri()
+                        visualMediaLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    }) { Text(text = "Gallery", style = MaterialTheme.typography.labelSmall) }
             }
         }
         Spacer(modifier = Modifier.padding(vertical = 2.dp))
-        Text(text = "Uri: ${imageUri?.path} \n FileName: $fileName",
-            style = MaterialTheme.typography.bodySmall)
-        Spacer(modifier = Modifier.padding(vertical = 3.dp))
-        Row (
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            val padding = 4.dp
-            OutlinedButton(
-                modifier = Modifier.padding(end = padding),
-                onClick = {
-                    if (hasCamPermission) {
-                        newImageUri = getNewImageUri()
-                        cameraLauncher.launch(newImageUri)
-                    } else {
-                        permissionLauncher.launch(
-                            arrayOf(
-                                android.Manifest.permission.CAMERA,
-                                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                            )
-                        )
-                    }
-                }) { Text(text = "Camera", style = MaterialTheme.typography.labelSmall) }
-            OutlinedButton(
-                modifier = Modifier.padding(end = padding),
-                onClick = {
-                    newImageUri = getNewImageUri()
-                    galleryLauncher.launch("image/*")
-                }) { Text(text = "File", style = MaterialTheme.typography.labelSmall) }
-            OutlinedButton(
-                modifier = Modifier.padding(end = padding),
-                onClick = {
-                    newImageUri = getNewImageUri()
-                    visualMediaLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    )
-                }) { Text(text = "Gallery", style = MaterialTheme.typography.labelSmall) }
+        AnimatedVisibility(visible = imageUri != null && !fileName.isNullOrEmpty()) {
+            Text(text = "Uri: ${imageUri?.path}\nFileName: $fileName", style = MaterialTheme.typography.bodySmall)
         }
+        Spacer(modifier = Modifier.padding(vertical = 3.dp))
+
     }
 }
 

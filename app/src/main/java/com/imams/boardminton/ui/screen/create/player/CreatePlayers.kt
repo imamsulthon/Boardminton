@@ -1,6 +1,9 @@
 package com.imams.boardminton.ui.screen.create.player
 
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -36,6 +40,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -47,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -59,7 +65,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.data.asDateTime
 import com.imams.boardminton.ui.screen.create.TakePhoto
 import com.imams.boardminton.ui.screen.create.ipModifierP
+import com.imams.boardminton.ui.utils.contactPermissionLauncher
+import com.imams.boardminton.ui.utils.hasPermissionContacts
 import com.imams.boardminton.ui.utils.keyboardNext
+import com.imams.boardminton.ui.utils.launchContactPermission
+import com.imams.boardminton.ui.utils.pickContact
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,12 +113,15 @@ fun CreatePlayerScreen(
 @Composable
 fun EditPlayerCreatedScreen(
     id: Int,
-    viewModel: CreatePlayerVM = hiltViewModel<CreatePlayerVM>().apply { setupWith(id = id) },
+    viewModel: CreatePlayerVM = hiltViewModel(),
     onSave: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val selfieState by viewModel.tempSelfieUri.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.setupWith(id)
+    }
     CreatePlayerContent(
         screenName = "Edit Player (id = ${uiState.id})",
         uiState = uiState,
@@ -138,6 +151,20 @@ internal fun CreatePlayerContent(
     val enableClear by rememberSaveable(uiState) {
         mutableStateOf(uiState.firstName.isNotEmpty() || uiState.lastName.isNotEmpty())
     }
+    val context = LocalContext.current
+    var hasContactPermission by remember { mutableStateOf(context.hasPermissionContacts()) }
+    val contactPermissionLauncher = contactPermissionLauncher(isPermitted = { hasContactPermission = it})
+    val pickContactLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickContact(),
+        onResult = {
+            it?.pickContact(context, callback = { _, number ->
+                event.invoke(CreatePlayerEvent.ImportContact(number))
+            })
+        }
+    )
+
+    val datePickerDialog = remember { mutableStateOf(false) }
+    var datePickerState = rememberDatePickerState()
 
     Scaffold(modifier = Modifier
         .fillMaxSize()
@@ -153,9 +180,6 @@ internal fun CreatePlayerContent(
             )
         }
     ) { p ->
-        val datePickerDialog = remember { mutableStateOf(false) }
-        var datePickerState = rememberDatePickerState()
-
         FormContent(
             Modifier
                 .fillMaxWidth()
@@ -168,6 +192,10 @@ internal fun CreatePlayerContent(
             onHandPlay = { event.invoke(CreatePlayerEvent.HandPlay(it)) },
             onDob = { datePickerDialog.value = true },
             onGender = { event.invoke(CreatePlayerEvent.Gender(it)) },
+            onPickContact = {
+                if (hasContactPermission) pickContactLauncher.launch()
+                else contactPermissionLauncher.launchContactPermission()
+            },
             takeSelfie = {
                 TakePhoto(
                     modifier = Modifier.fillMaxWidth(),
@@ -178,15 +206,14 @@ internal fun CreatePlayerContent(
                 )
             }
         )
-
-        if (datePickerDialog.value) {
-            MyDatePicker(
-                datePickerState = datePickerState,
-                onDismiss = { datePickerDialog.value = false },
-                onConfirm = { it?.let { event.invoke(CreatePlayerEvent.DOB(it)) } },
-                onState = { state -> datePickerState = state}
-            )
-        }
+    }
+    if (datePickerDialog.value) {
+        MyDatePicker(
+            datePickerState = datePickerState,
+            onDismiss = { datePickerDialog.value = false },
+            onConfirm = { it?.let { event.invoke(CreatePlayerEvent.DOB(it)) } },
+            onState = { state -> datePickerState = state}
+        )
     }
 }
 
@@ -228,6 +255,7 @@ private fun FormContent(
     onWeight: (Int) -> Unit,
     onHeight: (Int) -> Unit,
     onDob: (Long) -> Unit,
+    onPickContact: () -> Unit,
     onGender: (String) -> Unit,
     takeSelfie: @Composable () -> Unit,
 ) {
@@ -299,11 +327,26 @@ private fun FormContent(
             )
         }
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 5.dp),
             value = data.dob.toString().asDateTime("dd MMM yyyy") ?: data.dob.toString(),
+            label = { Text(text = "Date of Birth") },
             onValueChange = {},
             trailingIcon = { IconButton(onClick = { onDob.invoke(data.dob) }) {
                 Icon(Icons.Outlined.DateRange, contentDescription = "icon_import_date")
+            } },
+            enabled = false,
+        )
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 5.dp),
+            label = { Text(text = "Phone Number") },
+            value = data.phoneNumber,
+            onValueChange = {},
+            trailingIcon = { IconButton(onClick = { onPickContact.invoke() }) {
+                Icon(Icons.Outlined.Phone, contentDescription = "icon_import_contact")
             } },
             enabled = false,
         )

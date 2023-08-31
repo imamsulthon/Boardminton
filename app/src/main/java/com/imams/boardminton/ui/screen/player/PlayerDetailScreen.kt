@@ -21,18 +21,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.IconButton
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,10 +61,9 @@ import com.imams.boardminton.data.epochToAge
 import com.imams.boardminton.ui.component.RowInfoData
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.boardminton.ui.utils.horizontalGradientBackground
+import com.imams.boardminton.ui.utils.sendWhatsappMessage
 
 private const val initialImageFloat = 150f
-
-private fun log(m: String) = println("PlayerDetail: $m")
 
 @Composable
 fun PlayerDetailScreen(
@@ -71,21 +72,27 @@ fun PlayerDetailScreen(
     onEdit: (Int) -> Unit,
 ) {
     LaunchedEffect(Unit) {
-        log("LaunchedEffect $playerId")
         viewModel.getPlayer(playerId)
     }
 
     val uiState by viewModel.uiState.collectAsState()
 
-    Content(uiState = uiState, onEdit = {
-        onEdit.invoke(uiState.id)
-    })
+    val context = LocalContext.current
+    Content(
+        uiState = uiState,
+        onEdit = { onEdit.invoke(uiState.id)},
+        onSendMessage = {
+        context.sendWhatsappMessage(uiState.phoneNumber,
+            message = "Hai ${uiState.fullName}, This message from Boardminton")
+        }
+    )
 }
 
 @Composable
 internal fun Content(
     uiState: CreatePlayerState,
     onEdit: () -> Unit,
+    onSendMessage: () -> Unit,
 ) {
     Scaffold { paddingValues ->
         Box(
@@ -103,13 +110,14 @@ internal fun Content(
                     .verticalScroll(state = scrollState)
             ) {
                 Spacer(modifier = Modifier.height(50.dp))
-                TopScrollingContent(uiState, scrollState, onEdit = onEdit::invoke )
+                TopScrollingContent(uiState, scrollState, onEdit = onEdit::invoke, onSendMessage = onSendMessage)
                 BottomScrollingContent(uiState)
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopAppBarView(
     state: CreatePlayerState,
@@ -144,7 +152,6 @@ private fun TopAppBarView(
                     )
                 }
             },
-            backgroundColor = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -168,6 +175,7 @@ fun TopScrollingContent(
     state: CreatePlayerState,
     scrollState: ScrollState,
     onEdit: () -> Unit,
+    onSendMessage: () -> Unit,
 ) {
     val visibilityChangeFloat = scrollState.value > initialImageFloat - 20
 
@@ -198,9 +206,7 @@ fun TopScrollingContent(
                 val iSize = 20.dp
                 IconButton(
                     onClick = onEdit::invoke,
-                    modifier = Modifier
-                        .padding(start = 4.dp)
-                        .size(width = iSize, height = iSize),
+                    modifier = Modifier.size(width = iSize, height = iSize),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
@@ -211,7 +217,7 @@ fun TopScrollingContent(
                     onClick = onEdit::invoke,
                     enabled = false,
                     modifier = Modifier
-                        .padding(start = 4.dp)
+                        .padding(start = 6.dp)
                         .size(width = iSize, height = iSize),
                 ) {
                     Icon(
@@ -219,6 +225,13 @@ fun TopScrollingContent(
                         contentDescription = null,
                     )
                 }
+                IconButton(
+                    onClick = onSendMessage::invoke,
+                    enabled = state.phoneNumber.isNotEmpty(),
+                    modifier = Modifier
+                        .padding(start = 6.dp)
+                        .size(width = iSize, height = iSize),
+                ) { Icon(imageVector = Icons.Default.Send, contentDescription = null) }
             }
         }
     }
@@ -281,13 +294,14 @@ fun SectionPlayerData(
                 .padding(vertical = 8.dp)
                 .background(MaterialTheme.colorScheme.onSurface))
             Column {
-                RowInfoData(label = "Name", content = state.fullName)
+                RowInfoData(label = "Player ID", content = "${state.id}")
+                RowInfoData(label = "Full Name", content = state.fullName)
                 RowInfoData(label = "DoB", content = "${state.dob.asDateTime("dd MMM yyyy")}")
                 RowInfoData(label = "Gender", content = state.gender)
+                RowInfoData(label = "Phone Number", content = state.phoneNumber)
                 RowInfoData(label = "Hand Play", content = state.handPlay)
                 RowInfoData(label = "Height", content = "${state.height} cm")
                 RowInfoData(label = "Weight", content = "${state.weight} kg")
-                RowInfoData(label = "Player ID", content = "${state.id}")
             }
         }
     }
@@ -303,7 +317,7 @@ private fun PlayerDetailPreview() {
             weight = 56, height = 168,
             gender = "Man", handPlay = "Left",
         ),
-        onEdit = {}
+        onEdit = {}, onSendMessage = {},
     )
 }
 

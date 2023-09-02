@@ -10,5 +10,6 @@ data class Player(
     val height: Int = 0,
     val weight: Int = 0,
     val dob: Long = 0,
+    val nationalityCode: String = "",
     val photoProfileUri: String,
 )

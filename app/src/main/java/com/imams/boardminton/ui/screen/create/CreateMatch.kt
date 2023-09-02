@@ -15,11 +15,9 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,9 +37,9 @@ import com.imams.boardminton.data.toJson
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ITeam
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
-import com.imams.boardminton.ui.screen.create.player.CreateTeamState
-import com.imams.boardminton.ui.screen.create.player.PlayerBottomSheetContent
-import com.imams.boardminton.ui.screen.create.team.TeamBottomSheetContent
+import com.imams.boardminton.ui.screen.create.player.PlayerBottomSheet
+import com.imams.boardminton.ui.screen.create.team.CreateTeamState
+import com.imams.boardminton.ui.screen.create.team.TeamBottomSheet
 import com.imams.boardminton.ui.theme.Orientation
 import com.imams.boardminton.ui.utils.isNotEmptyAndSameName
 
@@ -349,17 +347,12 @@ private fun ImportPlayers(
     onChoose: (ITeam, CreatePlayerState) -> Unit,
     dismiss: () -> Unit,
 ) {
-    val skipPartiallyExpanded by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
     if (openBottomSheet) {
-        ModalBottomSheet(
+        PlayerBottomSheet(
             onDismissRequest = { dismiss.invoke() },
-            sheetState = bottomSheetState,
-        ) {
-            PlayerBottomSheetContent(list = optionalPlayers, onSelect = {
-                onChoose.invoke(onField, it)
-            })
-        }
+            list = optionalPlayers,
+            onSelect = { onChoose.invoke(onField, it) }
+        )
     }
 }
 
@@ -372,17 +365,12 @@ private fun ImportTeams(
     onChoose: (ISide, CreateTeamState) -> Unit,
     dismiss: () -> Unit,
 ) {
-    val skipPartiallyExpanded by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
     if (openBottomSheet) {
-        ModalBottomSheet(
+        TeamBottomSheet(
             onDismissRequest = { dismiss.invoke() },
-            sheetState = bottomSheetState,
-        ) {
-            TeamBottomSheetContent(list = optionalTeams, onSelect = {
-                onChoose.invoke(onField, it)
-            })
-        }
+            list = optionalTeams,
+            onSelect = { onChoose.invoke(onField, it) },
+        )
     }
 }
 

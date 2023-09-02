@@ -2,12 +2,15 @@ buildscript {
     ext {
         version_hilt = '2.47'
         version_compose = '1.4.3'
+        version_compose_activity = '1.7.2'
+        version_compose_fragment = '1.6.1'
         version_navigation_compose = '2.7.1'
         version_material_3 = '1.2.0-alpha04'
         version_material_2 = '1.2.1'
         version_constraintlayout = '1.0.1'
         version_lifecycle = '2.5.1'
         version_room = '2.5.2'
+        version_gson = '2.10.1'
     }
 }
 plugins {

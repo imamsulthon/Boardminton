@@ -15,6 +15,7 @@ data class PlayerEntity(
     @ColumnInfo("weight") val weight: Int,
     @ColumnInfo("gender") val gender: String,
     @ColumnInfo("phoneNumber") val phoneNumber: String,
+    @ColumnInfo("nationality_code") val nationalityCode: String,
     @ColumnInfo("hand_play") val handPlay: String,
     @ColumnInfo("dob") val dob: Long,
     @ColumnInfo("photo_profile_uri") val photoProfileUri: String,

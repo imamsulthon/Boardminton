@@ -1,5 +1,6 @@
-package com.imams.boardminton.ui.screen.create.player
+package com.imams.boardminton.ui.screen.create.team
 
+import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.boardminton.ui.utils.lastNameWith
 
 

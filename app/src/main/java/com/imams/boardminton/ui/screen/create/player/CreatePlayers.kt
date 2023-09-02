@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -30,7 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -38,7 +39,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -50,10 +50,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -63,6 +63,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.imams.boardminton.data.asDateTime
+import com.imams.boardminton.ui.component.country.CountryPickerBottomSheet
+import com.imams.boardminton.ui.component.country.countryCodeToFlag
+import com.imams.boardminton.ui.component.country.getCountryName
 import com.imams.boardminton.ui.screen.create.TakePhoto
 import com.imams.boardminton.ui.screen.create.ipModifierP
 import com.imams.boardminton.ui.utils.contactPermissionLauncher
@@ -92,20 +95,8 @@ fun CreatePlayerScreen(
         selfieState = selfieState
     )
 
-    // region check dialog
-    val skipPartiallyExpanded by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = skipPartiallyExpanded
-    )
-
-    // Sheet content
     if (openBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { openBottomSheet = false },
-            sheetState = bottomSheetState,
-        ) {
-            PlayerBottomSheetContent(list = savedPlayers)
-        }
+        PlayerBottomSheet(onDismissRequest = { openBottomSheet = false }, list = savedPlayers)
     }
 
 }
@@ -165,6 +156,7 @@ internal fun CreatePlayerContent(
 
     val datePickerDialog = remember { mutableStateOf(false) }
     var datePickerState = rememberDatePickerState()
+    var openCountryPicker by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(modifier = Modifier
         .fillMaxSize()
@@ -196,6 +188,7 @@ internal fun CreatePlayerContent(
                 if (hasContactPermission) pickContactLauncher.launch()
                 else contactPermissionLauncher.launchContactPermission()
             },
+            onCountry = { openCountryPicker = true },
             takeSelfie = {
                 TakePhoto(
                     modifier = Modifier.fillMaxWidth(),
@@ -215,6 +208,17 @@ internal fun CreatePlayerContent(
             onState = { state -> datePickerState = state}
         )
     }
+    if (openCountryPicker) {
+        CountryPickerBottomSheet(
+            onItemSelected = {
+                event.invoke(CreatePlayerEvent.Nationality(it.code))
+                openCountryPicker = false
+            }, onDismissRequest = {
+                openCountryPicker = false
+            }
+        )
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -256,6 +260,7 @@ private fun FormContent(
     onHeight: (Int) -> Unit,
     onDob: (Long) -> Unit,
     onPickContact: () -> Unit,
+    onCountry: () -> Unit,
     onGender: (String) -> Unit,
     takeSelfie: @Composable () -> Unit,
 ) {
@@ -350,6 +355,19 @@ private fun FormContent(
             } },
             enabled = false,
         )
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(vertical = 5.dp).fillMaxWidth()
+                .clickable { onCountry.invoke() },
+            label = { Text(text = "Nationality") },
+            value = "${countryCodeToFlag(data.nationalityCode)}  " +
+                    stringResource(id = getCountryName(data.nationalityCode)),
+            onValueChange = {},
+            trailingIcon = { IconButton(onClick = { onCountry.invoke() }) {
+                Icon(Icons.Outlined.Info, contentDescription = "icon_select_country")
+            } },
+            enabled = false,
+        )
         GenderField(modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 5.dp),
@@ -364,7 +382,6 @@ private fun FormContent(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun InputField(
     modifier: Modifier,
@@ -535,7 +552,9 @@ fun BottomView(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun CreatePlayerPreview() {
-    CreatePlayerContent("Create Player", CreatePlayerState(), event = {}, onSave = {},
-        onCheckSavePlayers = {}, selfieState = null, onNewSelfie = { Uri.parse("") }
+    CreatePlayerContent("Create Player", CreatePlayerState(),
+        event = {}, onSave = {},
+        onCheckSavePlayers = {},
+        selfieState = null, onNewSelfie = { Uri.parse("") }
     )
 }

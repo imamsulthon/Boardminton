@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Refresh
@@ -29,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -67,6 +69,7 @@ import com.imams.boardminton.ui.component.ButtonPointLeft
 import com.imams.boardminton.ui.component.ButtonPointRight
 import com.imams.boardminton.ui.component.GameFinishDialogContent
 import com.imams.boardminton.ui.component.MainNameBoardView
+import com.imams.boardminton.ui.component.MiniIconButton
 import com.imams.boardminton.ui.component.MyCourtMatch
 import com.imams.boardminton.ui.component.TimeCounterView
 import com.imams.boardminton.ui.screen.timer.TimeCounterUiState
@@ -185,11 +188,11 @@ private fun ScoreBoardScreen(
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(12.dp),
+            .background(MaterialTheme.colorScheme.background),
     ) {
         val (topRef, contentRef, bottomRef) = createRefs()
 
+        val compPadding = 12.dp
         TopView(
             modifier = Modifier
                 .fillMaxWidth()
@@ -198,7 +201,8 @@ private fun ScoreBoardScreen(
                     start.linkTo(parent.start)
                     top.linkTo(parent.top)
                     end.linkTo(parent.end)
-                },
+                }
+                .padding(compPadding),
             timer = timerUiState.counter,
             onSwap = { scoreVm.swapCourt() },
             onEdit = {
@@ -215,7 +219,7 @@ private fun ScoreBoardScreen(
         ContentView(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp)
+                .padding(compPadding)
                 .constrainAs(contentRef) {
                     top.linkTo(topRef.bottom)
                     bottom.linkTo(bottomRef.top)
@@ -445,62 +449,46 @@ private fun BottomView(
     enabled: Boolean,
 ) {
     @Composable
-    fun swapButton() {
-        OutlinedButton(
-            onClick = { swap.invoke() },
-            modifier = Modifier.widthIn(min = 40.dp, max = 60.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_on_serve),
-                contentDescription = "swap_server"
-            )
-        }
-    }
-
-    @Composable
     fun addCockButton() {
         BadgedBox(
             badge = { Badge { Text(text = cockCount.toString()) } }
         ) {
-            OutlinedButton(
-                onClick = { addCock.invoke() },
-                modifier = Modifier.widthIn(min = 40.dp, max = 60.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_cock),
-                    contentDescription = "increase_count"
-                )
-            }
+            MiniIconButton(icon = R.drawable.ic_cock, onClick = addCock::invoke)
         }
     }
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Bottom
+    Surface(
+        modifier = modifier
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+            ),
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
     ) {
-        ButtonPointLeft(
-            onClickPlus = { aPlus.invoke() },
-            onClickMin = { aMin.invoke() },
-            enabled = enabled
-        )
-        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                addCockButton()
-                swapButton()
-            }
-        } else {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .padding(top = 16.dp, bottom = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ButtonPointLeft(
+                onClickPlus = { aPlus.invoke() },
+                onClickMin = { aMin.invoke() },
+                enabled = enabled
+            )
             Row {
                 addCockButton()
                 Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                swapButton()
+                MiniIconButton(icon = R.drawable.ic_on_serve, onClick = swap::invoke)
             }
+            ButtonPointRight(
+                onClickPlus = { bPlus.invoke() },
+                onClickMin = { bMin.invoke() },
+                enabled = enabled,
+            )
         }
-
-        ButtonPointRight(
-            onClickPlus = { bPlus.invoke() },
-            onClickMin = { bMin.invoke() },
-            enabled = enabled,
-        )
     }
 }
 
@@ -515,8 +503,14 @@ private fun Context.vibrateButton(isVibrate: Boolean? = true) {
     isVibrate?.let { if (it) vibrateClick(this) }
 }
 
-@Preview(device = Devices.NEXUS_6)
+@Preview(device = Devices.NEXUS_6, showBackground = true)
 @Composable
-private fun ScoreBoardScreenV() {
-    ScoreBoardScreen(null, false, "listOf()", onEdit = {_, _, ->}, savedStateHandle = null, onBackPressed = {})
+private fun ScoreBoardScreenPreview() {
+//    ScoreBoardScreen(null, false, "listOf()", onEdit = {_, _, ->}, savedStateHandle = null, onBackPressed = {})
+    BottomView(
+        aPlus = { /*TODO*/ }, aMin = { /*TODO*/ },
+        bPlus = { /*TODO*/ }, bMin = { /*TODO*/ },
+        swap = { /*TODO*/ }, addCock = { /*TODO*/ },
+        enabled = true
+    )
 }

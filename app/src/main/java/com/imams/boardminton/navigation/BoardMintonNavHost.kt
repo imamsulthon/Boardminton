@@ -122,7 +122,9 @@ fun BoardMintonNavHost(
                 appConfig = appConfig,
                 onAppConfig = onAppConfig::invoke,
                 onGoingMatches = latestMatch,
-                onCreateMatch = { navController.navigate(CreateMatch.invoke(it)) },
+                onCreateMatch = {
+                    navController.navigate(CreateMatch.invoke(it))
+                },
                 onCreatePlayer = {
                     when (it) {
                         "create" -> { navController.navigate(CreatePlayer.fullRoute) }

@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,6 +49,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.imams.boardminton.R
 import com.imams.boardminton.domain.model.MatchViewParam
+import com.imams.boardminton.ui.component.AnimatedText
 import com.imams.boardminton.ui.component.ChildLayout
 import com.imams.boardminton.ui.component.LoadItemAfterSafeCast
 import com.imams.boardminton.ui.component.VerticalScroll
@@ -126,11 +128,7 @@ private fun HomeAppBar(
         },
         title = {
             val appName = stringResource(id = R.string.app_name)
-            Text(
-                text = appName,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 18.sp
-            )
+            AnimatedText(text = appName, useAnimation = true)
         },
         actions = {
             IconButton(onClick = onSettings::invoke) {
@@ -207,23 +205,26 @@ internal fun MenuWrap(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MenuGroup(label = "Create New Match") {
-                ItemMenu(label = "Single Match") {
+            MenuGroup(label = stringResource(R.string.label_create_match)) {
+                ItemMenu(label = stringResource(R.string.single_match)) {
                     onCreateMatch.invoke(true)
                 }
-                ItemMenu(label = "Double Match") {
+                ItemMenu(label = stringResource(R.string.double_match)) {
                     onCreateMatch.invoke(false)
                 }
             }
             HorizontalDivider(
-                modifier = Modifier.fillMaxWidth().height(1.dp).padding(vertical = 5.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .padding(vertical = 5.dp)
                     .background(MaterialTheme.colorScheme.onBackground)
             )
-            MenuGroup(label = "Create New Player") {
-                ItemMenu(label = "New Player") {
+            MenuGroup(label = stringResource(R.string.label_create_player)) {
+                ItemMenu(label = stringResource(R.string.label_create_player)) {
                     onCreatePlayer.invoke("create")
                 }
-                ItemMenu(label = "Registered Players", enabled = true) {
+                ItemMenu(label = stringResource(R.string.label_registered_player), enabled = true) {
                     onCreatePlayer.invoke("seeAll")
                 }
             }
@@ -250,12 +251,12 @@ private fun latestMatchGroup(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = "On Going Match",
+                        text = stringResource(R.string.label_on_going_match),
                         modifier = Modifier.wrapContentWidth(),
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "See All",
+                        text = stringResource(R.string.label_see_all),
                         fontSize = 11.sp,
                         modifier = Modifier
                             .wrapContentWidth()
@@ -332,14 +333,13 @@ private fun ItemMenu(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-
     Card(
         onClick = { onClick.invoke() },
         enabled = enabled,
         shape = RoundedCornerShape(
             topStart = 20.dp,
             topEnd = 5.dp,
-            bottomEnd = 20.dp,
+            bottomEnd = 5.dp,
             bottomStart = 5.dp
         ),
         modifier = Modifier
@@ -348,15 +348,22 @@ private fun ItemMenu(
     ) {
         val grad = listOf(
             MaterialTheme.colorScheme.primary.copy(alpha = .6f),
-            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = .5f)
+            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = .4f)
         )
-        Box(Modifier.fillMaxSize().linearGradientBackground(grad)) {
-            Text(label, Modifier.align(Alignment.Center))
+        Box(
+            Modifier
+                .fillMaxSize()
+                .linearGradientBackground(grad)
+        ) {
+            Text(label,
+                Modifier
+                    .padding(4.dp)
+                    .align(Alignment.Center), textAlign = TextAlign.Center)
         }
     }
 }
 
-@Preview(showSystemUi = true, uiMode = UI_MODE_NIGHT_YES, showBackground = true)
+@Preview(showSystemUi = true, uiMode = UI_MODE_NIGHT_YES, showBackground = true, locale = "id")
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 512, showSystemUi = true)
 @Composable
 private fun HomeScreenPreview() {

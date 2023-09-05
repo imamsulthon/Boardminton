@@ -1,5 +1,6 @@
 package com.imams.boardminton.ui.component
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
@@ -19,15 +20,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -38,10 +42,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -228,18 +234,14 @@ fun ButtonPointLeft(
             enabled = enabled,
             onClick = { onClickPlus.invoke() },
             modifier = Modifier.widthIn(min = 60.dp, max = 120.dp),
-        ) {
-            Text(text = "+1")
-        }
-
+        ) { Text(text = "+1") }
         OutlinedButton(
             onClick = { onClickMin.invoke() },
             modifier = Modifier
-                .widthIn(min = 40.dp, max = 80.dp)
-                .padding(horizontal = 4.dp)
+                .widthIn(min = 40.dp, max = 70.dp)
+                .padding(start = 3.dp)
                 .wrapContentHeight()
         ) { Text(text = "-1") }
-
     }
 }
 
@@ -253,13 +255,10 @@ fun ButtonPointRight(
         OutlinedButton(
             onClick = { onClickMin.invoke() },
             modifier = Modifier
-                .widthIn(min = 40.dp, max = 80.dp)
+                .widthIn(min = 40.dp, max = 70.dp)
                 .wrapContentHeight()
-                .padding(horizontal = 4.dp)
-        ) {
-            Text(text = "-1", modifier = Modifier.padding(2.dp))
-        }
-
+                .padding(end = 3.dp)
+        ) { Text(text = "-1", modifier = Modifier.padding(2.dp)) }
         Button(
             enabled = enabled,
             onClick = { onClickPlus.invoke() },
@@ -299,6 +298,31 @@ fun GameFinishDialogContent(
                 Text(text = "Finish")
             }
         }
+    }
+}
+
+@Composable
+fun MiniIconButton(
+    @DrawableRes icon: Int,
+    size: Dp = 32.dp,
+    padding: Dp = 2.dp,
+    iconSize: Dp = 16.dp,
+    onClick: () -> Unit
+) {
+    IconButton(
+        onClick = { onClick.invoke() },
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = .8f))
+            .padding(padding)
+    ) {
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = "swap_server",
+            modifier = Modifier.size(iconSize),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
 

@@ -1,63 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">Boardminton</string>
-    <string name="single_match">Single Match</string>
-    <string name="double_match">Double Match</string>
-    <string name="label_create_match">Create New Match</string>
-    <string name="label_create_new_player">Create New Player</string>
-    <string name="label_create_player">Create Player</string>
-    <string name="label_edit_player">Edit Player</string>
-    <string name="label_create_team">Create Team</string>
-    <string name="label_registered_player">Registered Player</string>
-    <string name="label_registered_team">Registered Team</string>
-    <string name="label_see_all">See All</string>
-    <string name="label_on_going_match">On Going Matches</string>
+    <string name="single_match">Pertandingan Tunggal</string>
+    <string name="double_match">Pertandingan Ganda</string>
+    <string name="label_create_new_player">Buat Pemain Baru</string>
+    <string name="label_create_player">Buat Pemain</string>
+    <string name="label_edit_player">Sunting Pemain</string>
+    <string name="label_create_team">Buat Tim</string>
+    <string name="label_registered_player">Daftar Pemain</string>
+    <string name="label_registered_team">Tim Terdaftar</string>
+    <string name="label_see_all">Lihat Semua</string>
+    <string name="label_on_going_match">Pertandingan Berjalan</string>
+    <string name="label_create_match">Buat Pertandingan</string>
+    <string name="label_take_selfie">Ambil Selfie Pemain</string>
+    <string name="label_camera">Kamera</string>
+    <string name="label_file">Dokumen</string>
+    <string name="label_gallery">Galeri</string>
 
-    // common views
-    <string name="label_cancel">Cancel</string>
-    <string name="label_save">Save</string>
-    <string name="label_clear">Clear</string>
-    <string name="label_next">Next</string>
-    <string name="label_back">Back</string>
-    <string name="label_apply">Apply</string>
+    <string name="label_cancel">Batal</string>
+    <string name="label_save">Simpan</string>
+    <string name="label_clear">Hapus</string>
+    <string name="label_next">Lanjut</string>
+    <string name="label_back">Kembali</string>
+    <string name="label_apply">Terapkan</string>
 
-    // create Player
-    <string name="first_name">First Name</string>
-    <string name="last_name">Last Name</string>
-    <string name="height">Height</string>
-    <string name="weight">Weight</string>
-    <string name="label_gender">Gender</string>
-    <string name="label_nationality">Nationality</string>
-    <string name="hand_play">Play Handed</string>
-    <string name="label_phone_number">Phone Number</string>
-    <string name="label_dob">Date of Birth</string>
-    <string name="label_left">Left</string>
-    <string name="label_right">Right</string>
-    <string name="label_both">Both</string>
-    <string name="label_gender_man">Man</string>
-    <string name="label_gender_woman">Woman</string>
-    <string name="label_take_selfie">ake Player Photo</string>
-    <string name="label_camera">Camera</string>
-    <string name="label_file">File</string>
-    <string name="label_gallery">Gallery</string>
+    // form
+    <string name="first_name">Nama Depan</string>
+    <string name="last_name">Nama Belakang</string>
+    <string name="height">Tinggi</string>
+    <string name="weight">Berat</string>
+    <string name="label_gender">Jenis Kelamin</string>
+    <string name="label_nationality">Kewarganegaraan</string>
+    <string name="hand_play">Tangan Bermain</string>
+    <string name="label_phone_number">Nomor Telepon</string>
+    <string name="label_dob">Tanggal Lahir</string>
+    <string name="label_left">Kiri</string>
+    <string name="label_right">Kanan</string>
+    <string name="label_both">Kiri &amp; Kanan</string>
+    <string name="label_gender_man">Laki-laki</string>
+    <string name="label_gender_woman">Perempuan</string>
 
     // Create Team
 
     // Create Match
-    <string name="label_create_format_match">Create %s Match</string>
-    <string name="label_single">Single</string>
-    <string name="label_double">Double</string>
-    <string name="import_team">Import Team</string>
-    <string name="label_field_player">Player %s Name</string>
+    <string name="label_create_format_match">Buat Pertandingan %s</string>
+    <string name="label_single">Tunggal</string>
+    <string name="label_double">Ganda</string>
+    <string name="import_team">Pilih Tim</string>
+    <string name="label_field_player">Nama Pemain %s</string>
 
     // App Settings
-    <string name="select_theme">Select Theme</string>
-    <string name="dynamic_colors">Dynamic Colors</string>
-    <string name="label_app_language">App Language</string>
-    <string name="match_board_settings">Match Board Settings</string>
-    <string name="button_vibrate">Button Vibrate</string>
+    <string name="select_theme">Pilih Tema</string>
+    <string name="dynamic_colors">Warna Dinamis</string>
+    <string name="label_app_language">Bahasa Aplikasi</string>
+    <string name="match_board_settings">Pengaturan Papan Skor</string>
+    <string name="button_vibrate">Getaran Tombol</string>
 
-
-    // country list
     <string name="andora">Andorra</string>
     <string name="united_arab_emirates">United Arab Emirates (UAE)</string>
     <string name="afghanistan">Afghanistan</string>
@@ -304,4 +303,5 @@
     <string name="unknown">Unknown</string>
     <string name="search">Search...</string>
     <string name="select_country">Select Country</string>
+
 </resources>

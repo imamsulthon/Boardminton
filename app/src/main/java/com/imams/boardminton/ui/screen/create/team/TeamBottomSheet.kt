@@ -10,17 +10,36 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.imams.boardminton.ui.screen.create.player.CreateTeamState
 import com.imams.boardminton.ui.utils.bottomDialogPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TeamBottomSheetContent(
+fun TeamBottomSheet(
+    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
+    onDismissRequest: () -> Unit,
+    list: List<CreateTeamState>,
+    onSelect: ((CreateTeamState) -> Unit)? = null,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest::invoke, sheetState = sheetState,
+    ) {
+        TeamBottomSheetContent(
+            list = list, onSelect = { onSelect?.invoke(it) }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TeamBottomSheetContent(
     list: List<CreateTeamState>,
     onSelect: ((CreateTeamState) -> Unit)? = null,
 ) {

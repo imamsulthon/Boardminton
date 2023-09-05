@@ -17,6 +17,7 @@ class DesignPreferenceStore(context: Context) {
     private val themeMode = intPreferencesKey("theme")
     private val themeDynamicColor = booleanPreferencesKey("theme_dynamic_colors")
     private val isVibratePoint = booleanPreferencesKey("is_vibrate_point")
+    private val isEnglish = booleanPreferencesKey("locale_is_english")
 
     // region App Themes
     suspend fun setTheme(id: Int) {
@@ -56,7 +57,8 @@ class DesignPreferenceStore(context: Context) {
             ),
             matchBoard = MatchBoardSetting(
                 isVibrateAddPoint = pref[isVibratePoint] ?: false
-            )
+            ),
+            isEnglish = pref[isEnglish] ?: true
         )
     }
 
@@ -65,6 +67,7 @@ class DesignPreferenceStore(context: Context) {
             settings[themeMode] = appConfig.theme.selected
             settings[themeDynamicColor] = appConfig.theme.dynamicColor
             settings[isVibratePoint] = appConfig.matchBoard.isVibrateAddPoint
+            settings[isEnglish] = appConfig.isEnglish
         }
     }
 
@@ -73,4 +76,5 @@ class DesignPreferenceStore(context: Context) {
 data class AppConfig(
     val theme: ChangeThemeState = ChangeThemeState(),
     var matchBoard: MatchBoardSetting = MatchBoardSetting(),
+    var isEnglish: Boolean = true
 )

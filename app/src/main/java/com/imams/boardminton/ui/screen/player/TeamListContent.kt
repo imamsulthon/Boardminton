@@ -43,7 +43,7 @@ import com.imams.boardminton.ui.component.EmptyContent
 import com.imams.boardminton.ui.component.ProfileImage
 import com.imams.boardminton.ui.component.SortField
 import com.imams.boardminton.ui.component.SwipeToOptional
-import com.imams.boardminton.ui.screen.create.player.CreateTeamState
+import com.imams.boardminton.ui.screen.create.team.CreateTeamState
 import com.imams.boardminton.ui.utils.bottomDialogPadding
 
 @OptIn(ExperimentalMaterial3Api::class)

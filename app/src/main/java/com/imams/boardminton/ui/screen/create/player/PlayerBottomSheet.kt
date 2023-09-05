@@ -10,18 +10,41 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.imams.boardminton.data.Athlete
+import com.imams.boardminton.ui.component.country.countryCodeToFlag
 import com.imams.boardminton.ui.utils.bottomDialogPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlayerBottomSheetContent(
+fun PlayerBottomSheet(
+    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
+    onDismissRequest: () -> Unit,
+    list: List<CreatePlayerState>,
+    onSelect: ((CreatePlayerState) -> Unit)? = null,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest::invoke,
+        sheetState = sheetState,
+    ) {
+        PlayerBottomSheetContent(
+            list = list,
+            onSelect = { onSelect?.invoke(it) }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun PlayerBottomSheetContent(
     list: List<CreatePlayerState>,
     onSelect: ((CreatePlayerState) -> Unit)? = null,
 ) {
@@ -56,6 +79,9 @@ fun PlayerBottomSheetContent(
                         }
                         Text(label)
                     },
+                    trailingContent = {
+                        Text(text = countryCodeToFlag(it.nationalityCode))
+                    }
                 )
             }
         }

@@ -14,6 +14,7 @@ object PlayerMapper {
         height = height,
         handPlay = handPlay,
         dob = dob,
+        nationalityCode = nationalityCode,
         photoProfileUri = photoProfileUri,
     )
 
@@ -27,6 +28,7 @@ object PlayerMapper {
         height = height,
         handPlay = handPlay,
         dob = dob,
+        nationalityCode = nationalityCode,
         photoProfileUri = photoProfileUri
     ).also {
         if (withId) it.id = id

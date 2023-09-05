@@ -28,12 +28,14 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.imams.boardminton.R
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ITeam
+import com.imams.boardminton.ui.component.MiniIconButton
 import com.imams.boardminton.ui.theme.Orientation
 import com.imams.boardminton.ui.utils.keyBoardDone
 import com.imams.boardminton.ui.utils.keyboardNext
@@ -80,7 +82,7 @@ fun FieldInputSingleMatch(
             onValueChange = {
                 onChange.invoke(ITeam.A1, it)
             },
-            label = "Player 1 Name",
+            label = stringResource(R.string.label_field_player, "1"),
             endIconClick = { importPerson.invoke(ITeam.A1) }
         )
         Row(
@@ -98,7 +100,7 @@ fun FieldInputSingleMatch(
             onValueChange = {
                 onChange.invoke(ITeam.B1, it)
             },
-            label = "Player 2 Name",
+            label = stringResource(R.string.label_field_player, "2"),
             keyboardOptions = keyBoardDone(),
             endIconClick = { importPerson.invoke(ITeam.B1) }
         )
@@ -126,7 +128,7 @@ fun FieldInputSingleLandscape(
             onValueChange = {
                 onChange.invoke(ITeam.A1, it)
             },
-            label = "Player 1 Name",
+            label = stringResource(R.string.label_field_player, "1"),
             endIconClick = { importPerson.invoke(ITeam.A1) }
         )
 
@@ -147,7 +149,7 @@ fun FieldInputSingleLandscape(
             onValueChange = {
                 onChange.invoke(ITeam.B1, it)
             },
-            label = "Player 2 Name",
+            label = stringResource(R.string.label_field_player, "2"),
             keyboardOptions = keyBoardDone(),
             endIconClick = { importPerson.invoke(ITeam.B1) }
         )
@@ -196,7 +198,7 @@ fun FieldInputDoubleMatch(
             onValueChange = {
                 onChange.invoke(ITeam.A1, it)
             },
-            label = "Player 1 Name",
+            label = stringResource(R.string.label_field_player, "1"),
             endIconClick = { importPerson.invoke(ITeam.A1) },
         )
         SwapButton({ swapPlayer.invoke(ISide.A) })
@@ -206,14 +208,14 @@ fun FieldInputDoubleMatch(
             onValueChange = {
                 onChange.invoke(ITeam.A2, it)
             },
-            label = "Player 2 Name",
+            label = stringResource(R.string.label_field_player, "2"),
             endIconClick = { importPerson.invoke(ITeam.A2) },
         )
         AnimatedVisibility(visible = importTeam != null) {
             OutlinedButton(
                 modifier = Modifier.padding(top = 6.dp),
                 onClick = { importTeam?.invoke(ISide.A) }
-            ) { Text(text = "Import Team") }
+            ) { Text(text = stringResource(R.string.import_team)) }
         }
         Row(
             modifier = ipModifierP,
@@ -228,7 +230,7 @@ fun FieldInputDoubleMatch(
             modifier = ipModifierP,
             value = pB1,
             onValueChange = { onChange.invoke(ITeam.B1, it) },
-            label = "Player 1 Name",
+            label = stringResource(R.string.label_field_player, "1"),
             endIconClick = { importPerson.invoke(ITeam.B1) },
         )
         SwapButton({ swapPlayer.invoke(ISide.B) })
@@ -236,7 +238,7 @@ fun FieldInputDoubleMatch(
             modifier = ipModifierP,
             value = pB2,
             onValueChange = { onChange.invoke(ITeam.B2, it) },
-            label = "Player 2 Name",
+            label = stringResource(R.string.label_field_player, "2"),
             keyboardOptions = keyBoardDone(),
             endIconClick = { importPerson.invoke(ITeam.B2) },
         )
@@ -244,7 +246,7 @@ fun FieldInputDoubleMatch(
             OutlinedButton(
                 modifier = Modifier.padding(top = 6.dp),
                 onClick = { importTeam?.invoke(ISide.B) }
-            ) { Text(text = "Import Team") }
+            ) { Text(text = stringResource(R.string.import_team)) }
         }
     }
 
@@ -280,7 +282,7 @@ private fun FieldInputDoubleLandscape(
                 onValueChange = {
                     onChange.invoke(ITeam.A1, it)
                 },
-                label = "Player 1 Name",
+                label = stringResource(R.string.label_field_player, "1"),
                 endIconClick = { importPerson.invoke(ITeam.A1) },
             )
             SwapButton({ swapPlayer.invoke(ISide.A) })
@@ -290,14 +292,14 @@ private fun FieldInputDoubleLandscape(
                 onValueChange = {
                     onChange.invoke(ITeam.A2, it)
                 },
-                label = "Player 2 Name",
+                label = stringResource(R.string.label_field_player, "2"),
                 endIconClick = { importPerson.invoke(ITeam.A2) },
             )
             AnimatedVisibility(visible = importTeam != null) {
                 OutlinedButton(
                     modifier = Modifier.padding(top = 6.dp),
                     onClick = { importTeam?.invoke(ISide.A) }
-                ) { Text(text = "Import Team") }
+                ) { Text(text = stringResource(R.string.import_team)) }
             }
         }
 
@@ -321,7 +323,7 @@ private fun FieldInputDoubleLandscape(
                 modifier = ipModifierL,
                 value = pB1,
                 onValueChange = { onChange.invoke(ITeam.B1, it) },
-                label = "Player 1 Name",
+                label = stringResource(R.string.label_field_player, "1"),
                 endIconClick = { importPerson.invoke(ITeam.B1) },
             )
             SwapButton({ swapPlayer.invoke(ISide.B) })
@@ -329,7 +331,7 @@ private fun FieldInputDoubleLandscape(
                 modifier = ipModifierL,
                 value = pB2,
                 onValueChange = { onChange.invoke(ITeam.B2, it) },
-                label = "Player 2 Name",
+                label = stringResource(R.string.label_field_player, "2"),
                 keyboardOptions = keyBoardDone(),
                 endIconClick = { importPerson.invoke(ITeam.B2) },
             )
@@ -337,14 +339,13 @@ private fun FieldInputDoubleLandscape(
                 OutlinedButton(
                     modifier = Modifier.padding(top = 6.dp),
                     onClick = { importTeam?.invoke(ISide.B) }
-                ) { Text(text = "Import Team") }
+                ) { Text(text = stringResource(R.string.import_team)) }
             }
         }
     }
 
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun InputPlayer(
     modifier: Modifier,
@@ -379,20 +380,11 @@ fun SwapButton(
     onSwap: () -> Unit,
     orientation: Orientation = Orientation.Portrait,
 ) {
-    IconButton(
-        onClick = { onSwap.invoke() },
-        modifier = Modifier
-            .padding(vertical = 2.dp)
-            .width(14.dp)
-            .height(14.dp)
-    ) {
-        Icon(
-            modifier = Modifier.wrapContentSize(),
-            painter = if (orientation == Orientation.Portrait) painterResource(id = R.drawable.ic_swap_1)
-            else painterResource(id = R.drawable.ic_swap_3),
-            contentDescription = "swap_icon"
-        )
-    }
+    MiniIconButton(
+        padding = 4.dp,
+        icon = if (orientation == Orientation.Portrait) R.drawable.ic_swap_1 else R.drawable.ic_swap_3,
+        onClick = onSwap::invoke
+    )
 }
 
 @Preview

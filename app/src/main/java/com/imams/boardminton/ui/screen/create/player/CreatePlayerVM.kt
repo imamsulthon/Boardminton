@@ -44,6 +44,7 @@ class CreatePlayerVM @Inject constructor(
             is CreatePlayerEvent.Height -> _uiState.update { it.copy(height = event.value) }
             is CreatePlayerEvent.Weight -> _uiState.update { it.copy(weight = event.value) }
             is CreatePlayerEvent.DOB -> _uiState.update { it.copy(dob = event.value) }
+            is CreatePlayerEvent.Nationality -> _uiState.update { it.copy(nationalityCode = event.value) }
             is CreatePlayerEvent.GenerateSelfie -> { onSelfieResponse(event.uri) }
             is CreatePlayerEvent.ImportContact -> _uiState.update { it.copy(phoneNumber = event.value) }
             is CreatePlayerEvent.Clear -> _uiState.update { CreatePlayerState() }
@@ -53,7 +54,6 @@ class CreatePlayerVM @Inject constructor(
 
     private var isInit = false
     fun setupWith(id: Int) {
-        // todo should use savedInstance state
         if (isInit) return
         viewModelScope.launch {
             useCase.getPlayer(id).collectLatest { player ->
@@ -65,13 +65,22 @@ class CreatePlayerVM @Inject constructor(
     }
 
     fun savePlayer(callback: (() -> Unit)? = null, data: CreatePlayerState = uiState.value) {
-        saveSelfie { uri, fileName ->
+        if (_tempSelfieUri.value.uri == null) {
             viewModelScope.launch {
-                useCase.createPlayer(data.copy(photoProfileUri = uri))
+                useCase.createPlayer(data)
                 delay(500)
                 callback?.invoke()
                 _uiState.update { CreatePlayerState() }
-                _tempSelfieUri.update { it.copy(uri = Uri.parse(uri), fileName = fileName) }
+            }
+        } else {
+            saveSelfie { uri, fileName ->
+                viewModelScope.launch {
+                    useCase.createPlayer(data.copy(photoProfileUri = uri))
+                    delay(500)
+                    callback?.invoke()
+                    _uiState.update { CreatePlayerState() }
+                    _tempSelfieUri.update { it.copy(uri = Uri.parse(uri), fileName = fileName) }
+                }
             }
         }
     }
@@ -151,6 +160,7 @@ data class CreatePlayerState(
     val weight: Int = 0,
     val dob: Long = 0,
     val phoneNumber: String = "",
+    val nationalityCode: String = "id",
     var photoProfileUri: String = "",
 ) {
     val fullName = "$firstName $lastName"
@@ -162,6 +172,7 @@ sealed class CreatePlayerEvent {
     data class Height(val value: Int) : CreatePlayerEvent()
     data class Weight(val value: Int) : CreatePlayerEvent()
     data class DOB(val value: Long) : CreatePlayerEvent()
+    data class Nationality(val value: String): CreatePlayerEvent()
     data class HandPlay(val value: String) : CreatePlayerEvent()
     data class Gender(val value: String) : CreatePlayerEvent()
     data class ImportContact(val value: String): CreatePlayerEvent()

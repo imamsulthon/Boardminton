@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -30,7 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -38,7 +39,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -50,10 +50,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -62,7 +62,11 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.imams.boardminton.R
 import com.imams.boardminton.data.asDateTime
+import com.imams.boardminton.ui.component.country.CountryPickerBottomSheet
+import com.imams.boardminton.ui.component.country.countryCodeToFlag
+import com.imams.boardminton.ui.component.country.getCountryName
 import com.imams.boardminton.ui.screen.create.TakePhoto
 import com.imams.boardminton.ui.screen.create.ipModifierP
 import com.imams.boardminton.ui.utils.contactPermissionLauncher
@@ -83,7 +87,7 @@ fun CreatePlayerScreen(
     val selfieState by viewModel.tempSelfieUri.collectAsState()
 
     CreatePlayerContent(
-        screenName = "Create Player",
+        screenName = stringResource(R.string.label_create_player),
         uiState = uiState,
         event = { viewModel.execute(it) },
         onSave = { viewModel.savePlayer(callback = onSave) },
@@ -92,20 +96,8 @@ fun CreatePlayerScreen(
         selfieState = selfieState
     )
 
-    // region check dialog
-    val skipPartiallyExpanded by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = skipPartiallyExpanded
-    )
-
-    // Sheet content
     if (openBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { openBottomSheet = false },
-            sheetState = bottomSheetState,
-        ) {
-            PlayerBottomSheetContent(list = savedPlayers)
-        }
+        PlayerBottomSheet(onDismissRequest = { openBottomSheet = false }, list = savedPlayers)
     }
 
 }
@@ -123,7 +115,7 @@ fun EditPlayerCreatedScreen(
         viewModel.setupWith(id)
     }
     CreatePlayerContent(
-        screenName = "Edit Player (id = ${uiState.id})",
+        screenName = stringResource(R.string.label_edit_player) + " (id = ${uiState.id})",
         uiState = uiState,
         event = { viewModel.execute(it) },
         onSave = { viewModel.updatePlayer(callback = onSave) },
@@ -165,6 +157,7 @@ internal fun CreatePlayerContent(
 
     val datePickerDialog = remember { mutableStateOf(false) }
     var datePickerState = rememberDatePickerState()
+    var openCountryPicker by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(modifier = Modifier
         .fillMaxSize()
@@ -196,6 +189,7 @@ internal fun CreatePlayerContent(
                 if (hasContactPermission) pickContactLauncher.launch()
                 else contactPermissionLauncher.launchContactPermission()
             },
+            onCountry = { openCountryPicker = true },
             takeSelfie = {
                 TakePhoto(
                     modifier = Modifier.fillMaxWidth(),
@@ -215,6 +209,17 @@ internal fun CreatePlayerContent(
             onState = { state -> datePickerState = state}
         )
     }
+    if (openCountryPicker) {
+        CountryPickerBottomSheet(
+            onItemSelected = {
+                event.invoke(CreatePlayerEvent.Nationality(it.code))
+                openCountryPicker = false
+            }, onDismissRequest = {
+                openCountryPicker = false
+            }
+        )
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -240,7 +245,7 @@ private fun MyDatePicker(
             ) { Text("OK") }
         },
         dismissButton = {
-            TextButton(onClick = { onDismiss.invoke() }) { Text("Cancel") }
+            TextButton(onClick = { onDismiss.invoke() }) { Text(stringResource(R.string.label_cancel)) }
         }
     ) { DatePicker(state = datePickerState) }
 }
@@ -256,6 +261,7 @@ private fun FormContent(
     onHeight: (Int) -> Unit,
     onDob: (Long) -> Unit,
     onPickContact: () -> Unit,
+    onCountry: () -> Unit,
     onGender: (String) -> Unit,
     takeSelfie: @Composable () -> Unit,
 ) {
@@ -275,7 +281,7 @@ private fun FormContent(
                     .weight(1f)
                     .padding(end = 10.dp),
                 value = data.firstName,
-                label = "First Name",
+                label = stringResource(R.string.first_name),
                 onValueChange = { onFirstName.invoke(it) },
             )
             InputField(
@@ -284,7 +290,7 @@ private fun FormContent(
                     .weight(1f)
                     .padding(start = 10.dp),
                 value = data.lastName,
-                label = "Last Name",
+                label = stringResource(R.string.last_name),
                 onValueChange = { onLastName.invoke(it) },
             )
         }
@@ -303,7 +309,7 @@ private fun FormContent(
                     onHeight.invoke(if (it.isEmpty()) 0 else if (it.length <= 3) it.toInt() else 250)
                 },
                 suffix = { Text(text = "cm") },
-                label = "Height",
+                label = stringResource(R.string.height),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next
@@ -319,7 +325,7 @@ private fun FormContent(
                     onWeight.invoke(if (it.isEmpty()) 0 else if (it.length <= 3) it.toInt() else 200)
                 },
                 suffix = { Text(text = "kg") },
-                label = "Weight",
+                label = stringResource(R.string.weight),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Done
@@ -331,7 +337,7 @@ private fun FormContent(
                 .fillMaxWidth()
                 .padding(vertical = 5.dp),
             value = data.dob.toString().asDateTime("dd MMM yyyy") ?: data.dob.toString(),
-            label = { Text(text = "Date of Birth") },
+            label = { Text(text = stringResource(R.string.label_dob)) },
             onValueChange = {},
             trailingIcon = { IconButton(onClick = { onDob.invoke(data.dob) }) {
                 Icon(Icons.Outlined.DateRange, contentDescription = "icon_import_date")
@@ -342,11 +348,25 @@ private fun FormContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 5.dp),
-            label = { Text(text = "Phone Number") },
+            label = { Text(text = stringResource(R.string.label_phone_number)) },
             value = data.phoneNumber,
             onValueChange = {},
             trailingIcon = { IconButton(onClick = { onPickContact.invoke() }) {
                 Icon(Icons.Outlined.Phone, contentDescription = "icon_import_contact")
+            } },
+            enabled = false,
+        )
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(vertical = 5.dp)
+                .fillMaxWidth()
+                .clickable { onCountry.invoke() },
+            label = { Text(text = stringResource(id = R.string.label_nationality)) },
+            value = "${countryCodeToFlag(data.nationalityCode)}  " +
+                    stringResource(id = getCountryName(data.nationalityCode)),
+            onValueChange = {},
+            trailingIcon = { IconButton(onClick = { onCountry.invoke() }) {
+                Icon(Icons.Outlined.Info, contentDescription = "icon_select_country")
             } },
             enabled = false,
         )
@@ -364,7 +384,6 @@ private fun FormContent(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun InputField(
     modifier: Modifier,
@@ -398,14 +417,18 @@ fun HandPlays(
     initialSelection: String = "",
     onSelected: (String) -> Unit,
 ) {
-    val radioOptions = listOf("Left", "Right", "Both")
+    val radioOptions = listOf(
+        Pair("Left", stringResource(R.string.label_left)),
+        Pair("Right", stringResource(R.string.label_right)),
+        Pair("Both", stringResource(R.string.label_both)),
+    )
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
         Text(
-            text = "Hand Play: ",
+            text = stringResource(R.string.hand_play) + ": ",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .padding(end = 10.dp)
@@ -420,12 +443,13 @@ fun HandPlays(
             radioOptions.forEach { text ->
                 InputChip(
                     modifier = Modifier.padding(horizontal = 5.dp),
-                    selected = text == initialSelection,
-                    onClick = { onSelected.invoke(text) },
+                    selected = text.first == initialSelection,
+                    onClick = { onSelected.invoke(text.first) },
                     label = {
                         Text(
                             modifier = Modifier.padding(5.dp),
-                            text = text, textAlign = TextAlign.Center,
+                            text = text.second,
+                            textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     }
@@ -435,7 +459,6 @@ fun HandPlays(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GenderField(
@@ -443,14 +466,17 @@ fun GenderField(
     initialSelection: String = "",
     onSelected: (String) -> Unit,
 ) {
-    val radioOptions = listOf("Man", "Woman")
+    val radioOptions = listOf(
+        Pair("Man", stringResource(R.string.label_gender_man)),
+        Pair("Woman", stringResource(R.string.label_gender_woman))
+    )
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
         Text(
-            text = "Gender: ",
+            text = stringResource(R.string.label_gender) + ": ",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .padding(end = 10.dp)
@@ -460,11 +486,11 @@ fun GenderField(
             Modifier
                 .selectableGroup()
                 .weight(.75f)) {
-            radioOptions.forEach { text ->
+            radioOptions.forEach { gender ->
                 InputChip(
                     modifier = Modifier.padding(horizontal = 5.dp),
-                    selected = text == initialSelection,
-                    onClick = { onSelected.invoke(text) },
+                    selected = gender.first == initialSelection,
+                    onClick = { onSelected.invoke(gender.first) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Outlined.Person,
@@ -473,7 +499,7 @@ fun GenderField(
                     },
                     label = {
                         Text(
-                            text = text,
+                            text = gender.second,
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(5.dp)
                         )
@@ -520,13 +546,13 @@ fun BottomView(
             horizontalArrangement = Arrangement.End
         ) {
             OutlinedButton(onClick = { onClear.invoke() }, enabled = enableClear) {
-                Text(text = "Clear")
+                Text(text = stringResource(R.string.label_clear))
             }
             OutlinedButton(
                 enabled = enableSave, onClick = { onSave.invoke() },
                 modifier = Modifier.padding(start = 10.dp)
             ) {
-                Text(text = "Save")
+                Text(text = stringResource(R.string.label_save))
             }
         }
     }
@@ -535,7 +561,9 @@ fun BottomView(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun CreatePlayerPreview() {
-    CreatePlayerContent("Create Player", CreatePlayerState(), event = {}, onSave = {},
-        onCheckSavePlayers = {}, selfieState = null, onNewSelfie = { Uri.parse("") }
+    CreatePlayerContent("Create Player", CreatePlayerState(),
+        event = {}, onSave = {},
+        onCheckSavePlayers = {},
+        selfieState = null, onNewSelfie = { Uri.parse("") }
     )
 }

@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -80,7 +81,7 @@ fun TakePhoto(
 
     Column(modifier) {
         Text(
-            text = "Take Player Photo",
+            text = stringResource(R.string.label_take_selfie),
             style = MaterialTheme.typography.bodyMedium,
         )
         Spacer(modifier = Modifier.padding(vertical = 3.dp))
@@ -125,13 +126,13 @@ fun TakePhoto(
                         } else {
                             cameraPermissionLauncher.launchPermissionCamera()
                         }
-                    }) { Text(text = "Camera", style = MaterialTheme.typography.labelSmall) }
+                    }) { Text(text = stringResource(R.string.label_camera), style = MaterialTheme.typography.labelSmall) }
                 OutlinedButton(
                     modifier = Modifier.padding(end = padding),
                     onClick = {
                         newImageUri = getNewImageUri()
                         galleryLauncher.launch("image/*")
-                    }) { Text(text = "File", style = MaterialTheme.typography.labelSmall) }
+                    }) { Text(text = stringResource(R.string.label_file), style = MaterialTheme.typography.labelSmall) }
                 OutlinedButton(
                     modifier = Modifier.padding(end = padding),
                     onClick = {
@@ -139,7 +140,7 @@ fun TakePhoto(
                         visualMediaLauncher.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                         )
-                    }) { Text(text = "Gallery", style = MaterialTheme.typography.labelSmall) }
+                    }) { Text(text = stringResource(R.string.label_gallery), style = MaterialTheme.typography.labelSmall) }
             }
         }
         Spacer(modifier = Modifier.padding(vertical = 2.dp))

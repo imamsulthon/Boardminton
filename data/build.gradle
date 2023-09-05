@@ -46,7 +46,7 @@ dependencies {
     implementation("androidx.room:room-ktx:$version_room")
 
     // GSON
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation "com.google.code.gson:gson:$version_gson"
 
     // Hilt
     ksp "com.google.dagger:hilt-android-compiler:$version_hilt"

@@ -168,12 +168,7 @@ class MatchEngine(
         winner = winner,
         shuttleCockCount = shuttleCockCount,
     )
-
     // endregion
-
-    private fun printLog(msg: String) {
-        println("MatchEngine: $msg")
-    }
 
 }
 

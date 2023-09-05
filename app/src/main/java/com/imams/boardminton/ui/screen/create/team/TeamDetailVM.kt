@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.imams.boardminton.domain.mapper.UseCaseMapper.toModel
 import com.imams.boardminton.domain.mapper.UseCaseMapper.toState
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
-import com.imams.boardminton.ui.screen.create.player.CreateTeamState
 import com.imams.data.player.repository.PlayerRepository
 import com.imams.data.team.repository.TeamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

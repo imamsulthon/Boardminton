@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,6 +60,8 @@ import com.imams.boardminton.R
 import com.imams.boardminton.data.asDateTime
 import com.imams.boardminton.data.epochToAge
 import com.imams.boardminton.ui.component.RowInfoData
+import com.imams.boardminton.ui.component.country.countryCodeToFlag
+import com.imams.boardminton.ui.component.country.getCountryName
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
 import com.imams.boardminton.ui.utils.horizontalGradientBackground
 import com.imams.boardminton.ui.utils.sendWhatsappMessage
@@ -198,7 +201,7 @@ fun TopScrollingContent(
                 modifier = Modifier.padding(bottom = 4.dp), maxLines = 3,
             )
             Text(
-                text = "${state.gender} (${state.dob.epochToAge()} years old)",
+                text = "${countryCodeToFlag(state.nationalityCode)} ${state.gender} (${state.dob.epochToAge()} years old)",
                 style = typography.labelMedium,
                 modifier = Modifier.padding(bottom = 8.dp), maxLines = 2
             )
@@ -298,6 +301,7 @@ fun SectionPlayerData(
                 RowInfoData(label = "Full Name", content = state.fullName)
                 RowInfoData(label = "DoB", content = "${state.dob.asDateTime("dd MMM yyyy")}")
                 RowInfoData(label = "Gender", content = state.gender)
+                RowInfoData(label = "Nationality", content = stringResource(id = getCountryName(state.nationalityCode)))
                 RowInfoData(label = "Phone Number", content = state.phoneNumber)
                 RowInfoData(label = "Hand Play", content = state.handPlay)
                 RowInfoData(label = "Height", content = "${state.height} cm")
@@ -314,8 +318,8 @@ private fun PlayerDetailPreview() {
     Content(
         CreatePlayerState(id = 10,
             firstName = "Imam", lastName = "Sulthon",
-            weight = 56, height = 168,
-            gender = "Man", handPlay = "Left",
+            weight = 56, height = 168, phoneNumber = "081922999200",
+            gender = "Man", handPlay = "Left", nationalityCode = "au"
         ),
         onEdit = {}, onSendMessage = {},
     )

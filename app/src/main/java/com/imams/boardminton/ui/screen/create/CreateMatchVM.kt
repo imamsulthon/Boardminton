@@ -17,7 +17,7 @@ import com.imams.boardminton.domain.model.PlayerViewParam
 import com.imams.boardminton.domain.model.TeamViewParam
 import com.imams.boardminton.engine.data.model.Winner
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
-import com.imams.boardminton.ui.screen.create.player.CreateTeamState
+import com.imams.boardminton.ui.screen.create.team.CreateTeamState
 import com.imams.data.match.model.Match
 import com.imams.data.match.repository.MatchRepository
 import com.imams.data.team.repository.TeamRepository

@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
@@ -15,11 +17,9 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,18 +30,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.imams.boardminton.R
 import com.imams.boardminton.data.toJson
 import com.imams.boardminton.domain.model.ISide
 import com.imams.boardminton.domain.model.ITeam
+import com.imams.boardminton.ui.component.Section
+import com.imams.boardminton.ui.component.SectionSelector
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
-import com.imams.boardminton.ui.screen.create.player.CreateTeamState
-import com.imams.boardminton.ui.screen.create.player.PlayerBottomSheetContent
-import com.imams.boardminton.ui.screen.create.team.TeamBottomSheetContent
+import com.imams.boardminton.ui.screen.create.player.PlayerBottomSheet
+import com.imams.boardminton.ui.screen.create.team.CreateTeamState
+import com.imams.boardminton.ui.screen.create.team.TeamBottomSheet
 import com.imams.boardminton.ui.theme.Orientation
 import com.imams.boardminton.ui.utils.isNotEmptyAndSameName
 
@@ -208,42 +212,42 @@ private fun TopView(
     single: Boolean = true,
     onChange: (Boolean) -> Unit,
 ) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(vertical = 5.dp, horizontal = 5.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
     ) {
+        val typeLbl = if (single) stringResource(R.string.label_single)
+        else stringResource(R.string.label_double)
         Text(
-            modifier = Modifier.padding(horizontal = 5.dp),
-            text = "Create ${if (single) "Single" else "Double"} match",
-            fontSize = 16.sp
-        )
-
-        Row(
             modifier = Modifier
-                .wrapContentWidth()
-                .wrapContentHeight(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Button(
-                onClick = { onChange.invoke(true) },
-                modifier = Modifier.padding(horizontal = 5.dp),
-                enabled = !single
-            ) {
-                Text(text = "Single")
-            }
-            Button(
-                onClick = { onChange.invoke(false) },
-                modifier = Modifier.padding(horizontal = 5.dp),
-                enabled = single
-            ) {
-                Text(text = "Double")
-            }
+                .padding(horizontal = 5.dp).padding(bottom = 10.dp)
+                .align(Alignment.CenterHorizontally),
+            text = stringResource(R.string.label_create_format_match, typeLbl),
+            fontSize = 18.sp
+        )
+        val selectionTitles = listOf(
+            Section("Single"), Section("Double")
+        )
+        var currentSelection by remember(single) {
+            mutableStateOf(if (single) selectionTitles[0] else selectionTitles[1])
         }
-
+        SectionSelector(
+            modifier = Modifier.wrapContentWidth()
+                .height(50.dp).widthIn(max = 250.dp)
+                .padding(5.dp)
+                .align(Alignment.CenterHorizontally),
+            sections = selectionTitles,
+            selection = currentSelection,
+            onClick = { selection ->
+                if (selection != currentSelection) {
+                    currentSelection = selection
+                    if (selection.title.equals("Single", true)) onChange.invoke(true)
+                    else onChange.invoke(false)
+                }
+            }
+        )
     }
 }
 
@@ -318,7 +322,7 @@ private fun BottomButton(
             onClick = { listener.onBackPressed() },
             modifier = Modifier.padding(end = 5.dp)
         ) {
-            Text(text = "Back")
+            Text(text = stringResource(R.string.label_back))
         }
 
         OutlinedButton(
@@ -335,7 +339,7 @@ private fun BottomButton(
             modifier = Modifier.padding(start = 5.dp),
             enabled = enableNext
         ) {
-            Text(text = "Next")
+            Text(text = stringResource(R.string.label_next))
         }
     }
 }
@@ -349,17 +353,12 @@ private fun ImportPlayers(
     onChoose: (ITeam, CreatePlayerState) -> Unit,
     dismiss: () -> Unit,
 ) {
-    val skipPartiallyExpanded by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
     if (openBottomSheet) {
-        ModalBottomSheet(
+        PlayerBottomSheet(
             onDismissRequest = { dismiss.invoke() },
-            sheetState = bottomSheetState,
-        ) {
-            PlayerBottomSheetContent(list = optionalPlayers, onSelect = {
-                onChoose.invoke(onField, it)
-            })
-        }
+            list = optionalPlayers,
+            onSelect = { onChoose.invoke(onField, it) }
+        )
     }
 }
 
@@ -372,17 +371,12 @@ private fun ImportTeams(
     onChoose: (ISide, CreateTeamState) -> Unit,
     dismiss: () -> Unit,
 ) {
-    val skipPartiallyExpanded by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
     if (openBottomSheet) {
-        ModalBottomSheet(
+        TeamBottomSheet(
             onDismissRequest = { dismiss.invoke() },
-            sheetState = bottomSheetState,
-        ) {
-            TeamBottomSheetContent(list = optionalTeams, onSelect = {
-                onChoose.invoke(onField, it)
-            })
-        }
+            list = optionalTeams,
+            onSelect = { onChoose.invoke(onField, it) },
+        )
     }
 }
 

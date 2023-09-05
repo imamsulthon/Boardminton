@@ -11,11 +11,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,9 +30,7 @@ import com.imams.boardminton.ui.screen.create.InputPlayer
 import com.imams.boardminton.ui.screen.create.SwapButton
 import com.imams.boardminton.ui.screen.create.ipModifierP
 import com.imams.boardminton.ui.screen.create.player.BottomView
-import com.imams.boardminton.ui.screen.create.player.CreateTeamEvent
-import com.imams.boardminton.ui.screen.create.player.CreateTeamState
-import com.imams.boardminton.ui.screen.create.player.PlayerBottomSheetContent
+import com.imams.boardminton.ui.screen.create.player.PlayerBottomSheet
 import com.imams.boardminton.ui.screen.create.player.TopView
 import com.imams.boardminton.ui.utils.isNotEmptyAndSameName
 import com.imams.boardminton.ui.utils.keyBoardDone
@@ -68,42 +64,22 @@ fun CreateTeamScreen(
         onCheckSaveTeams = { openSavedTeams = true },
         onCreatePlayer = onCreatePlayer::invoke
     )
-    // region check dialog
-    val skipPartiallyExpanded1 by remember { mutableStateOf(false) }
-    val sheetState1 = rememberModalBottomSheetState(
-        skipPartiallyExpanded = skipPartiallyExpanded1
-    )
-    val skipPartiallyExpanded2 by remember { mutableStateOf(false) }
-    val sheetState2 = rememberModalBottomSheetState(
-        skipPartiallyExpanded = skipPartiallyExpanded2
-    )
 
     // Sheet content
     if (openSavedTeams) {
-        ModalBottomSheet(
-            onDismissRequest = { openSavedTeams = false },
-            sheetState = sheetState1,
-        ) {
-            TeamBottomSheetContent(list = savedTeams)
-        }
+        TeamBottomSheet(onDismissRequest = { openSavedTeams = false }, list = savedTeams)
     }
     // sheet saved teams
     if (openPlayerOptional) {
-        ModalBottomSheet(
-            onDismissRequest = { openPlayerOptional = false },
-            sheetState = sheetState2,
-        ) {
-            PlayerBottomSheetContent(
-                list = savedPlayers,
-                onSelect = {
-                    when (selectedField) {
-                        1 -> viewModel.execute(CreateTeamEvent.Player1(it))
-                        2 -> viewModel.execute(CreateTeamEvent.Player2(it))
-                    }
-                    openPlayerOptional = false
+        PlayerBottomSheet(onDismissRequest = { openPlayerOptional = false }, list = savedPlayers,
+            onSelect = {
+                when (selectedField) {
+                    1 -> viewModel.execute(CreateTeamEvent.Player1(it))
+                    2 -> viewModel.execute(CreateTeamEvent.Player2(it))
                 }
-            )
-        }
+                openPlayerOptional = false
+            }
+        )
     }
 }
 

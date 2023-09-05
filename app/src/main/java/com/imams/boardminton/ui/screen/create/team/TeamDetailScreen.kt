@@ -49,7 +49,6 @@ import com.imams.boardminton.R
 import com.imams.boardminton.ui.component.ProfileImage
 import com.imams.boardminton.ui.component.RowInfoData
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
-import com.imams.boardminton.ui.screen.create.player.CreateTeamState
 import com.imams.boardminton.ui.utils.horizontalGradientBackground
 
 @Composable

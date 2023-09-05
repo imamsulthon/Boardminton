@@ -1,24 +1,30 @@
 package com.imams.boardminton.domain.mapper
 
 import com.imams.boardminton.ui.screen.create.player.CreatePlayerState
-import com.imams.boardminton.ui.screen.create.player.CreateTeamState
+import com.imams.boardminton.ui.screen.create.team.CreateTeamState
 import com.imams.data.player.model.Player
 import com.imams.data.team.model.Team
-
 
 object UseCaseMapper {
 
     fun Player.toState() = CreatePlayerState(
         id = id,
-        firstName = firstName, lastName = lastName, handPlay = handPlay,
-        gender = gender, height = height, weight = weight, phoneNumber = phoneNumber,
-        dob = dob, photoProfileUri = photoProfileUri,
+        firstName = firstName, lastName = lastName,
+        handPlay = handPlay, gender = gender,
+        height = height, weight = weight,
+        dob = dob,
+        phoneNumber = phoneNumber,
+        nationalityCode = nationalityCode,
+        photoProfileUri = photoProfileUri,
     )
 
     fun CreatePlayerState.toModel(withId: Boolean = false) = Player(
-        firstName = firstName, lastName = lastName, handPlay = handPlay,
-        gender = gender, height = height, weight = weight, dob = dob,
+        firstName = firstName, lastName = lastName,
+        handPlay = handPlay, gender = gender,
+        height = height, weight = weight,
+        dob = dob,
         phoneNumber = phoneNumber,
+        nationalityCode = nationalityCode,
         photoProfileUri = photoProfileUri,
     ).also {
         if (withId) it.id = id

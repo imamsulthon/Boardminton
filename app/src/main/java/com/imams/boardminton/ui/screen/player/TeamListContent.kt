@@ -32,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -80,7 +81,7 @@ internal fun TeamList(
         },
     ) { padding ->
         if (list.isEmpty()) {
-            EmptyContent(message = "No Team registered")
+            EmptyContent(message = stringResource(R.string.empty_data_teams))
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -179,7 +180,10 @@ fun TeamItem(
                 )
             }
             Text(
-                modifier = Modifier.wrapContentSize().padding(compPad).constrainAs(vE) {
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(compPad)
+                    .constrainAs(vE) {
                         end.linkTo(parent.end)
                         top.linkTo(vC.top)
                         bottom.linkTo(vC.bottom)
@@ -212,7 +216,7 @@ fun SortTeamSheet(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        Text(text = "Sort by:", fontWeight = FontWeight.SemiBold)
+        Text(text = stringResource(R.string.label_sort_by), fontWeight = FontWeight.SemiBold)
         SortField(label = "ID", options = sortData, initialSelection = sortId?.name.orEmpty(),
             onSelected = {
                 init = SortTeam.Id(it)
@@ -224,7 +228,7 @@ fun SortTeamSheet(
                 sortLose = null
             }
         )
-        SortField(label = "Name", options = sortData, initialSelection = sortName?.name.orEmpty(),
+        SortField(label = stringResource(R.string.name), options = sortData, initialSelection = sortName?.name.orEmpty(),
             onSelected = {
                 init = SortTeam.Name(it)
                 sortName = init.asc
@@ -235,7 +239,7 @@ fun SortTeamSheet(
                 sortLose = null
             }
         )
-        SortField(label = "Rank", options = sortData, initialSelection = sortRank?.name.orEmpty(),
+        SortField(label = stringResource(R.string.label_rank), options = sortData, initialSelection = sortRank?.name.orEmpty(),
             onSelected = {
                 init = SortTeam.Rank(it)
                 sortId = null
@@ -246,7 +250,7 @@ fun SortTeamSheet(
                 sortLose = null
             }
         )
-        SortField(label = "Play", options = sortData, initialSelection = sortPlay?.name.orEmpty(),
+        SortField(label = stringResource(R.string.label_play), options = sortData, initialSelection = sortPlay?.name.orEmpty(),
             onSelected = {
                 init = SortTeam.Play(it)
                 sortId = null
@@ -257,7 +261,7 @@ fun SortTeamSheet(
                 sortLose = null
             }
         )
-        SortField(label = "Win", options = sortData, initialSelection = sortWin?.name.orEmpty(),
+        SortField(label = stringResource(R.string.label_win), options = sortData, initialSelection = sortWin?.name.orEmpty(),
             onSelected = {
                 init = SortTeam.Win(it)
                 sortId = null
@@ -268,7 +272,7 @@ fun SortTeamSheet(
                 sortLose = null
             }
         )
-        SortField(label = "Lose", options = sortData, initialSelection = sortLose?.name.orEmpty(),
+        SortField(label = stringResource(R.string.label_lose), options = sortData, initialSelection = sortLose?.name.orEmpty(),
             onSelected = {
                 init = SortTeam.Lose(it)
                 sortId = null
@@ -290,13 +294,13 @@ fun SortTeamSheet(
                     .weight(1f)
                     .padding(end = 4.dp),
                 onClick = { onCancel.invoke() }
-            ) { Text(text = "Cancel") }
+            ) { Text(text = stringResource(R.string.label_cancel)) }
             OutlinedButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
                 onClick = { onApply.invoke(init) }
-            ) { Text(text = "Apply") }
+            ) { Text(text = stringResource(R.string.label_apply)) }
         }
     }
 }

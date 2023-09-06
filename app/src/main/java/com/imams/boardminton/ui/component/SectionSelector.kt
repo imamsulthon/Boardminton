@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,9 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.imams.boardminton.ui.theme.BoardMintonTheme
 
-@Stable
-@JvmInline
-value class Section(val title: String)
+data class Section(val id: String, val title: String)
 
 @Composable
 fun SectionSelector(
@@ -42,7 +39,7 @@ fun SectionSelector(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(50),
-        border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.primaryContainer)
+        border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.onPrimaryContainer)
     ) {
         Row {
             sections.forEach { item ->
@@ -70,7 +67,6 @@ fun SectionItem(modifier: Modifier, title: String, isSelected: Boolean) {
         targetValue = if (isSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary,
         animationSpec = tween(200), label = ""
     )
-
     Box(
         modifier = modifier.background(bgColor),
         contentAlignment = Alignment.Center,
@@ -91,9 +87,9 @@ private fun PreviewSectionSelector() {
     BoardMintonTheme(darkTheme = false) {
         val sectionTitles = remember {
             listOf(
-                Section("Comments"),
-                Section("Popular"),
-                Section("Others")
+                Section("c", "Comments"),
+                Section("p", "Popular"),
+                Section("o", "Others")
             )
         }
         var currentSelection by remember { mutableStateOf(sectionTitles.first()) }

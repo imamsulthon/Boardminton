@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -173,7 +174,6 @@ private fun TopAppBarView(
                     )
                 }
             }
-
         },
     )
 }
@@ -203,7 +203,7 @@ private fun SectionTeamData(
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
-                text = "Team Data & Stats",
+                text = stringResource(R.string.data_team),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -213,11 +213,11 @@ private fun SectionTeamData(
                     .background(MaterialTheme.colorScheme.onSurface)
             )
             Column {
-                RowInfoData(label = "Id", content = state.id.toString())
-                RowInfoData(label = "Rank", content = state.rank.toString())
-                RowInfoData(label = "Play", content = state.play.toString())
-                RowInfoData(label = "Win", content = state.win.toString())
-                RowInfoData(label = "Lose", content = state.lose.toString())
+                RowInfoData(label = R.string.label_player_id, content = state.id.toString())
+                RowInfoData(label = R.string.label_rank, content = state.rank.toString())
+                RowInfoData(label = R.string.label_play, content = state.play.toString())
+                RowInfoData(label = R.string.label_win, content = state.win.toString())
+                RowInfoData(label = R.string.label_lose, content = state.lose.toString())
             }
         }
     }

@@ -31,11 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.imams.boardminton.R
 import com.imams.boardminton.domain.model.GameViewParam
 import com.imams.boardminton.domain.model.TeamViewParam
 import com.imams.boardminton.ui.utils.getLabel
@@ -62,7 +64,7 @@ fun MainNameBoardView(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "${if (single) "Single" else "Double"} Match",
+                text = stringResource(if (single) R.string.single_match else R.string.double_match),
                 fontWeight = FontWeight.ExtraBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -147,6 +149,8 @@ fun ProfileImage(
             .build(),
         contentScale = ContentScale.Crop,
         contentDescription = null,
-        modifier = modifier.size(size).clip(CircleShape)
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
     )
 }

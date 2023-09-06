@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -113,7 +113,9 @@ fun CreateMatchScreen(
     }
 
     @Composable
-    fun topView() = TopView(single = singleMatch, onChange = { singleMatch = it })
+    fun topView(orientation: Orientation) {
+        TopView(single = singleMatch, orientation = orientation, onChange = { singleMatch = it })
+    }
 
     @Composable
     fun formView(
@@ -170,14 +172,14 @@ fun CreateMatchScreen(
     when (config.orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
             PortraitContent(
-                topView = { topView() },
+                topView = { topView(orientation = Orientation.Portrait) },
                 formField = { formView(mPortrait, orientation = Orientation.Portrait) },
                 bottomView = { bottomView(orientation = Orientation.Portrait) }
             )
         }
         else -> {
             LandscapeContent(
-                topView = { topView() },
+                topView = { topView(orientation = Orientation.Landscape) },
                 formField = { formView(mLandscape, orientation = Orientation.Landscape) },
                 bottomView = { bottomView(orientation = Orientation.Landscape) }
             )
@@ -210,44 +212,57 @@ fun CreateMatchScreen(
 @Composable
 private fun TopView(
     single: Boolean = true,
+    orientation: Orientation,
     onChange: (Boolean) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(vertical = 5.dp, horizontal = 5.dp),
-    ) {
+    @Composable
+    fun component() {
         val typeLbl = if (single) stringResource(R.string.label_single)
         else stringResource(R.string.label_double)
         Text(
             modifier = Modifier
-                .padding(horizontal = 5.dp).padding(bottom = 10.dp)
-                .align(Alignment.CenterHorizontally),
+                .padding(horizontal = 5.dp, vertical = 12.dp),
             text = stringResource(R.string.label_create_format_match, typeLbl),
-            fontSize = 18.sp
+            fontSize = 20.sp
         )
         val selectionTitles = listOf(
-            Section("Single"), Section("Double")
+            Section("Single", stringResource(R.string.label_single)),
+            Section("Double", stringResource(R.string.label_double))
         )
         var currentSelection by remember(single) {
             mutableStateOf(if (single) selectionTitles[0] else selectionTitles[1])
         }
         SectionSelector(
-            modifier = Modifier.wrapContentWidth()
-                .height(50.dp).widthIn(max = 250.dp)
-                .padding(5.dp)
-                .align(Alignment.CenterHorizontally),
+            modifier = Modifier
+                .wrapContentWidth()
+                .height(50.dp)
+                .widthIn(max = 250.dp)
+                .padding(5.dp),
             sections = selectionTitles,
             selection = currentSelection,
             onClick = { selection ->
                 if (selection != currentSelection) {
                     currentSelection = selection
-                    if (selection.title.equals("Single", true)) onChange.invoke(true)
+                    if (selection.id.equals("Single", true)) onChange.invoke(true)
                     else onChange.invoke(false)
                 }
             }
         )
+    }
+    if (orientation == Orientation.Landscape) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) { component() }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(vertical = 5.dp, horizontal = 5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) { component() }
     }
 }
 
@@ -257,25 +272,10 @@ private fun PortraitContent(
     formField: @Composable () -> Unit,
     bottomView: @Composable () -> Unit,
 ) {
-    Surface {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                verticalArrangement = Arrangement.Top
-            ) {
-                topView()
-                formField()
-            }
-            bottomView()
-        }
-    }
-
+    Scaffold(
+        topBar = { topView() },
+        bottomBar = { bottomView() }
+    ) { p -> Surface(modifier = Modifier.padding(p)) { formField() } }
 }
 
 @Composable
@@ -284,23 +284,10 @@ private fun LandscapeContent(
     formField: @Composable () -> Unit,
     bottomView: @Composable () -> Unit,
 ) {
-    Surface {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            topView()
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                formField()
-            }
-            bottomView()
-        }
-    }
-
+    Scaffold(
+        topBar = { topView() },
+        bottomBar = { bottomView() }
+    ) { p -> Surface(modifier = Modifier.padding(p)) { formField() } }
 }
 
 @Composable

@@ -12,6 +12,20 @@
     <string name="label_see_all">See All</string>
     <string name="label_on_going_match">On Going Matches</string>
 
+    <plurals name="label_team">
+        <item quantity="one">Team</item>
+        <item quantity="few">Teams</item>
+    </plurals>
+
+    <plurals name="label_player">
+        <item quantity="one">Team</item>
+        <item quantity="few">Teams</item>
+    </plurals>
+    <string name="label_player">Players</string>
+    <string name="label_team">Teams</string>
+    <string name="data_player">Player Data</string>
+    <string name="data_team">Team Data</string>
+
     // common views
     <string name="label_cancel">Cancel</string>
     <string name="label_save">Save</string>
@@ -19,12 +33,24 @@
     <string name="label_next">Next</string>
     <string name="label_back">Back</string>
     <string name="label_apply">Apply</string>
+    <string name="label_finish">Finish</string>
+    <string name="label_sort">Sort</string>
+    <string name="label_filter">Filter</string>
+    <string name="label_sort_by">Sort by:</string>
+    <string name="label_filter_by">Filter by:</string>
+    <string name="empty_data_players">No Player registered</string>
+    <string name="empty_data_teams">No Team registered</string>
 
     // create Player
+    <string name="player_id">Player ID: %s</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
     <string name="height">Height</string>
     <string name="weight">Weight</string>
+    <string name="age">Age</string>
+    <string name="name">Name</string>
+    <string name="full_name">Full Name</string>
+    <string name="label_player_id">Player ID</string>
     <string name="label_gender">Gender</string>
     <string name="label_nationality">Nationality</string>
     <string name="hand_play">Play Handed</string>
@@ -39,6 +65,10 @@
     <string name="label_camera">Camera</string>
     <string name="label_file">File</string>
     <string name="label_gallery">Gallery</string>
+    <string name="label_rank">Rank</string>
+    <string name="label_play">Play</string>
+    <string name="label_win">Won</string>
+    <string name="label_lose">Lose</string>
 
     // Create Team
 
@@ -48,6 +78,9 @@
     <string name="label_double">Double</string>
     <string name="import_team">Import Team</string>
     <string name="label_field_player">Player %s Name</string>
+    <string name="label_match_done">Match Done</string>
+    <string name="label_game_done">Game %s Done</string>
+    <string name="label_winner_by">Winner by %s</string>
 
     // App Settings
     <string name="select_theme">Select Theme</string>
@@ -55,7 +88,7 @@
     <string name="label_app_language">App Language</string>
     <string name="match_board_settings">Match Board Settings</string>
     <string name="button_vibrate">Button Vibrate</string>
-
+    <string name="button_sound">Button Vibrate</string>
 
     // country list
     <string name="andora">Andorra</string>

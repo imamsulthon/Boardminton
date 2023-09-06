@@ -156,23 +156,12 @@ fun SwipeToOptional(
             ActionRow(modifier = Modifier.align(Alignment.CenterEnd), alphaTransition) {
                 BackgroundListItem(
                     this,
-                    onDelete = {
-                        printLog("onDelete $index")
-                        onDelete.invoke(index)
-                    },
-                    onEdit = {
-                        printLog("onDelete $index")
-                        onEdit.invoke(index)
-                    },
+                    onDelete = { onDelete.invoke(index) },
+                    onEdit = { onEdit.invoke(index) },
                 )
             }
         }
     }
-}
-
-
-private fun printLog(m: String) {
-    println("SwipeToOptional $m")
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -195,7 +184,6 @@ fun ForegroundListItem(
             initialValue = SwipeState.VISIBLE,
             anchors = swipeAnchors,
             confirmValueChange = {
-                printLog("confirmValueChange $it")
                 when (it) {
                     SwipeState.VISIBLE -> onFullVisible.invoke(index)
                     SwipeState.MIDDLE -> onHalfSwiped.invoke(index)

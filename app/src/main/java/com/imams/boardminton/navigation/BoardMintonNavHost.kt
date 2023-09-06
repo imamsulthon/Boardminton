@@ -297,10 +297,6 @@ fun BoardMintonNavHost(
     }
 }
 
-private fun printLog(msg: String) {
-    println("MyNavigation $msg")
-}
-
 // todo example of nested navigation graphs
 fun NavGraphBuilder.scoreBoardGraph(navController: NavController) {
     navigation(startDestination = "username", route = "login") {

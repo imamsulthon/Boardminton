@@ -51,8 +51,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun log(m: String) = println("MainActivity: log $m")
-
     private fun setLocale(isEnglish: Boolean) {
         if (isEnglish) setLocale("en") else setLocale("id")
     }

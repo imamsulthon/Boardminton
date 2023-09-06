@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <string name="app_name">Boardminton</string>
     <string name="single_match">Pertandingan Tunggal</string>
@@ -11,12 +11,25 @@
     <string name="label_registered_player">Daftar Pemain</string>
     <string name="label_registered_team">Tim Terdaftar</string>
     <string name="label_see_all">Lihat Semua</string>
-    <string name="label_on_going_match">Pertandingan Berjalan</string>
+    <string name="label_on_going_match">Pertandingan Berlangsung</string>
     <string name="label_create_match">Buat Pertandingan</string>
     <string name="label_take_selfie">Ambil Selfie Pemain</string>
     <string name="label_camera">Kamera</string>
     <string name="label_file">Dokumen</string>
     <string name="label_gallery">Galeri</string>
+
+    <plurals name="label_team" tools:ignore="UnusedQuantity">
+        <item quantity="one">Tim</item>
+        <item quantity="few">Tim</item>
+    </plurals>
+    <plurals name="label_player" tools:ignore="UnusedQuantity">Pemain>
+        <item quantity="one">Pemain</item>
+        <item quantity="few">Pemain</item>
+    </plurals>
+    <string name="label_player">Pemain</string>
+    <string name="label_team">Tim</string>
+    <string name="data_player">Data Pemain</string>
+    <string name="data_team">Data Tim</string>
 
     <string name="label_cancel">Batal</string>
     <string name="label_save">Simpan</string>
@@ -24,12 +37,25 @@
     <string name="label_next">Lanjut</string>
     <string name="label_back">Kembali</string>
     <string name="label_apply">Terapkan</string>
+    <string name="label_finish">Selesai</string>
+    <string name="label_sort">Urutkan</string>
+    <string name="label_filter">Filter</string>
+    <string name="label_sort_by">Urut dengan:</string>
+    <string name="label_filter_by">Filter dengan:</string>
+
+    <string name="empty_data_players">Tidak ada pemain terdaftar</string>
+    <string name="empty_data_teams">Tidak ada tim terdaftar</string>
 
     // form
+    <string name="player_id">ID Pemain: %s</string>
     <string name="first_name">Nama Depan</string>
     <string name="last_name">Nama Belakang</string>
     <string name="height">Tinggi</string>
     <string name="weight">Berat</string>
+    <string name="age">Usia</string>
+    <string name="name">Nama</string>
+    <string name="full_name">Nama Lengkap</string>
+    <string name="label_player_id">Player ID</string>
     <string name="label_gender">Jenis Kelamin</string>
     <string name="label_nationality">Kewarganegaraan</string>
     <string name="hand_play">Tangan Bermain</string>
@@ -40,6 +66,10 @@
     <string name="label_both">Kiri &amp; Kanan</string>
     <string name="label_gender_man">Laki-laki</string>
     <string name="label_gender_woman">Perempuan</string>
+    <string name="label_rank">Peringkat</string>
+    <string name="label_play">Bermain</string>
+    <string name="label_win">Menang</string>
+    <string name="label_lose">Kalah</string>
 
     // Create Team
 
@@ -49,6 +79,9 @@
     <string name="label_double">Ganda</string>
     <string name="import_team">Pilih Tim</string>
     <string name="label_field_player">Nama Pemain %s</string>
+    <string name="label_match_done">Pertandingan Selesai</string>
+    <string name="label_game_done">Game %s Selesai</string>
+    <string name="label_winner_by">Dimenangkan oleh $s</string>
 
     // App Settings
     <string name="select_theme">Pilih Tema</string>
@@ -56,6 +89,7 @@
     <string name="label_app_language">Bahasa Aplikasi</string>
     <string name="match_board_settings">Pengaturan Papan Skor</string>
     <string name="button_vibrate">Getaran Tombol</string>
+    <string name="button_sound">Suara Tombol</string>
 
     <string name="andora">Andorra</string>
     <string name="united_arab_emirates">United Arab Emirates (UAE)</string>
@@ -300,8 +334,8 @@
     <string name="south_africa">South Africa</string>
     <string name="zambia">Zambia</string>
     <string name="zimbabwe">Zimbabwe</string>
-    <string name="unknown">Unknown</string>
-    <string name="search">Search...</string>
-    <string name="select_country">Select Country</string>
+    <string name="unknown">Tidak diketahui</string>
+    <string name="search">Mencari...</string>
+    <string name="select_country">Pilih Negara</string>
 
 </resources>

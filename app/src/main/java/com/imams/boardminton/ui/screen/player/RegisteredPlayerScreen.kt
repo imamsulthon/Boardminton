@@ -14,9 +14,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,6 +40,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -100,8 +99,8 @@ private fun ContentWrapper(
     teamList: @Composable () -> Unit,
 ) {
     val tabData = listOf(
-        "Players" to Icons.Filled.Home,
-        "Teams" to Icons.Filled.AccountBox,
+        "Players" to stringResource(R.string.label_player),
+        "Teams" to stringResource(R.string.label_team),
     )
     val pagerState = rememberPagerState(pageCount = { tabData.size })
     val tabIndex = pagerState.currentPage
@@ -118,8 +117,8 @@ private fun ContentWrapper(
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
                 ) {
                     when (index) {
-                        0 -> Text(text = pair.first, Modifier.padding(5.dp))
-                        else -> Text(text = pair.first, Modifier.padding(5.dp))
+                        0 -> Text(text = pair.second, Modifier.padding(5.dp))
+                        else -> Text(text = pair.second, Modifier.padding(5.dp))
                     }
                 }
             }
@@ -175,7 +174,7 @@ internal fun PlayerList(
         },
     ) { padding ->
         if (list.isEmpty()) {
-            EmptyContent(message = "No Player registered")
+            EmptyContent(message = stringResource(R.string.empty_data_players))
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -231,10 +230,6 @@ internal fun PlayerList(
     }
 }
 
-private fun printLog(m: String) {
-    println("SwipeToOptional Page $m")
-}
-
 // todo chane List Item to other layout component
 @Composable
 private fun PlayerItem(
@@ -247,10 +242,10 @@ private fun PlayerItem(
             ProfileImage(imgUriPath = item.photoProfileUri, imgDefault = imgRes)
         },
         trailingContent = {
-            Text(text = "Hand Play\n${item.handPlay}")
+            Text(text = stringResource(R.string.hand_play) +"\n${item.handPlay}")
         },
         overlineContent = {
-            Text(text = "Player ID: ${item.id}")
+            Text(text = stringResource(R.string.player_id, item.id.toString()))
         },
         tonalElevation = 2.dp,
         shadowElevation = 2.dp,
@@ -290,7 +285,7 @@ fun ListBottomBar(
                     .weight(1f)
                     .padding(end = 5.dp),
                 onClick = { onSort.invoke() }) {
-                Text(text = "Sort")
+                Text(text = stringResource(R.string.label_sort))
             }
             OutlinedButton(enabled = enableFilter,
                 modifier = Modifier
@@ -298,7 +293,7 @@ fun ListBottomBar(
                     .weight(1f)
                     .padding(start = 5.dp),
                 onClick = { onFilter.invoke() }) {
-                Text(text = "Filter")
+                Text(text = stringResource(R.string.label_filter))
             }
         }
     }
@@ -315,7 +310,7 @@ private fun FilterSheet(
     Column(
         modifier = Modifier.bottomDialogPadding()
     ) {
-        Text(text = "Filter by:")
+        Text(text = stringResource(R.string.label_filter_by))
         GenderField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -338,14 +333,14 @@ private fun FilterSheet(
                     .weight(1f)
                     .padding(end = 4.dp),
                 onClick = { onCancel.invoke() }) {
-                Text(text = "Cancel")
+                Text(text = stringResource(R.string.label_cancel))
             }
             OutlinedButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
                 onClick = { onApply.invoke(filter.copy(gender = sGender, handPlay = sHandPlay)) }
-            ) { Text(text = "Apply") }
+            ) { Text(text = stringResource(R.string.label_apply)) }
         }
     }
 }
@@ -370,7 +365,7 @@ private fun SortSheet(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        Text(text = "Sort by:", fontWeight = FontWeight.SemiBold)
+        Text(text = stringResource(R.string.label_sort_by), fontWeight = FontWeight.SemiBold)
         SortField(label = "ID", options = sortData, initialSelection = sortId?.name.orEmpty(),
             onSelected = {
                 init = SortPlayer.Id(it)
@@ -381,7 +376,7 @@ private fun SortSheet(
                 sortAge = null
             }
         )
-        SortField(label = "Name", options = sortData, initialSelection = sortName?.name.orEmpty(),
+        SortField(label = stringResource(R.string.name), options = sortData, initialSelection = sortName?.name.orEmpty(),
             onSelected = {
                 init = SortPlayer.Name(it)
                 sortName = init.asc
@@ -391,7 +386,7 @@ private fun SortSheet(
                 sortAge = null
             }
         )
-        SortField(label = "Height", options = sortData, initialSelection = sortHeight?.name.orEmpty(),
+        SortField(label = stringResource(R.string.height), options = sortData, initialSelection = sortHeight?.name.orEmpty(),
             onSelected = {
                 init = SortPlayer.Height(it)
                 sortHeight = init.asc
@@ -401,7 +396,7 @@ private fun SortSheet(
                 sortAge = null
             }
         )
-        SortField(label = "Weight", options = sortData, initialSelection = sortWeight?.name.orEmpty(),
+        SortField(label = stringResource(R.string.weight), options = sortData, initialSelection = sortWeight?.name.orEmpty(),
             onSelected = {
                 init = SortPlayer.Weight(it)
                 sortWeight = init.asc
@@ -411,7 +406,7 @@ private fun SortSheet(
                 sortAge = null
             }
         )
-        SortField(label = "Age", options = sortData, initialSelection = sortAge?.name.orEmpty(),
+        SortField(label = stringResource(R.string.age), options = sortData, initialSelection = sortAge?.name.orEmpty(),
             onSelected = {
                 init = SortPlayer.Age(it)
                 sortAge = init.asc
@@ -432,13 +427,13 @@ private fun SortSheet(
                     .weight(1f)
                     .padding(end = 4.dp),
                 onClick = { onCancel.invoke() }
-            ) { Text(text = "Cancel") }
+            ) { Text(text = stringResource(R.string.label_cancel)) }
             OutlinedButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
                 onClick = { onApply.invoke(init) }
-            ) { Text(text = "Apply") }
+            ) { Text(text = stringResource(R.string.label_apply)) }
         }
     }
 }

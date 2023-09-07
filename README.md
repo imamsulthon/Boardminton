@@ -3,6 +3,13 @@ Simple Board Score application for Badminton
 
 Developer: Imam Sulthon
 
+<img src="screenshoots/boardminton_01.jpeg" width="140">
+<img src="screenshoots/boardminton_01.jpeg" width="140"> 
+<img src="screenshoots/boardminton_03a.jpeg" width="140"> 
+<img src="screenshoots/boardminton_03b.jpeg" width="140"> 
+<img src="screenshoots/boardminton_04.jpeg" width="140">
+<img src="screenshoots/boardminton_05.jpeg" width="140">
+
 Libraries:
 - [Hilt](https://dagger.dev/hilt/) - Hilt provides a standard way to incorporate Dagger dependency injection into an Android application.
 - [Jetpack Compose](https://developer.android.com/jetpack/compose) - Jetpack Compose is Android’s recommended modern toolkit for building native UI. It simplifies and accelerates UI development on Android.

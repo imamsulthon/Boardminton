@@ -16,9 +16,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.imams.boardminton.R
 import com.imams.boardminton.data.Athlete
 import com.imams.boardminton.ui.component.country.countryCodeToFlag
 import com.imams.boardminton.ui.utils.bottomDialogPadding
@@ -51,7 +53,9 @@ internal fun PlayerBottomSheetContent(
     LazyColumn(modifier = Modifier.bottomDialogPadding()) {
         item {
             Text(
-                text = "Registered Players (${list.size})", fontSize = 16.sp,
+                text = stringResource(R.string.label_registered_player) +
+                        if (list.isNotEmpty()) " (${list.size})" else "",
+                fontSize = 16.sp,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
                     .padding(top = 6.dp, bottom = 12.dp)

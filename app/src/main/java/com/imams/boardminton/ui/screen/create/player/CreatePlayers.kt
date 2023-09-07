@@ -7,6 +7,8 @@ import androidx.activity.result.launch
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -410,7 +412,7 @@ private fun InputField(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun HandPlays(
     modifier: Modifier,
@@ -434,11 +436,8 @@ fun HandPlays(
                 .padding(end = 10.dp)
                 .weight(.25f),
         )
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .weight(.75f)
-                .selectableGroup()
+        FlowRow(
+            Modifier.fillMaxWidth().weight(.75f).selectableGroup(),
         ) {
             radioOptions.forEach { text ->
                 InputChip(
@@ -459,7 +458,7 @@ fun HandPlays(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun GenderField(
     modifier: Modifier,
@@ -480,12 +479,11 @@ fun GenderField(
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .padding(end = 10.dp)
-                .weight(.25f),
+                .weight(.25f).align(Alignment.CenterVertically),
         )
-        Row(
-            Modifier
-                .selectableGroup()
-                .weight(.75f)) {
+        FlowRow(
+            Modifier.selectableGroup().weight(.75f)
+        ) {
             radioOptions.forEach { gender ->
                 InputChip(
                     modifier = Modifier.padding(horizontal = 5.dp),

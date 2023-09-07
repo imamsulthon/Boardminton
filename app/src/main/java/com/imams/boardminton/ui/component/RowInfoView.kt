@@ -1,5 +1,6 @@
 package com.imams.boardminton.ui.component
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,12 +10,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 
 @Composable
 fun RowInfoData(
-    label: String,
+    @StringRes label: Int,
     content: String,
     weightLabel: Float = .25f,
     weightContent: Float = .7f
@@ -25,7 +27,7 @@ fun RowInfoData(
             .wrapContentHeight(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TableCell(text = label, weight = weightLabel)
+        TableCell(text = stringResource(label), weight = weightLabel)
         TableCell(text = ": ", weight = .05f)
         TableCell(text = content, weight = weightContent, maxLines = 2)
     }

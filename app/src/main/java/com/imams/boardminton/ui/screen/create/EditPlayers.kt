@@ -50,7 +50,8 @@ fun EditPlayersScreen(
         orientation = orientation,
         onChange = vm::updatePlayerName,
         swapPlayer = vm::swapSingleMatch,
-        importPerson = {}
+        importPerson = {},
+        umpireField = {},
     )
 
     @Composable
@@ -65,6 +66,7 @@ fun EditPlayersScreen(
             swapTeam = vm::swapDoubleMatch,
             importPerson = {},
             importTeam = {},
+            umpireView = {},
         )
 
     @Composable

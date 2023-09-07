@@ -63,8 +63,6 @@ class MatchTimerGenerator {
         updateTimeStates()
     }
 
-    private fun log(m: String) = println("ScoreBoard MatchTimeGenerator: $m")
-
 }
 
 data class TimeCounterUiState(

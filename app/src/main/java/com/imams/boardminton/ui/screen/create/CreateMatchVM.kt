@@ -44,6 +44,8 @@ class CreateMatchVM @Inject constructor(
     val playerB1 = _playerB1
     private val _playerB2 = mutableStateOf("")
     val playerB2 = _playerB2
+    private val _umpire = mutableStateOf("")
+    val umpire = _umpire
 
     private val _savePlayers = mutableStateListOf<CreatePlayerState>()
     private val _savePlayersFlow = MutableStateFlow(_savePlayers)
@@ -78,6 +80,10 @@ class CreateMatchVM @Inject constructor(
             ITeam.B1 -> _playerB1.update(v)
             ITeam.B2 -> _playerB2.update(v)
         }
+    }
+
+    fun umpireName(name: String) {
+        _umpire.update(name)
     }
 
     fun updatePlayerName(iTeam: ITeam, data: CreatePlayerState) {
@@ -169,6 +175,7 @@ class CreateMatchVM @Inject constructor(
                     lastUpdate = System.currentTimeMillis().toString(),
                     matchDuration = 0L,
                     shuttleCockUsed = 0,
+                    umpireName = umpire.value
                 )
             ).toInt()
             ) {

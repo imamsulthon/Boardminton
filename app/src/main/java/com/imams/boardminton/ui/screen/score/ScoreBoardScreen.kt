@@ -202,7 +202,8 @@ private fun ScoreBoardScreen(
                     top.linkTo(parent.top)
                     end.linkTo(parent.end)
                 }
-                .padding(compPadding),
+                .padding(horizontal = compPadding)
+                .padding(vertical = 6.dp),
             timer = timerUiState.counter,
             onSwap = { scoreVm.swapCourt() },
             onEdit = {
@@ -456,20 +457,21 @@ private fun BottomView(
             MiniIconButton(icon = R.drawable.ic_cock, onClick = addCock::invoke)
         }
     }
+    val surfCorner = 24.dp
     Surface(
         modifier = modifier
             .background(
                 color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                shape = RoundedCornerShape(topStart =surfCorner, topEnd = surfCorner)
             ),
         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        shape = RoundedCornerShape(topStart = surfCorner, topEnd = surfCorner),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .padding(top = 16.dp, bottom = 6.dp),
+                .padding(horizontal = 12.dp)
+                .padding(top = 12.dp, bottom = 6.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {

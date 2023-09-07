@@ -4,10 +4,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -24,10 +23,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,6 +59,7 @@ fun FieldInputSingleMatch(
     onChange: (ITeam, String) -> Unit,
     swapPlayer: () -> Unit,
     importPerson: (ITeam) -> Unit,
+    umpireField: @Composable () -> Unit,
 ) {
     // Landscape
     if (orientation == Orientation.Landscape) {
@@ -72,10 +70,11 @@ fun FieldInputSingleMatch(
             onChange = onChange::invoke,
             onSwap = { swapPlayer.invoke() },
             importPerson = {},
+            umpireField = {umpireField()}
         )
         return
     }
-    Column(modifier = modifier, verticalArrangement = Arrangement.Top) {
+    Column(modifier = modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Top) {
         InputPlayer(
             modifier = ipModifierP,
             value = pA1,
@@ -93,7 +92,6 @@ fun FieldInputSingleMatch(
             Text(text = "Versus", modifier = Modifier.padding(vertical = 10.dp))
             SwapButton({ swapPlayer.invoke() })
         }
-
         InputPlayer(
             modifier = ipModifierP,
             value = pB1,
@@ -101,11 +99,28 @@ fun FieldInputSingleMatch(
                 onChange.invoke(ITeam.B1, it)
             },
             label = stringResource(R.string.label_field_player, "2"),
-            keyboardOptions = keyBoardDone(),
+            keyboardOptions = keyboardNext(),
             endIconClick = { importPerson.invoke(ITeam.B1) }
         )
+        umpireField()
     }
+}
 
+@Composable
+fun FieldInputUmpire(
+    modifier: Modifier,
+    umpireName: String,
+    onUmpire: (String) -> Unit,
+    endIconClick: (() -> Unit)? = null
+) {
+    InputPlayer(
+        modifier = modifier,
+        value = umpireName,
+        onValueChange = onUmpire::invoke,
+        label = stringResource(R.string.label_umpire),
+        keyboardOptions = keyBoardDone(),
+        endIconClick = {endIconClick?.invoke()},
+    )
 }
 
 @Composable
@@ -116,43 +131,49 @@ fun FieldInputSingleLandscape(
     onChange: (ITeam, String) -> Unit,
     onSwap: () -> Unit,
     importPerson: (ITeam) -> Unit,
+    umpireField: @Composable () -> Unit
 ) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceAround,
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = modifier.verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        InputPlayer(
-            modifier = ipModifierL,
-            value = pA1,
-            onValueChange = {
-                onChange.invoke(ITeam.A1, it)
-            },
-            label = stringResource(R.string.label_field_player, "1"),
-            endIconClick = { importPerson.invoke(ITeam.A1) }
-        )
-
-        Column(
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(horizontal = 10.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Versus", modifier = Modifier.padding(vertical = 10.dp))
-            SwapButton(orientation = Orientation.Landscape, onSwap = { onSwap.invoke() })
-        }
+            InputPlayer(
+                modifier = ipModifierL,
+                value = pA1,
+                onValueChange = {
+                    onChange.invoke(ITeam.A1, it)
+                },
+                label = stringResource(R.string.label_field_player, "1"),
+                endIconClick = { importPerson.invoke(ITeam.A1) }
+            )
+            Column(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(horizontal = 10.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Versus", modifier = Modifier.padding(vertical = 10.dp))
+                SwapButton(orientation = Orientation.Landscape, onSwap = { onSwap.invoke() })
+            }
 
-        InputPlayer(
-            modifier = ipModifierL,
-            value = pB1,
-            onValueChange = {
-                onChange.invoke(ITeam.B1, it)
-            },
-            label = stringResource(R.string.label_field_player, "2"),
-            keyboardOptions = keyBoardDone(),
-            endIconClick = { importPerson.invoke(ITeam.B1) }
-        )
+            InputPlayer(
+                modifier = ipModifierL,
+                value = pB1,
+                onValueChange = {
+                    onChange.invoke(ITeam.B1, it)
+                },
+                label = stringResource(R.string.label_field_player, "2"),
+                keyboardOptions = keyBoardDone(),
+                endIconClick = { importPerson.invoke(ITeam.B1) }
+            )
+        }
+        umpireField()
     }
 }
 
@@ -169,6 +190,7 @@ fun FieldInputDoubleMatch(
     swapTeam: () -> Unit,
     importPerson: (ITeam) -> Unit,
     importTeam: ((ISide) -> Unit)? = null,
+    umpireView: @Composable () -> Unit
 ) {
     // Landscape
     if (orientation == Orientation.Landscape) {
@@ -183,6 +205,7 @@ fun FieldInputDoubleMatch(
             swapTeam = { swapTeam.invoke() },
             importPerson = { importPerson.invoke(it) },
             importTeam = { importTeam?.invoke(it) },
+            umpireView = { umpireView() }
         )
         return
     }
@@ -201,6 +224,7 @@ fun FieldInputDoubleMatch(
             label = stringResource(R.string.label_field_player, "1"),
             endIconClick = { importPerson.invoke(ITeam.A1) },
         )
+        Spacer(modifier = Modifier.padding(top = 8.dp))
         SwapButton({ swapPlayer.invoke(ISide.A) })
         InputPlayer(
             modifier = ipModifierP,
@@ -233,6 +257,7 @@ fun FieldInputDoubleMatch(
             label = stringResource(R.string.label_field_player, "1"),
             endIconClick = { importPerson.invoke(ITeam.B1) },
         )
+        Spacer(modifier = Modifier.padding(top = 8.dp))
         SwapButton({ swapPlayer.invoke(ISide.B) })
         InputPlayer(
             modifier = ipModifierP,
@@ -248,6 +273,7 @@ fun FieldInputDoubleMatch(
                 onClick = { importTeam?.invoke(ISide.B) }
             ) { Text(text = stringResource(R.string.import_team)) }
         }
+        umpireView()
     }
 
 }
@@ -265,85 +291,104 @@ private fun FieldInputDoubleLandscape(
     swapTeam: () -> Unit,
     importPerson: (ITeam) -> Unit,
     importTeam: ((ISide) -> Unit)? = null,
+    umpireView: @Composable () -> Unit
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.wrapContentSize(),
-            verticalArrangement = vArrangement,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            InputPlayer(
-                modifier = ipModifierL,
-                value = pA1,
-                onValueChange = {
-                    onChange.invoke(ITeam.A1, it)
-                },
-                label = stringResource(R.string.label_field_player, "1"),
-                endIconClick = { importPerson.invoke(ITeam.A1) },
-            )
-            SwapButton({ swapPlayer.invoke(ISide.A) })
-            InputPlayer(
-                modifier = ipModifierL,
-                value = pA2,
-                onValueChange = {
-                    onChange.invoke(ITeam.A2, it)
-                },
-                label = stringResource(R.string.label_field_player, "2"),
-                endIconClick = { importPerson.invoke(ITeam.A2) },
-            )
-            AnimatedVisibility(visible = importTeam != null) {
-                OutlinedButton(
-                    modifier = Modifier.padding(top = 6.dp),
-                    onClick = { importTeam?.invoke(ISide.A) }
-                ) { Text(text = stringResource(R.string.import_team)) }
+            Column(
+                modifier = Modifier.wrapContentSize(),
+                verticalArrangement = vArrangement,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                InputPlayer(
+                    modifier = ipModifierL,
+                    value = pA1,
+                    onValueChange = {
+                        onChange.invoke(ITeam.A1, it)
+                    },
+                    label = stringResource(R.string.label_field_player, "1"),
+                    endIconClick = { importPerson.invoke(ITeam.A1) },
+                )
+                Spacer(modifier = Modifier.padding(top = 4.dp))
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SwapButton({ swapPlayer.invoke(ISide.A) })
+                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                    AnimatedVisibility(visible = importTeam != null) {
+                        OutlinedButton(
+                            onClick = { importTeam?.invoke(ISide.A) }
+                        ) { Text(text = stringResource(R.string.import_team)) }
+                    }
+                }
+                InputPlayer(
+                    modifier = ipModifierL,
+                    value = pA2,
+                    onValueChange = {
+                        onChange.invoke(ITeam.A2, it)
+                    },
+                    label = stringResource(R.string.label_field_player, "2"),
+                    endIconClick = { importPerson.invoke(ITeam.A2) },
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(horizontal = 10.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Versus", modifier = Modifier.padding(vertical = 10.dp))
+                SwapButton(orientation = Orientation.Landscape, onSwap = { swapTeam.invoke() })
+            }
+            Column(
+                modifier = Modifier.wrapContentSize(),
+                verticalArrangement = vArrangement,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                InputPlayer(
+                    modifier = ipModifierL,
+                    value = pB1,
+                    onValueChange = { onChange.invoke(ITeam.B1, it) },
+                    label = stringResource(R.string.label_field_player, "1"),
+                    endIconClick = { importPerson.invoke(ITeam.B1) },
+                )
+                Spacer(modifier = Modifier.padding(top = 4.dp))
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AnimatedVisibility(visible = importTeam != null) {
+                        OutlinedButton(
+                            modifier = Modifier,
+                            onClick = { importTeam?.invoke(ISide.B) }
+                        ) { Text(text = stringResource(R.string.import_team)) }
+                    }
+                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                    SwapButton({ swapPlayer.invoke(ISide.B) })
+                }
+                InputPlayer(
+                    modifier = ipModifierL,
+                    value = pB2,
+                    onValueChange = { onChange.invoke(ITeam.B2, it) },
+                    label = stringResource(R.string.label_field_player, "2"),
+                    keyboardOptions = keyBoardDone(),
+                    endIconClick = { importPerson.invoke(ITeam.B2) },
+                )
             }
         }
-
-        Column(
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(horizontal = 10.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = "Versus", modifier = Modifier.padding(vertical = 10.dp))
-            SwapButton(orientation = Orientation.Landscape, onSwap = { swapTeam.invoke() })
-        }
-
-        Column(
-            modifier = Modifier.wrapContentSize(),
-            verticalArrangement = vArrangement,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            InputPlayer(
-                modifier = ipModifierL,
-                value = pB1,
-                onValueChange = { onChange.invoke(ITeam.B1, it) },
-                label = stringResource(R.string.label_field_player, "1"),
-                endIconClick = { importPerson.invoke(ITeam.B1) },
-            )
-            SwapButton({ swapPlayer.invoke(ISide.B) })
-            InputPlayer(
-                modifier = ipModifierL,
-                value = pB2,
-                onValueChange = { onChange.invoke(ITeam.B2, it) },
-                label = stringResource(R.string.label_field_player, "2"),
-                keyboardOptions = keyBoardDone(),
-                endIconClick = { importPerson.invoke(ITeam.B2) },
-            )
-            AnimatedVisibility(visible = importTeam != null) {
-                OutlinedButton(
-                    modifier = Modifier.padding(top = 6.dp),
-                    onClick = { importTeam?.invoke(ISide.B) }
-                ) { Text(text = stringResource(R.string.import_team)) }
-            }
-        }
+        umpireView()
     }
-
 }
 
 @Composable
@@ -396,7 +441,8 @@ fun SingleLandscapeP() {
         pB1 = "player2",
         onChange = { x, y -> },
         onSwap = { },
-        importPerson = {}
+        importPerson = {},
+        umpireField = {},
     )
 }
 
@@ -412,5 +458,6 @@ fun DoubleLandscapeP() {
         swapTeam = { },
         importPerson = {},
         importTeam = {},
+        umpireView = {}
     )
 }

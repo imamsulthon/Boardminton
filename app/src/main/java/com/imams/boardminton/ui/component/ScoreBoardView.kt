@@ -43,7 +43,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -222,7 +224,6 @@ fun PlayerName(
     if (alignment == Alignment.Start && onServe) ServeIc()
 }
 
-
 @Composable
 fun ButtonPointLeft(
     onClickPlus: () -> Unit,
@@ -286,16 +287,18 @@ fun GameFinishDialogContent(
     ) {
         val compMod = Modifier.padding(horizontal = 5.dp, vertical = 5.dp)
 
-        val title = if (state.type == WinnerState.Type.Game) "Game ${state.index} Done"
-        else "Match Done"
+        val title = if (state.type == WinnerState.Type.Game)
+            stringResource(R.string.label_game_done, state.index.toString())
+        else stringResource(R.string.label_match_done)
         Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        Text(text = "Winner by: ${state.by}", modifier = compMod, color = MaterialTheme.colorScheme.primary)
-        Row {
+        Text(text = stringResource(R.string.label_winner_by, state.by),
+            modifier = compMod, color = MaterialTheme.colorScheme.primary)
+        Row(modifier = Modifier.align(Alignment.End)) {
             OutlinedButton(onClick = { onDone.invoke(false, state.type) }, modifier = compMod) {
-                Text(text = "Cancel")
+                Text(text = stringResource(R.string.label_cancel))
             }
             OutlinedButton(onClick = { onDone.invoke(true, state.type) }, modifier = compMod) {
-                Text(text = "Finish")
+                Text(text = stringResource(R.string.label_finish))
             }
         }
     }
@@ -323,6 +326,25 @@ fun MiniIconButton(
             modifier = Modifier.size(iconSize),
             tint = MaterialTheme.colorScheme.onSurface
         )
+    }
+}
+@Composable
+fun MiniIconButton(
+    icon: ImageVector,
+    size: Dp = 32.dp,
+    padding: Dp = 2.dp,
+    iconSize: Dp = 16.dp,
+    onClick: () -> Unit
+) {
+    IconButton(
+        onClick = { onClick.invoke() },
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = .8f))
+            .padding(padding)
+    ) {
+        Icon(icon, modifier = Modifier.size(iconSize), contentDescription = "Localized description")
     }
 }
 

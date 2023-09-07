@@ -86,7 +86,7 @@ fun PlayerDetailScreen(
         onEdit = { onEdit.invoke(uiState.id)},
         onSendMessage = {
         context.sendWhatsappMessage(uiState.phoneNumber,
-            message = "Hai ${uiState.fullName}, This message from Boardminton")
+            message = "Hi ${uiState.fullName}, This message from Boardminton")
         }
     )
 }
@@ -289,7 +289,7 @@ fun SectionPlayerData(
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
-                text = "Player Data",
+                text = stringResource(R.string.data_player),
                 style = typography.bodyMedium,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -297,15 +297,16 @@ fun SectionPlayerData(
                 .padding(vertical = 8.dp)
                 .background(MaterialTheme.colorScheme.onSurface))
             Column {
-                RowInfoData(label = "Player ID", content = "${state.id}")
-                RowInfoData(label = "Full Name", content = state.fullName)
-                RowInfoData(label = "DoB", content = "${state.dob.asDateTime("dd MMM yyyy")}")
-                RowInfoData(label = "Gender", content = state.gender)
-                RowInfoData(label = "Nationality", content = stringResource(id = getCountryName(state.nationalityCode)))
-                RowInfoData(label = "Phone Number", content = state.phoneNumber)
-                RowInfoData(label = "Hand Play", content = state.handPlay)
-                RowInfoData(label = "Height", content = "${state.height} cm")
-                RowInfoData(label = "Weight", content = "${state.weight} kg")
+                RowInfoData(label = R.string.player_id, content = "${state.id}")
+                RowInfoData(label = R.string.full_name, content = state.fullName)
+                RowInfoData(label = R.string.label_dob, content = "${state.dob.asDateTime("dd MMM yyyy")}")
+                RowInfoData(label = R.string.full_name, content = state.gender)
+                RowInfoData(label = R.string.label_nationality,
+                    content = stringResource(id = getCountryName(state.nationalityCode)))
+                RowInfoData(label = R.string.label_phone_number, content = state.phoneNumber)
+                RowInfoData(label = R.string.hand_play, content = state.handPlay)
+                RowInfoData(label = R.string.height, content = "${state.height} cm")
+                RowInfoData(label = R.string.weight, content = "${state.weight} kg")
             }
         }
     }

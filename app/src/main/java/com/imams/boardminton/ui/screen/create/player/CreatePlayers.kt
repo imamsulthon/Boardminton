@@ -426,7 +426,7 @@ fun HandPlays(
     )
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
         Text(
@@ -471,7 +471,7 @@ fun GenderField(
     )
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
         Text(
@@ -479,7 +479,7 @@ fun GenderField(
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .padding(end = 10.dp)
-                .weight(.25f),
+                .weight(.25f).align(Alignment.CenterVertically),
         )
         FlowRow(
             Modifier.selectableGroup().weight(.75f)

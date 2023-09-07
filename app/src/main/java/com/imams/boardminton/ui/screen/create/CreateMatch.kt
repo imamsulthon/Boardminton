@@ -62,6 +62,7 @@ fun CreateMatchScreen(
     val playerA2 by rememberSaveable { vm.playerA2 }
     val playerB1 by rememberSaveable { vm.playerB1 }
     val playerB2 by rememberSaveable { vm.playerB2 }
+    val umpire by rememberSaveable { vm.umpire }
     val enableNext by rememberSaveable(singleMatch, playerA1, playerA2, playerB1, playerB2) {
         mutableStateOf(
             if (singleMatch) isNotEmptyAndSameName(playerA1, playerB1)
@@ -118,6 +119,15 @@ fun CreateMatchScreen(
     }
 
     @Composable
+    fun umpireField(orientation: Orientation) {
+        FieldInputUmpire(
+            modifier = if (orientation == Orientation.Portrait) ipModifierP.padding(top = 4.dp)
+            else ipModifierL.padding(top = 4.dp),
+            umpireName = umpire, onUmpire = vm::umpireName
+        )
+    }
+
+    @Composable
     fun formView(
         modifier: Modifier = Modifier,
         orientation: Orientation = Orientation.Portrait,
@@ -133,7 +143,8 @@ fun CreateMatchScreen(
                 importPerson = {
                     selectedPlayerForImport = it
                     openOptionalPlayer = true
-                }
+                },
+                umpireField = { umpireField(orientation) }
             )
         } else {
             FieldInputDoubleMatch(
@@ -151,7 +162,8 @@ fun CreateMatchScreen(
                 importTeam = {
                     selectedFieldForTeam = it
                     openOptionalTeam = true
-                }
+                },
+                umpireView = {umpireField(orientation)}
             )
         }
     }

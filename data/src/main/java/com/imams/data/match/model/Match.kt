@@ -11,4 +11,5 @@ data class Match(
     var lastUpdate: String,
     var matchDuration: Long,
     var shuttleCockUsed: Int,
+    val umpireName: String,
 )

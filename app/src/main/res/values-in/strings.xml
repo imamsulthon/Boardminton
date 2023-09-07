@@ -82,6 +82,7 @@
     <string name="label_match_done">Pertandingan Selesai</string>
     <string name="label_game_done">Game %s Selesai</string>
     <string name="label_winner_by">Dimenangkan oleh $s</string>
+    <string name="label_umpire">Wasit</string>
 
     // App Settings
     <string name="select_theme">Pilih Tema</string>

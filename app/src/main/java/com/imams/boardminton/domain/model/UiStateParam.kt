@@ -62,6 +62,7 @@ data class MatchViewParam(
     val lastUpdate: String = "",
     val matchDurations: Long = 0L,
     val shuttleCockCount: Int = 0,
+    val umpireName: String = ""
 )
 
 data class TeamViewParam(

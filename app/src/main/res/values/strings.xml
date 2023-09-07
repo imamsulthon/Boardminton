@@ -61,7 +61,7 @@
     <string name="label_both">Both</string>
     <string name="label_gender_man">Man</string>
     <string name="label_gender_woman">Woman</string>
-    <string name="label_take_selfie">ake Player Photo</string>
+    <string name="label_take_selfie">Take Player Photo</string>
     <string name="label_camera">Camera</string>
     <string name="label_file">File</string>
     <string name="label_gallery">Gallery</string>
@@ -81,6 +81,7 @@
     <string name="label_match_done">Match Done</string>
     <string name="label_game_done">Game %s Done</string>
     <string name="label_winner_by">Winner by %s</string>
+    <string name="label_umpire">Umpire</string>
 
     // App Settings
     <string name="select_theme">Select Theme</string>
